@@ -379,16 +379,15 @@ hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
    ============================================================ */
 
 const KEY = 'pawsly:v1';
-const DEFAULT_RATE = 0.15;        // 15% to the venue
+const DEFAULT_RATE = 0.1;        // 10% to the venue
 
 /* ============================================================
    BRAND — edit these five lines to rebrand the whole app
    ============================================================ */
 const BRAND = {
   name:    'Pawsly Gourmet',              // wordmark text, used when logo is empty
-  tagline: "",    // small caps line under the logo
   logo:    'Logo.png',                    // must match the uploaded filename EXACTLY, capitals included
-  logoH:   200,                            // logo height in px on the customer page
+  logoH:   250,                            // logo height in px on the customer page
   bannerHeadline: 'Give The Very best for your Pet',   // the big line on the printed x-banner
   bannerSub: 'Pick, Mix, Delivered it to You',
 };
@@ -409,7 +408,7 @@ const SIZES = [
 const GROUPS = [
   { id:'protein', title:'Protein', max:2, items:[
     { id:'ayam',   label:'Chicken',c1:'#F6CFC9', c2:'#E3A79E', shape:'blob' },
-    { id:'sapi',   label:'Beef',   c1:'#C2342B', c2:'#8E201A', shape:'dice' },
+    { id:'sapi', label:'Sapi', img:'img/sapi.jpg' },
     { id:'pork',   label:'Pork',   c1:'#E79A9A', c2:'#F3DCD4', shape:'dice' },
     { id:'lamb',   label:'Lamb',   c1:'#A82E2E', c2:'#D98B7E', shape:'blob' },
     { id:'rabbit', label:'Rabbit', c1:'#F0D6CB', c2:'#DCB4A4', shape:'blob' },
