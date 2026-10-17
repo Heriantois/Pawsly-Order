@@ -127,7 +127,7 @@ a{color:var(--ink-2)}
 .size .sub{font-size:10.5px;color:var(--text-soft);line-height:1.25;min-height:2.4em}
 
 /* drawn bowl */
-.bowl{position:relative;width:100%;max-width:86px;aspect-ratio:1/.78;transition:transform .15s}
+.bowl{display:block;position:relative;width:100%;max-width:86px;aspect-ratio:1/.78;transition:transform .15s}
 .bowl .food{
   position:absolute;left:14%;right:14%;top:4%;height:34%;
   border-radius:50% 50% 40% 40%;
@@ -153,6 +153,10 @@ a{color:var(--ink-2)}
 .size.s .bowl{max-width:62px}
 .size.m .bowl{max-width:76px}
 .size.l .bowl{max-width:92px}
+.bowlimg{display:block;width:100%;height:auto;border-radius:9px;background:#FFFBF2}
+.size.s .bowlimg{max-width:70px}
+.size.m .bowlimg{max-width:84px}
+.size.l .bowlimg{max-width:98px}
 
 /* ---------- recipe chips ---------- */
 .recipes{display:grid;gap:10px}
@@ -185,7 +189,7 @@ a{color:var(--ink-2)}
 .pick[aria-pressed="true"]{border-color:var(--ink);background:var(--cream-2)}
 .pick[disabled]{opacity:.34}
 .pick .med{
-  width:46px;height:46px;border-radius:50%;background:var(--bone);
+  display:block;width:46px;height:46px;border-radius:50%;background:var(--bone);
   border:2px solid var(--line);position:relative;overflow:hidden;flex:none
 }
 .pick[aria-pressed="true"] .med{border-color:var(--ink)}
@@ -195,7 +199,7 @@ a{color:var(--ink-2)}
   background:var(--marigold);color:#12351F;font-size:11px;font-weight:900;display:none;place-items:center
 }
 .pick[aria-pressed="true"] .chk{display:grid}
-.medwrap{position:relative}
+.medwrap{position:relative;display:inline-block;line-height:0}
 
 /* ---------- addons ---------- */
 .addon{
@@ -366,6 +370,15 @@ td b{font-weight:800}
 hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
 .inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .lvl{font-size:12.5px;color:var(--text-soft);margin:6px 0 0}
+.logo img{max-width:86vw}
+.promo{
+  background:var(--marigold);border-radius:var(--r-m);padding:13px 18px;margin:14px 0 2px;
+  text-align:center;border:2px solid var(--marigold-dk)
+}
+.promo b{display:block;font-family:var(--display);font-weight:800;font-size:19px;color:#12351F;line-height:1.15}
+.promo span{display:block;font-size:13px;font-weight:600;color:#3A2A08;margin-top:2px}
+.xbgrid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(238px,1fr))}
+.xbgrid .xb{max-width:none}
 </style>
 </head>
 <body>
@@ -379,15 +392,18 @@ hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
    ============================================================ */
 
 const KEY = 'pawsly:v1';
-const DEFAULT_RATE = 0.1;        // 10% to the venue
+const DEFAULT_RATE = 0.10;        // 10% to the venue
 
 /* ============================================================
    BRAND — edit these five lines to rebrand the whole app
    ============================================================ */
 const BRAND = {
   name:    'Pawsly Gourmet',              // wordmark text, used when logo is empty
+  tagline: "Your pet's personal chef",    // small caps line under the logo
   logo:    'Logo.png',                    // must match the uploaded filename EXACTLY, capitals included
-  logoH:   250,                            // logo height in px on the customer page
+  logoH:   120,                           // logo height in px (also capped at 86vw so phones never clip it)
+  promoTitle: 'Freshly cooked, right here at the park',
+  promoLine:  'Pick a portion, mix the toppings, collect at the counter',
   bannerHeadline: 'Give The Very best for your Pet',   // the big line on the printed x-banner
   bannerSub: 'Pick, Mix, Delivered it to You',
 };
@@ -400,34 +416,34 @@ function logoMark(size, suffix){
 
 /* ---------- catalogue ---------- */
 const SIZES = [
-  { id:'S', img: 'pawbowl.png', name:'Small',  price:26000,  cls:'s', sub:'Small Portion, Big Love' },
-  { id:'M', name:'Medium', price:57500,  cls:'m', sub:'Enough, Full Loaded Nutrition' },
-  { id:'L', name:'Large',  price:115000, cls:'l', sub:'Huge Love, Bazzinga Nutrition' },
+  { id:'S', name:'Small',  price:26000,  cls:'s', sub:'Small Portion, Big Love',      img:'img/bowl-small.jpg'  },
+  { id:'M', name:'Medium', price:57500,  cls:'m', sub:'Enough, Full Loaded Nutrition', img:'img/bowl-medium.jpg' },
+  { id:'L', name:'Large',  price:115000, cls:'l', sub:'Huge Love, Bazzinga Nutrition', img:'img/bowl-large.jpg'  },
 ];
 
 const GROUPS = [
   { id:'protein', title:'Protein', max:2, items:[
-    { id:'ayam',   label:'Chicken',c1:'#F6CFC9', c2:'#E3A79E', shape:'blob' },
-    { id:'sapi', label:'Sapi', img:'beef.png' },
-    { id:'pork',   label:'Pork',   c1:'#E79A9A', c2:'#F3DCD4', shape:'dice' },
-    { id:'lamb',   label:'Lamb',   c1:'#A82E2E', c2:'#D98B7E', shape:'blob' },
-    { id:'rabbit', label:'Rabbit', c1:'#F0D6CB', c2:'#DCB4A4', shape:'blob' },
+    { id:'ayam',   label:'Chicken', img:'img/chicken.jpg', c1:'#F6CFC9', c2:'#E3A79E', shape:'blob' },
+    { id:'sapi',   label:'Beef',    img:'img/beef.jpg',    c1:'#C2342B', c2:'#8E201A', shape:'dice' },
+    { id:'pork',   label:'Pork',    img:'img/pork.jpg',    c1:'#E79A9A', c2:'#F3DCD4', shape:'dice' },
+    { id:'lamb',   label:'Lamb',    img:'img/lamb.jpg',    c1:'#A82E2E', c2:'#D98B7E', shape:'blob' },
+    { id:'rabbit', label:'Rabbit',  img:'img/rabbit.jpg',  c1:'#F0D6CB', c2:'#DCB4A4', shape:'blob' },
   ]},
   { id:'organ', title:'Organ Meat', max:2, items:[
-    { id:'liver_ayam', label:'Chicken Liver', c1:'#6B2016', c2:'#3F100A', shape:'blob' },
-    { id:'liver_sapi', label:'Beef Liver', c1:'#55180F', c2:'#2E0A06', shape:'blob' },
+    { id:'liver_ayam', label:'Chicken Liver', img:'img/chicken-liver.jpg', c1:'#6B2016', c2:'#3F100A', shape:'blob' },
+    { id:'liver_sapi', label:'Beef Liver',    img:'img/beef-liver.jpg',    c1:'#55180F', c2:'#2E0A06', shape:'blob' },
   ]},
   { id:'sayuran', title:'Vegetables', max:2, items:[
-    { id:'wortel',      label:'Carrot',      c1:'#E8731F', c2:'#C7540E', shape:'floret' },
-    { id:'brokoli',     label:'Broccoli',    c1:'#3F7A2E', c2:'#27551C', shape:'floret' },
-    { id:'edamame',     label:'Edamame',     c1:'#8FBE4A', c2:'#5E8F2A', shape:'grain' },
-    { id:'kembang_kol', label:'Cauliflower', c1:'#EFE3C8', c2:'#D4C39C', shape:'floret' },
+    { id:'wortel',      label:'Carrot',      img:'img/carrot.jpg',      c1:'#E8731F', c2:'#C7540E', shape:'floret' },
+    { id:'brokoli',     label:'Broccoli',    img:'img/broccoli.jpg',    c1:'#3F7A2E', c2:'#27551C', shape:'floret' },
+    { id:'edamame',     label:'Edamame',     img:'img/edamame.jpg',     c1:'#8FBE4A', c2:'#5E8F2A', shape:'grain' },
+    { id:'kembang_kol', label:'Cauliflower', img:'img/cauliflower.jpg', c1:'#EFE3C8', c2:'#D4C39C', shape:'floret' },
   ]},
   { id:'karbohidrat', title:'Carbs', max:2, items:[
-    { id:'oats',       label:'Rolled Oats', c1:'#D9BE8A', c2:'#B99A61', shape:'grain' },
-    { id:'labu',       label:'Pumpkin',     c1:'#E89A2A', c2:'#C47812', shape:'dice' },
-    { id:'ubi_madu',   label:'Sweet Potato',c1:'#DD6B20', c2:'#B24D0D', shape:'dice' },
-    { id:'ubi_ungu',   label:'Purple Yam',  c1:'#6B3FA0', c2:'#47266E', shape:'dice' },
+    { id:'oats',       label:'Rolled Oats',  img:'img/oats.jpg',         c1:'#D9BE8A', c2:'#B99A61', shape:'grain' },
+    { id:'labu',       label:'Pumpkin',      img:'img/pumpkin.jpg',      c1:'#E89A2A', c2:'#C47812', shape:'dice' },
+    { id:'ubi_madu',   label:'Sweet Potato', img:'img/sweet-potato.jpg', c1:'#DD6B20', c2:'#B24D0D', shape:'dice' },
+    { id:'ubi_ungu',   label:'Purple Yam',   img:'img/purple-yam.jpg',   c1:'#6B3FA0', c2:'#47266E', shape:'dice' },
   ]},
 ];
 
@@ -443,9 +459,16 @@ const RECIPES = [
     pick:{ protein:['sapi'], organ:['liver_sapi'], sayuran:['wortel'], karbohidrat:['ubi_madu'] }, addons:['potion'] },
 ];
 
+// Trim or extend freely -- the selected default is always the first entry,
+// so deleting a method can no longer leave the checkout with nothing selected.
 const PAYMENTS = [
-  { id:'bca',   label:'BCA Transfer',    desc:'Virtual account, checked automatically', collect:'pawsly' },
-  ];
+  // 'collect' decides which way the money flows, so it drives the whole revenue split:
+  //   'pawsly' -> Pawsly receives the payment and owes the venue its share
+  //   'venue'  -> the venue receives it, keeps its share, and owes Pawsly the rest
+  // Set QRIS to 'venue' if you are using the venue's own static QRIS sticker.
+  { id:'qris',  label:'QRIS',           desc:'Scan with any e-wallet or mobile banking app', collect:'pawsly' },
+  { id:'bca',   label:'BCA Transfer',   desc:'Virtual account, checked automatically',       collect:'pawsly' },
+];
 
 const FULFIL = [
   { id:'counter',  label:'Pick up at the counter', desc:"We'll deliver it to you when it's ready" },
@@ -467,7 +490,9 @@ const itemById = id => GROUPS.flatMap(g=>g.items).find(i=>i.id===id) || ADDONS.f
 const label = id => (itemById(id)||{label:id}).label;
 
 function medallion(it){
-  if(it.img) return `center/cover no-repeat url("${it.img}")`;   // photo wins when present
+  // Single quotes matter: this lands inside style="..." so double quotes would
+  // close the attribute early and the photo would silently never load.
+  if(it.img) return `center/cover no-repeat url('${String(it.img).replace(/['"\\]/g,'')}')`;
   const dots = {
     dice:   [[30,34,22],[66,44,20],[46,70,19]],
     blob:   [[36,40,27],[66,58,23],[44,74,16]],
@@ -483,7 +508,7 @@ let DB = null;          // { venues, orders, config }
 let S = {               // view state
   route:'order', venueCode:null, stage:'menu',
   size:'M', pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],
-  fulfil:'counter', payment:'qris',
+  fulfil:FULFIL[0].id, payment:PAYMENTS[0].id,
   cust:{name:'',phone:'',dog:''}, note:'',
   lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null,
 };
@@ -664,6 +689,7 @@ function seed(){
   const venues = [
     { code:'PAWS',         name:'PawS',          kind:'Dog pool & Play park', city:'Gading Serpong', pin:'1510', rate:0.10, payout:'BCA 2290xxxx81 · PT PawS Indonesia', active:true },
     { code:'PUPPY-AFFAIR', name:'Puppy Affair',  kind:'Pet Groomer',          city:'Gading Serpong', pin:'2208', rate:0.10, payout:'Mandiri 1270xxxx44 · CV Puppy Affair',    active:true },
+    { code:'PAWSLY-HQ',    name:'Pawsly HQ',     kind:'Pawsly kitchen & pickup', city:'Gading Serpong', pin:'9001', rate:0,    payout:'— own outlet, nothing to pay out',          active:true },
   ];
   const orders = [];
   const names = ['Dira','Bagas','Nadya','Reno','Kiki','Tomi','Sasha','Yoga','Mila','Fajar','Intan','Bram','Sinta','Danu'];
@@ -675,9 +701,11 @@ function seed(){
       // (Hardcoding index 2 here broke the moment the venue list dropped to two.)
       const vi = Math.random() < 0.5 ? 0 : 1 + Math.floor(Math.random() * Math.max(1, venues.length - 1));
       const v = venues[Math.min(vi, venues.length - 1)];
-      const size = SIZES[Math.random()<.3?0:(Math.random()<.65?1:2)];
+      // Every lookup below is clamped to the array length, so trimming SIZES,
+      // FULFIL or PAYMENTS in the catalogue can never crash the seeder again.
+      const size = SIZES[Math.min(SIZES.length-1, Math.random()<.3?0:(Math.random()<.65?1:2))];
       const pay = PAYMENTS[Math.floor(Math.random()*PAYMENTS.length)];
-      const ful = Math.random()<.35 ? FULFIL[1] : FULFIL[0];
+      const ful = FULFIL[Math.min(FULFIL.length-1, Math.random()<.35 ? 1 : 0)];
       const add = Math.random()<.3 ? [ADDONS[Math.floor(Math.random()*ADDONS.length)]] : [];
       const when = new Date(); when.setDate(when.getDate()-d);
       when.setHours(9+Math.floor(Math.random()*9), Math.floor(Math.random()*60), 0, 0);
@@ -788,6 +816,7 @@ function viewMenu(){
       <p class="tag">${esc(BRAND.tagline)}</p>
       <h2 class="h1">Build your dog's bowl</h2>
       <p class="lede">Fresh Ingredients, Cook on the spot, Choose your portion and Mix it</p>
+      <div class="promo"><b>${esc(BRAND.promoTitle)}</b><span>${esc(BRAND.promoLine)}</span></div>
     </header>
 
     <section>
@@ -795,7 +824,8 @@ function viewMenu(){
       <div class="sizes">
         ${SIZES.map(s=>`
           <button class="size ${s.cls}" data-size="${s.id}" aria-pressed="${S.size===s.id}">
-            <span class="bowl"><span class="food"></span><span class="body"></span><span class="mark">pawsly</span></span>
+            ${s.img ? `<img class="bowlimg ${s.cls}" src="${esc(s.img)}" alt="" loading="lazy">`
+                    : `<span class="bowl"><span class="food"></span><span class="body"></span><span class="mark">pawsly</span></span>`}
             <span class="nm">${s.name}</span>
             <span class="px">${rp(s.price)}</span>
             <span class="sub">${s.sub}</span>
@@ -942,7 +972,7 @@ async function placeOrder(){
   const p = priceNow();
   const v = venue(S.venueCode);
   const rate = v ? v.rate : 0;
-  const pay = PAYMENTS.find(m=>m.id===S.payment);
+  const pay = PAYMENTS.find(m=>m.id===S.payment) || PAYMENTS[0];
   const btn = $('#payNow'); if(btn){ btn.disabled = true; btn.textContent = 'Processing…'; }
 
   const order = {
@@ -1142,7 +1172,7 @@ function viewPartner(){
         <hr class="sep">
         <div class="inline">
           <button class="btn ghost sm" id="copyLink">Copy link</button>
-          <button class="btn ghost sm" id="printBanner">Print x-banner</button>
+          <button class="btn ghost sm" data-print="xbanner">Print x-banner</button>
           <button class="btn ghost sm" id="csv">Download CSV</button>
         </div>
       </div>
@@ -1179,11 +1209,11 @@ function editVenueCard(v){
   </div>`;
 }
 
-function bannerArt(v){
+function bannerArt(v, id='xbanner'){
   const link = orderLink(v.code);
-  return `<div class="xb" id="xbanner">
+  return `<div class="xb" id="${id}">
     <div class="logo" style="font-size:30px">${logoMark(30)}</div>
-    <div style="font-size:10px;letter-spacing:.18em;font-weight:700;color:var(--text-soft)">${esc(BRAND.tagline.toUpperCase())}</div>
+    <div style="font-size:10px;letter-spacing:.18em;font-weight:700;color:var(--text-soft)">${esc((BRAND.tagline||'').toUpperCase())}</div>
     <div class="k">${esc(BRAND.bannerHeadline)}</div>
     <div class="s">${esc(BRAND.bannerSub)}</div>
     <div class="qr">${qrSvg(link)}</div>
@@ -1258,6 +1288,21 @@ function viewHQ(){
       </div>
       <button class="btn block" id="addVenue">Create venue & QR</button>
       <p class="lvl">The venue code and dashboard PIN are generated automatically.</p>
+    </div>
+
+    <div class="step"><b>QR codes for every branch</b><i>Print ready</i></div>
+    <div class="card">
+      <p style="margin:0 0 12px;font-size:14px;color:var(--text-soft)">Each code opens the menu already tagged to that branch, so the revenue share is credited automatically. Print one per x-banner.</p>
+      <div class="xbgrid">
+        ${DB.venues.filter(v=>v.active!==false).map(v=>`
+          <div>
+            ${bannerArt(v, 'xb-'+v.code)}
+            <div class="inline" style="justify-content:center;margin-top:8px">
+              <button class="btn ghost sm" data-print="xb-${esc(v.code)}">Print</button>
+              <span class="chip neutral">${Math.round(v.rate*100)}% share</span>
+            </div>
+          </div>`).join('')}
+      </div>
     </div>
 
     <div class="step"><b>Data storage</b><i>${esc(STORE.label())}</i></div>
@@ -1386,6 +1431,7 @@ document.addEventListener('click', async (e)=>{
   if(d.pay){ S.payment = d.pay; keepForm(); render(); return; }
   if(d.tab){ S.tab = d.tab; render(); return; }
   if(d.edit){ S.editVenue = (S.editVenue===d.edit ? null : d.edit); render(); return; }
+  if(d.print){ printBanner(d.print); return; }
 
   switch(b.id){
     case 'toCheckout': S.stage='checkout'; render(); window.scrollTo(0,0); break;
@@ -1393,6 +1439,7 @@ document.addEventListener('click', async (e)=>{
     case 'payNow':     await placeOrder(); break;
     case 'again':
       S.pick={protein:[],organ:[],sayuran:[],karbohidrat:[]}; S.addons=[]; S.stage='menu'; S.lastOrder=null;
+      S.payment=PAYMENTS[0].id; S.fulfil=FULFIL[0].id;
       render(); window.scrollTo(0,0); break;
     case 'gotoPartner': S.session = S.lastOrder.venueCode; S.route='partner'; render(); window.scrollTo(0,0); break;
     case 'doLogin': {
@@ -1414,7 +1461,6 @@ document.addEventListener('click', async (e)=>{
       catch(err){ toast(link); }
       break;
     }
-    case 'printBanner': printBanner(); break;
     case 'csv':    downloadCsv(ordersFor(S.session), `pawsly-${S.session}.csv`); break;
     case 'csvAll': downloadCsv(DB.orders, 'pawsly-all-orders.csv'); break;
     case 'sbSave': {
@@ -1514,8 +1560,8 @@ function keepForm(){
   if($('#cNote')) S.note = $('#cNote').value;
 }
 
-function printBanner(){
-  const el = $('#xbanner'); if(!el) return;
+function printBanner(id){
+  const el = $('#'+id); if(!el){ toast('Nothing to print'); return; }
   const w = window.open('', '_blank', 'width=700,height=900');
   if(!w){ toast('Allow pop-ups to print'); return; }
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Pawsly x-banner</title>
