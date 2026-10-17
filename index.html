@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pawsly — Pesan di Venue</title>
+<title>Pawsly Gourmet — Order at the Venue</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
@@ -408,67 +408,67 @@ const SIZES = [
 
 const GROUPS = [
   { id:'protein', title:'Protein', max:2, items:[
-    { id:'ayam',   label:'Ayam',   c1:'#F6CFC9', c2:'#E3A79E', shape:'blob' },
-    { id:'sapi',   label:'Sapi',   c1:'#C2342B', c2:'#8E201A', shape:'dice' },
+    { id:'ayam',   label:'Chicken',c1:'#F6CFC9', c2:'#E3A79E', shape:'blob' },
+    { id:'sapi',   label:'Beef',   c1:'#C2342B', c2:'#8E201A', shape:'dice' },
     { id:'pork',   label:'Pork',   c1:'#E79A9A', c2:'#F3DCD4', shape:'dice' },
     { id:'lamb',   label:'Lamb',   c1:'#A82E2E', c2:'#D98B7E', shape:'blob' },
     { id:'rabbit', label:'Rabbit', c1:'#F0D6CB', c2:'#DCB4A4', shape:'blob' },
   ]},
-  { id:'organ', title:'Organ', max:2, items:[
-    { id:'liver_ayam', label:'Liver Ayam', c1:'#6B2016', c2:'#3F100A', shape:'blob' },
-    { id:'liver_sapi', label:'Liver Sapi', c1:'#55180F', c2:'#2E0A06', shape:'blob' },
+  { id:'organ', title:'Organ Meat', max:2, items:[
+    { id:'liver_ayam', label:'Chicken Liver', c1:'#6B2016', c2:'#3F100A', shape:'blob' },
+    { id:'liver_sapi', label:'Beef Liver', c1:'#55180F', c2:'#2E0A06', shape:'blob' },
   ]},
-  { id:'sayuran', title:'Sayuran', max:2, items:[
-    { id:'wortel',      label:'Wortel',      c1:'#E8731F', c2:'#C7540E', shape:'floret' },
-    { id:'brokoli',     label:'Brokoli',     c1:'#3F7A2E', c2:'#27551C', shape:'floret' },
+  { id:'sayuran', title:'Vegetables', max:2, items:[
+    { id:'wortel',      label:'Carrot',      c1:'#E8731F', c2:'#C7540E', shape:'floret' },
+    { id:'brokoli',     label:'Broccoli',    c1:'#3F7A2E', c2:'#27551C', shape:'floret' },
     { id:'edamame',     label:'Edamame',     c1:'#8FBE4A', c2:'#5E8F2A', shape:'grain' },
-    { id:'kembang_kol', label:'Kembang Kol', c1:'#EFE3C8', c2:'#D4C39C', shape:'floret' },
+    { id:'kembang_kol', label:'Cauliflower', c1:'#EFE3C8', c2:'#D4C39C', shape:'floret' },
   ]},
-  { id:'karbohidrat', title:'Karbohidrat', max:2, items:[
+  { id:'karbohidrat', title:'Carbs', max:2, items:[
     { id:'oats',       label:'Rolled Oats', c1:'#D9BE8A', c2:'#B99A61', shape:'grain' },
-    { id:'labu',       label:'Labu Kuning', c1:'#E89A2A', c2:'#C47812', shape:'dice' },
-    { id:'ubi_madu',   label:'Ubi Madu',    c1:'#DD6B20', c2:'#B24D0D', shape:'dice' },
-    { id:'ubi_ungu',   label:'Ubi Ungu',    c1:'#6B3FA0', c2:'#47266E', shape:'dice' },
+    { id:'labu',       label:'Pumpkin',     c1:'#E89A2A', c2:'#C47812', shape:'dice' },
+    { id:'ubi_madu',   label:'Sweet Potato',c1:'#DD6B20', c2:'#B24D0D', shape:'dice' },
+    { id:'ubi_ungu',   label:'Purple Yam',  c1:'#6B3FA0', c2:'#47266E', shape:'dice' },
   ]},
 ];
 
 const ADDONS = [
-  { id:'potion', label:'Pawsly Potion', price:25000, desc:'Suplemen minyak ikan untuk bulu & kulit' },
-  { id:'topper', label:'Extra Protein Topper', price:15000, desc:'Tambahan 50g protein pilihan' },
+  { id:'potion', label:'Pawsly Potion', price:25000, desc:'Fish oil supplement for coat & skin' },
+  { id:'topper', label:'Extra Protein Topper', price:15000, desc:'Extra 50g of your chosen protein' },
 ];
 
 const RECIPES = [
-  { id:'tears', n:1, title:'Bye Bye Tears Stain', desc:'Ayam · Ati Ayam · Rolled Oats · Wortel',
+  { id:'tears', n:1, title:'Bye Bye Tears Stain', desc:'Chicken · Chicken Liver · Rolled Oats · Carrot',
     pick:{ protein:['ayam'], organ:['liver_ayam'], sayuran:['wortel'], karbohidrat:['oats'] }, addons:[] },
-  { id:'bulu', n:2, title:'Bye Bye Bulu Rontok', desc:'Sapi · Liver Sapi · Ubi Madu · Wortel + Pawsly Potion',
+  { id:'bulu', n:2, title:'Bye Bye Bulu Rontok', desc:'Beef · Beef Liver · Sweet Potato · Carrot + Pawsly Potion',
     pick:{ protein:['sapi'], organ:['liver_sapi'], sayuran:['wortel'], karbohidrat:['ubi_madu'] }, addons:['potion'] },
 ];
 
 const PAYMENTS = [
-  { id:'qris',  label:'QRIS',            desc:'Semua e-wallet & mobile banking', collect:'pawsly' },
-  { id:'gopay', label:'GoPay',           desc:'Bayar dari aplikasi Gojek',       collect:'pawsly' },
-  { id:'ovo',   label:'OVO',             desc:'Bayar dari aplikasi OVO',         collect:'pawsly' },
-  { id:'dana',  label:'DANA',            desc:'Bayar dari aplikasi DANA',        collect:'pawsly' },
-  { id:'bca',   label:'Transfer BCA',    desc:'Virtual account, cek otomatis',   collect:'pawsly' },
-  { id:'cash',  label:'Tunai di counter', desc:'Bayar langsung ke kasir venue',  collect:'venue' },
+  { id:'qris',  label:'QRIS',            desc:'Any e-wallet or mobile banking app', collect:'pawsly' },
+  { id:'gopay', label:'GoPay',           desc:'Pay from the Gojek app',            collect:'pawsly' },
+  { id:'ovo',   label:'OVO',             desc:'Pay from the OVO app',              collect:'pawsly' },
+  { id:'dana',  label:'DANA',            desc:'Pay from the DANA app',             collect:'pawsly' },
+  { id:'bca',   label:'BCA Transfer',    desc:'Virtual account, checked automatically', collect:'pawsly' },
+  { id:'cash',  label:'Cash at counter',  desc:'Pay the venue cashier directly',  collect:'venue' },
 ];
 
 const FULFIL = [
-  { id:'counter',  label:'Ambil di counter',   desc:'Dipanggil saat pesanan siap' },
-  { id:'poolside', label:'Antar ke pool deck', desc:'Tambah Rp 5.000',    fee:5000 },
+  { id:'counter',  label:'Pick up at the counter', desc:"We'll call you when it's ready" },
+  { id:'poolside', label:'Deliver to the pool deck', desc:'Adds Rp 5,000', fee:5000 },
 ];
 
 /* ---------- helpers ---------- */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const rp  = n => 'Rp ' + Math.round(n||0).toLocaleString('id-ID');
-const rpk = n => n>=1e6 ? 'Rp ' + (n/1e6).toFixed(n>=1e7?0:1).replace('.',',') + ' jt'
-                : n>=1e3 ? 'Rp ' + Math.round(n/1e3) + 'rb' : rp(n);
+const rp  = n => 'Rp ' + Math.round(n||0).toLocaleString('en-US');
+const rpk = n => n>=1e6 ? 'Rp ' + (n/1e6).toFixed(n>=1e7?0:1) + 'M'
+                : n>=1e3 ? 'Rp ' + Math.round(n/1e3) + 'k' : rp(n);
 const dayKey = d => { const x=new Date(d); const p=n=>String(n).padStart(2,'0');
                       return `${x.getFullYear()}-${p(x.getMonth()+1)}-${p(x.getDate())}`; };
 const todayKey = () => dayKey(new Date());
-const fmtDay = k => new Date(k+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'});
-const fmtTime = iso => new Date(iso).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+const fmtDay = k => new Date(k+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const fmtTime = iso => new Date(iso).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 const rid = n => Array.from({length:n},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
 const itemById = id => GROUPS.flatMap(g=>g.items).find(i=>i.id===id) || ADDONS.find(a=>a.id===id);
 const label = id => (itemById(id)||{label:id}).label;
@@ -509,7 +509,7 @@ const ORDER_COLS = 'id,code,venue_code,created_at,size,size_name,pick,addons,ful
 const maskPhone = p => { const d=String(p||'').replace(/\D/g,''); return d.length>3 ? '\u2022\u2022\u2022\u2022'+d.slice(-4) : ''; };
 
 const toRowVenue = v => ({ code:v.code, name:v.name, kind:v.kind, city:v.city, pin:v.pin, rate:v.rate, payout:v.payout, active:v.active!==false });
-const fromRowVenue = r => ({ code:r.code, name:r.name, kind:r.kind||'', city:r.city||'', pin:String(r.pin||''), rate:Number(r.rate)||0, payout:r.payout||'Belum diisi', active:r.active!==false });
+const fromRowVenue = r => ({ code:r.code, name:r.name, kind:r.kind||'', city:r.city||'', pin:String(r.pin||''), rate:Number(r.rate)||0, payout:r.payout||'Not set', active:r.active!==false });
 
 const toRowOrder = o => ({
   id:o.id, code:o.code, venue_code:o.venueCode, created_at:o.createdAt,
@@ -543,7 +543,7 @@ const STORE = {
     }catch(e){ this.canLocal = false; }
     this.mode = (this.cfg.url && this.cfg.key) ? 'cloud' : (this.canLocal ? 'device' : 'memory');
   },
-  label(){ return { cloud:'Supabase — semua perangkat', device:'Perangkat ini saja', memory:'Sementara — tidak tersimpan' }[this.mode]; },
+  label(){ return { cloud:'Supabase — all devices', device:'This device only', memory:'Temporary — not saved' }[this.mode]; },
 
   async api(path, opts={}){
     const r = await fetch(this.cfg.url.replace(/\/+$/,'') + '/rest/v1/' + path, Object.assign({}, opts, {
@@ -580,34 +580,34 @@ const STORE = {
   async persist(){
     if(this.mode!=='device') return;
     try{ localStorage.setItem(KEY, JSON.stringify({ venues:DB.venues, orders:DB.orders.slice(-800) })); }
-    catch(e){ toast('Penyimpanan perangkat penuh'); }
+    catch(e){ toast('Device storage is full'); }
   },
 
   async addOrder(o){
     DB.orders.push(o);
     if(this.mode!=='cloud') return this.persist();
     try{ await this.api('orders', { method:'POST', body:JSON.stringify(toRowOrder(o)) }); }
-    catch(e){ toast('Pesanan tersimpan lokal, server gagal: '+e.message); }
+    catch(e){ toast('Order saved locally, server failed: '+e.message); }
   },
 
   async saveVenue(v){
     if(this.mode!=='cloud') return this.persist();
     try{ await this.api('venues?on_conflict=code', { method:'POST', headers:{ Prefer:'resolution=merge-duplicates' }, body:JSON.stringify(toRowVenue(v)) }); }
-    catch(e){ toast('Gagal simpan venue: '+e.message); }
+    catch(e){ toast('Could not save venue: '+e.message); }
   },
 
   async settle(code){
     ordersFor(code).forEach(o=>o.settled=true);
     if(this.mode!=='cloud') return this.persist();
     try{ await this.api('orders?venue_code=eq.'+encodeURIComponent(code), { method:'PATCH', body:JSON.stringify({ settled:true }) }); }
-    catch(e){ toast('Gagal update server: '+e.message); }
+    catch(e){ toast('Server update failed: '+e.message); }
   },
 
   async deleteVenue(code){
     DB.venues = DB.venues.filter(v=>v.code!==code);
     if(this.mode!=='cloud') return this.persist();
     try{ await this.api('venues?code=eq.'+encodeURIComponent(code), { method:'DELETE' }); }
-    catch(e){ toast('Gagal hapus di server: '+e.message); }
+    catch(e){ toast('Server delete failed: '+e.message); }
   },
 
   async pushAll(){
@@ -641,7 +641,7 @@ async function load(){
   let data = null;
   try{ data = await STORE.loadAll(); }
   catch(e){
-    toast('Server tidak terjangkau — pakai data perangkat');
+    toast('Server unreachable — using data from this device');
     STORE.mode = STORE.canLocal ? 'device' : 'memory';
     try{ data = await STORE.loadAll(); }catch(e2){}
   }
@@ -669,8 +669,8 @@ function poll(){
 
 function seed(){
   const venues = [
-    { code:'PAWS',         name:'PawS',          kind:'Dog pool & Play park', city:'Gading Serpong', pin:'1510', rate:0.10, payout:'BCA 2290xxxx81 · PT Paw Park Nusantara', active:true },
-    { code:'PUPPY-AFFAIR', name:'Puppy Affair',  kind:'Pet Groomer',          city:'Gading Serpong', pin:'2208', rate:0.10, payout:'Mandiri 1270xxxx44 · CV Splash Paws',    active:true },
+    { code:'PAWS',         name:'PawS',          kind:'Dog pool & Play park', city:'Gading Serpong', pin:'1510', rate:0.10, payout:'BCA 2290xxxx81 · PT PawS Indonesia', active:true },
+    { code:'PUPPY-AFFAIR', name:'Puppy Affair',  kind:'Pet Groomer',          city:'Gading Serpong', pin:'2208', rate:0.10, payout:'Mandiri 1270xxxx44 · CV Puppy Affair',    active:true },
   ];
   const orders = [];
   const names = ['Dira','Bagas','Nadya','Reno','Kiki','Tomi','Sasha','Yoga','Mila','Fajar','Intan','Bram','Sinta','Danu'];
@@ -753,11 +753,11 @@ function toast(msg){
   clearTimeout(toastT); toastT = setTimeout(()=>el.remove(), 2600);
 }
 function qrSvg(text, px=170){
-  if(typeof qrcode !== 'function') return `<div style="width:${px}px;height:${px}px;display:grid;place-items:center;font-size:11px;padding:8px;text-align:center">QR tidak termuat.<br>Pakai tautan di bawah.</div>`;
+  if(typeof qrcode !== 'function') return `<div style="width:${px}px;height:${px}px;display:grid;place-items:center;font-size:11px;padding:8px;text-align:center">QR did not load.<br>Use the link below.</div>`;
   try{
     const q = qrcode(0,'M'); q.addData(text); q.make();
     return q.createSvgTag({ cellSize:4, margin:1, scalable:true });
-  }catch(e){ return '<div style="padding:12px;font-size:11px">Tautan terlalu panjang untuk QR.</div>'; }
+  }catch(e){ return '<div style="padding:12px;font-size:11px">Link is too long for a QR code.</div>'; }
 }
 function orderLink(code){
   const base = (DB.config.baseUrl||'').replace(/[?#].*$/,'');
@@ -788,17 +788,17 @@ function bowlText(pick){
 function viewMenu(){
   const v = venue(S.venueCode);
   return `
-  ${v ? `<div class="ribbon"><span class="dot"></span>Kamu memesan di <b>&nbsp;${esc(v.name)}</b><small>&nbsp;· ${esc(v.city)}</small></div>` : ''}
+  ${v ? `<div class="ribbon"><span class="dot"></span>You're ordering at <b>&nbsp;${esc(v.name)}</b><small>&nbsp;· ${esc(v.city)}</small></div>` : ''}
   <div class="wrap">
     <header class="mast">
       <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
       <p class="tag">${esc(BRAND.tagline)}</p>
-      <h2 class="h1">Racik mangkuk anjingmu</h2>
+      <h2 class="h1">Build your dog's bowl</h2>
       <p class="lede">Fresh Ingredients, Cook on the spot, Choose your portion and Mix it</p>
     </header>
 
     <section>
-      <div class="step"><b>Choose Size</b><i>Langkah 1</i></div>
+      <div class="step"><b>Choose size</b><i>Step 1</i></div>
       <div class="sizes">
         ${SIZES.map(s=>`
           <button class="size ${s.cls}" data-size="${s.id}" aria-pressed="${S.size===s.id}">
@@ -808,11 +808,11 @@ function viewMenu(){
             <span class="sub">${s.sub}</span>
           </button>`).join('')}
       </div>
-      <p class="lvl">Toppings below already included in the price. Maksimum 2 Toppings per Category.</p>
+      <p class="lvl">Toppings below are already included in the price. Maximum 2 per category.</p>
     </section>
 
     <section>
-      <div class="step"><b>Resep andalan dapur</b><i>Jalan pintas</i></div>
+      <div class="step"><b>Kitchen favourites</b><i>Shortcut</i></div>
       <div class="recipes">
         ${RECIPES.map(r=>`
           <button class="recipe" data-recipe="${r.id}">
@@ -823,7 +823,7 @@ function viewMenu(){
     </section>
 
     <section>
-      <div class="step"><b>Racik sendiri</b><i>Langkah 2</i></div>
+      <div class="step"><b>Mix your own</b><i>Step 2</i></div>
       ${GROUPS.map(g=>{
         const sel = S.pick[g.id]||[];
         const full = sel.length>=g.max;
@@ -831,7 +831,7 @@ function viewMenu(){
         <div class="group ${full?'full':''}">
           <header>
             <h3>${g.title}</h3>
-            <span>${sel.length}/${g.max} dipilih</span>
+            <span>${sel.length}/${g.max} selected</span>
           </header>
           <div class="picks">
             ${g.items.map(it=>{
@@ -847,7 +847,7 @@ function viewMenu(){
     </section>
 
     <section>
-      <div class="step"><b>Tambahan</b><i>Opsional</i></div>
+      <div class="step"><b>Add-ons</b><i>Optional</i></div>
       <div class="recipes">
         ${ADDONS.map(a=>`
           <button class="addon" data-addon="${a.id}" aria-pressed="${S.addons.includes(a.id)}">
@@ -865,8 +865,8 @@ function stickyMenu(){
   const p = priceNow();
   const ready = bowlReady();
   return `<div class="sticky"><div class="inner">
-    <span class="sum"><b>${rp(p.subtotal)}</b><span>${p.size.name}${S.addons.length?` + ${S.addons.length} tambahan`:''}</span></span>
-    <button class="btn" id="toCheckout" ${ready?'':'disabled'}>${ready?'Lanjut bayar':'Pilih protein & karbo'}</button>
+    <span class="sum"><b>${rp(p.subtotal)}</b><span>${p.size.name}${S.addons.length?` + ${S.addons.length} add-on${S.addons.length>1?'s':''}`:''}</span></span>
+    <button class="btn" id="toCheckout" ${ready?'':'disabled'}>${ready?'Continue to payment':'Pick a protein & carb'}</button>
   </div></div>`;
 }
 
@@ -874,20 +874,20 @@ function viewCheckout(){
   const v = venue(S.venueCode);
   const p = priceNow();
   return `
-  ${v ? `<div class="ribbon"><span class="dot"></span>Pesanan untuk <b>&nbsp;${esc(v.name)}</b></div>` : ''}
+  ${v ? `<div class="ribbon"><span class="dot"></span>Order for <b>&nbsp;${esc(v.name)}</b></div>` : ''}
   <div class="wrap">
     <header class="mast">
-      <h2 class="h1" style="margin-top:8px">Selesaikan pesanan</h2>
+      <h2 class="h1" style="margin-top:8px">Complete your order</h2>
     </header>
 
     <div class="card">
       <div class="row"><span><b>${p.size.name} Bowl</b></span><span>${rp(p.size.price)}</span></div>
       <p class="bowlline" style="margin:6px 0 0">${bowlText(S.pick)}</p>
       ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row" style="margin-top:7px"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
-      <div style="margin-top:10px"><button class="btn ghost sm" id="backMenu">Ubah isian</button></div>
+      <div style="margin-top:10px"><button class="btn ghost sm" id="backMenu">Change ingredients</button></div>
     </div>
 
-    <div class="step"><b>Pengambilan</b></div>
+    <div class="step"><b>Collection</b></div>
     <div class="radios">
       ${FULFIL.map(f=>`
         <button class="radio" data-ful="${f.id}" aria-pressed="${S.fulfil===f.id}">
@@ -896,15 +896,15 @@ function viewCheckout(){
         </button>`).join('')}
     </div>
 
-    <div class="step"><b>Data pemesan</b></div>
+    <div class="step"><b>Your details</b></div>
     <div class="card">
-      <label class="field"><span>Nama kamu</span><input type="text" id="cName" value="${esc(S.cust.name)}" placeholder="Nama panggilan"></label>
-      <label class="field"><span>Nomor WhatsApp <em>— untuk notifikasi pesanan siap</em></span><input type="tel" id="cPhone" value="${esc(S.cust.phone)}" placeholder="08xx xxxx xxxx" inputmode="numeric"></label>
-      <label class="field"><span>Nama anjing</span><input type="text" id="cDog" value="${esc(S.cust.dog)}" placeholder="Dipanggil saat pesanan siap"></label>
-      <label class="field"><span>Catatan dapur <em>— alergi, tekstur, dll</em></span><textarea id="cNote" placeholder="Contoh: potong kecil, tanpa garam">${esc(S.note)}</textarea></label>
+      <label class="field"><span>Your name</span><input type="text" id="cName" value="${esc(S.cust.name)}" placeholder="First name is fine"></label>
+      <label class="field"><span>WhatsApp number <em>— so we can tell you when it’s ready</em></span><input type="tel" id="cPhone" value="${esc(S.cust.phone)}" placeholder="08xx xxxx xxxx" inputmode="numeric"></label>
+      <label class="field"><span>Dog’s name</span><input type="text" id="cDog" value="${esc(S.cust.dog)}" placeholder="We’ll call this name at pickup"></label>
+      <label class="field"><span>Note for the kitchen <em>— allergies, texture, anything else</em></span><textarea id="cNote" placeholder="e.g. cut small, no salt">${esc(S.note)}</textarea></label>
     </div>
 
-    <div class="step"><b>Metode pembayaran</b></div>
+    <div class="step"><b>Payment method</b></div>
     <div class="radios">
       ${PAYMENTS.map(m=>`
         <button class="radio" data-pay="${m.id}" aria-pressed="${S.payment===m.id}">
@@ -917,7 +917,7 @@ function viewCheckout(){
       <div class="rows">
         <div class="row"><span>${p.size.name} Bowl</span><span>${rp(p.size.price)}</span></div>
         ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
-        ${p.fee?`<div class="row"><span>Antar ke pool deck</span><span>${rp(p.fee)}</span></div>`:''}
+        ${p.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(p.fee)}</span></div>`:''}
         <div class="row total"><span>Total</span><span>${rp(p.total)}</span></div>
       </div>
     </div>
@@ -930,8 +930,8 @@ function stickyCheckout(){
   const p = priceNow();
   const cash = S.payment==='cash';
   return `<div class="sticky"><div class="inner">
-    <span class="sum"><b>${rp(p.total)}</b><span>${cash?'Bayar di kasir venue':'Pembayaran online'}</span></span>
-    <button class="btn gold" id="payNow">${cash?'Buat pesanan':'Bayar sekarang'}</button>
+    <span class="sum"><b>${rp(p.total)}</b><span>${cash?'Pay at the venue counter':'Paid online'}</span></span>
+    <button class="btn gold" id="payNow">${cash?'Place order':'Pay now'}</button>
   </div></div>`;
 }
 
@@ -939,7 +939,7 @@ async function placeOrder(){
   const name = ($('#cName')||{}).value?.trim() || '';
   const phone = ($('#cPhone')||{}).value?.trim() || '';
   if(!name || phone.replace(/\D/g,'').length < 9){
-    toast('Isi nama dan nomor WhatsApp yang valid');
+    toast('Enter your name and a valid WhatsApp number');
     const bad = !name ? $('#cName') : $('#cPhone'); if(bad) bad.focus();
     return;
   }
@@ -950,7 +950,7 @@ async function placeOrder(){
   const v = venue(S.venueCode);
   const rate = v ? v.rate : 0;
   const pay = PAYMENTS.find(m=>m.id===S.payment);
-  const btn = $('#payNow'); if(btn){ btn.disabled = true; btn.textContent = 'Memproses…'; }
+  const btn = $('#payNow'); if(btn){ btn.disabled = true; btn.textContent = 'Processing…'; }
 
   const order = {
     id:'o'+Date.now(), code:'PW-'+rid(4),
@@ -980,35 +980,35 @@ function viewDone(){
   const cash = o.collect==='venue';
   return `
   <div class="wrap">
-    <header class="mast"><h2 class="h1">${cash?'Pesanan dibuat':'Pembayaran diterima'}</h2>
-    <p class="lede">${cash?'Tunjukkan kode ini di kasir venue untuk membayar.':'Dapur sudah mulai memasak.'}</p></header>
+    <header class="mast"><h2 class="h1">${cash?'Order placed':'Payment received'}</h2>
+    <p class="lede">${cash?'Show this code at the venue counter to pay.':'The kitchen has started cooking.'}</p></header>
 
     <div class="tix">
       <div class="code">${esc(o.code)}</div>
-      <div class="lbl">Sebutkan kode ini saat pengambilan</div>
+      <div class="lbl">Give this code when you collect</div>
     </div>
 
     <div class="card" style="margin-top:12px">
       <div class="rows">
         <div class="row"><span>${esc(o.sizeName)} Bowl${o.addons.length?` + ${o.addons.map(a=>esc(a.label)).join(', ')}`:''}</span><span>${rp(o.subtotal)}</span></div>
-        ${o.fee?`<div class="row"><span>Antar ke pool deck</span><span>${rp(o.fee)}</span></div>`:''}
+        ${o.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(o.fee)}</span></div>`:''}
         <div class="row total"><span>Total</span><span>${rp(o.total)}</span></div>
-        <div class="row muted"><span>${esc(o.paymentLabel)}</span><span>${cash?'<span class="chip cash">Bayar di kasir</span>':'<span class="chip paid">Lunas</span>'}</span></div>
+        <div class="row muted"><span>${esc(o.paymentLabel)}</span><span>${cash?'<span class="chip cash">Pay at counter</span>':'<span class="chip paid">Paid</span>'}</span></div>
       </div>
       <hr class="sep">
       <p class="bowlline">${bowlText(o.pick)}</p>
-      ${o.note?`<p class="bowlline" style="margin-top:6px"><b>Catatan:</b> ${esc(o.note)}</p>`:''}
+      ${o.note?`<p class="bowlline" style="margin-top:6px"><b>Note:</b> ${esc(o.note)}</p>`:''}
       ${v?`<p class="bowlline" style="margin-top:6px"><b>Venue:</b> ${esc(v.name)} — ${esc(FULFIL.find(f=>f.id===o.fulfil).label)}</p>`:''}
     </div>
 
-    ${v?`<div class="note" style="margin-top:12px"><b>Terima kasih sudah pesan dari ${esc(v.name)}</b>
-      ${Math.round(v.rate*100)}% dari pesanan ini kembali ke venue untuk merawat fasilitas anjingmu.</div>`:''}
+    ${v?`<div class="note" style="margin-top:12px"><b>Thanks for ordering at ${esc(v.name)}</b>
+      ${Math.round(v.rate*100)}% of this order goes back to the venue to keep its facilities running.</div>`:''}
 
     <div style="margin-top:16px;display:grid;gap:8px">
-      <button class="btn block" id="again">Pesan lagi</button>
-      ${v?`<button class="btn ghost block" id="gotoPartner">Lihat dashboard venue (demo)</button>`:''}
+      <button class="btn block" id="again">Order again</button>
+      ${v?`<button class="btn ghost block" id="gotoPartner">View venue dashboard (demo)</button>`:''}
     </div>
-    <p class="foot">Status pesanan dikirim ke WhatsApp ${esc(o.cust.phone)}.</p>
+    <p class="foot">Order updates go to WhatsApp ${esc(o.cust.phone)}.</p>
   </div>`;
 }
 
@@ -1018,10 +1018,10 @@ function viewNoVenue(){
     <header class="mast">
       <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
       <p class="tag">${esc(BRAND.tagline)}</p>
-      <h2 class="h1">${S.closedVenue ? 'Venue ini sedang tidak aktif' : 'Pindai QR di venue'}</h2>
+      <h2 class="h1">${S.closedVenue ? 'This venue is not active' : 'Scan the QR at the venue'}</h2>
       <p class="lede">${S.closedVenue
-        ? `Pawsly sudah tidak melayani pesanan di ${esc(S.closedVenue)}. Pilih venue lain di bawah.`
-        : 'Pemesanan Pawsly dibuka lewat QR pada x-banner di kolam atau taman anjing. Pilih venue di bawah untuk mencoba alurnya.'}</p>
+        ? `Pawsly no longer takes orders at ${esc(S.closedVenue)}. Pick another venue below.`
+        : 'Ordering opens from the QR code on the x-banner at the pool or dog park. Pick a venue below to try the flow.'}</p>
     </header>
     <div class="recipes">
       ${DB.venues.filter(v=>v.active).map(v=>`
@@ -1044,12 +1044,12 @@ function chart(series, key='gmv'){
     const bh = (d[key]/max)*78;
     const last = i===series.length-1;
     return `<rect class="bar ${last?'today':''}" x="${(i*bw+bw*0.17).toFixed(2)}" y="${(84-bh).toFixed(2)}" width="${(bw*0.66).toFixed(2)}" height="${Math.max(bh,0.6).toFixed(2)}" rx="1.2">
-      <title>${fmtDay(d.k)} — ${rp(d[key])} · ${d.n} pesanan</title></rect>`;
+      <title>${fmtDay(d.k)} — ${rp(d[key])} · ${d.n} orders</title></rect>`;
   }).join('');
   const labels = series.map((d,i)=> (i%3===0||i===series.length-1)
     ? `<text x="${(i*bw+bw/2).toFixed(2)}" y="95" text-anchor="middle">${fmtDay(d.k).replace(' ','\u00a0')}</text>` : '').join('');
   return `<svg class="chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img"
-    aria-label="Pendapatan ${series.length} hari terakhir, tertinggi ${rp(max)}">
+    aria-label="Revenue over the last ${series.length} days, highest ${rp(max)}">
     <line class="gl" x1="0" y1="84.5" x2="100" y2="84.5"/>
     <line class="gl" x1="0" y1="45" x2="100" y2="45" stroke-dasharray="1.5 1.5"/>
     ${bars}${labels}</svg>`;
@@ -1060,17 +1060,17 @@ function viewLogin(){
   <div class="wrap">
     <header class="mast">
       <h1 class="logo" style="font-size:34px">${logoMark(34,'partner')}</h1>
-      <h2 class="h1" style="font-size:26px">Masuk ke dashboard venue</h2>
-      <p class="lede">Lihat pesanan dan bagi hasil dari QR venue kamu, diperbarui setiap pesanan masuk.</p>
+      <h2 class="h1" style="font-size:26px">Sign in to your venue dashboard</h2>
+      <p class="lede">See orders and revenue share from your venue QR, updated as each order comes in.</p>
     </header>
     <div class="card">
-      <label class="field"><span>Kode venue</span>
+      <label class="field"><span>Venue code</span>
         <select id="lCode">${DB.venues.map(v=>`<option value="${esc(v.code)}">${esc(v.name)} — ${esc(v.code)}</option>`).join('')}</select>
       </label>
-      <label class="field"><span>PIN</span><input type="password" id="lPin" inputmode="numeric" placeholder="4 digit"></label>
-      <button class="btn block" id="doLogin">Masuk</button>
+      <label class="field"><span>PIN</span><input type="password" id="lPin" inputmode="numeric" placeholder="4 digits"></label>
+      <button class="btn block" id="doLogin">Sign in</button>
       <!-- DELETE THIS LINE before real partners use the dashboard: it prints every venue PIN in public -->
-      <p class="lvl">PIN demo: ${DB.venues.map(v=>`${esc(v.name)} <b>${esc(v.pin)}</b>`).join(' \u00b7 ')}</p>
+      <p class="lvl">Demo PINs: ${DB.venues.map(v=>`${esc(v.name)} <b>${esc(v.pin)}</b>`).join(' \u00b7 ')}</p>
     </div>
   </div>`;
 }
@@ -1093,68 +1093,68 @@ function viewPartner(){
     <div class="dash-head">
       <div>
         <h2>${esc(v.name)}</h2>
-        <p>${esc(v.kind)} · bagi hasil ${Math.round(v.rate*100)}% · kode ${esc(v.code)}</p>
+        <p>${esc(v.kind)} · ${Math.round(v.rate*100)}% revenue share · code ${esc(v.code)}</p>
       </div>
-      <button class="out" id="logout">Keluar</button>
+      <button class="out" id="logout">Sign out</button>
     </div>
   </div></div>
 
   <div class="wrap wide">
     <div class="kpis">
-      <div class="kpi hero"><div class="k">Bagi hasil hari ini</div><div class="v">${rp(t.com)}</div><div class="n">${Math.round(v.rate*100)}% dari ${rp(t.gmv)}</div></div>
-      <div class="kpi"><div class="k">Pesanan hari ini</div><div class="v">${t.n}</div><div class="n">rata-rata ${rp(t.avg)}</div></div>
-      <div class="kpi"><div class="k">Bagi hasil bulan ini</div><div class="v">${rpk(m.com)}</div><div class="n">${m.n} pesanan · ${rpk(m.gmv)} omzet</div></div>
-      <div class="kpi"><div class="k">Menunggu transfer</div><div class="v">${rpk(owedToVenue)}</div><div class="n">${unsettled.length} pesanan belum dibayarkan</div></div>
+      <div class="kpi hero"><div class="k">Your share today</div><div class="v">${rp(t.com)}</div><div class="n">${Math.round(v.rate*100)}% of ${rp(t.gmv)}</div></div>
+      <div class="kpi"><div class="k">Orders today</div><div class="v">${t.n}</div><div class="n">${rp(t.avg)} average</div></div>
+      <div class="kpi"><div class="k">Your share this month</div><div class="v">${rpk(m.com)}</div><div class="n">${m.n} orders · ${rpk(m.gmv)} revenue</div></div>
+      <div class="kpi"><div class="k">Awaiting transfer</div><div class="v">${rpk(owedToVenue)}</div><div class="n">${unsettled.length} orders not yet paid out</div></div>
     </div>
 
     <div class="card chartwrap">
-      <div class="row" style="margin-bottom:8px"><span><b>Omzet 14 hari terakhir</b></span><span style="font-weight:600;color:var(--text-soft);font-size:12.5px">batang kuning = hari ini</span></div>
+      <div class="row" style="margin-bottom:8px"><span><b>Revenue, last 14 days</b></span><span style="font-weight:600;color:var(--text-soft);font-size:12.5px">yellow bar = today</span></div>
       ${chart(days,'gmv')}
     </div>
 
-    ${owedToPawsly>0?`<div class="note" style="margin-top:12px"><b>Setoran tunai ${rp(owedToPawsly)}</b>
-      ${cashUnsettled.length} pesanan dibayar tunai di kasir kamu. Kamu simpan bagi hasilnya, sisanya disetor ke Pawsly saat kurir mengambil.</div>`:''}
+    ${owedToPawsly>0?`<div class="note" style="margin-top:12px"><b>Cash to deposit: ${rp(owedToPawsly)}</b>
+      ${cashUnsettled.length} orders were paid in cash at your counter. Keep your share; the rest goes to Pawsly when the courier collects.</div>`:''}
 
     <div class="tabs" role="tablist">
-      <button role="tab" aria-selected="${S.tab==='today'}" data-tab="today">Hari ini (${today.length})</button>
-      <button role="tab" aria-selected="${S.tab==='all'}" data-tab="all">Semua (${all.length})</button>
+      <button role="tab" aria-selected="${S.tab==='today'}" data-tab="today">Today (${today.length})</button>
+      <button role="tab" aria-selected="${S.tab==='all'}" data-tab="all">All (${all.length})</button>
     </div>
 
     <div class="card" style="padding:14px 10px">
       ${rows.length?`<div class="tscroll"><table>
-        <thead><tr><th>Waktu</th><th>Kode</th><th>Pesanan</th><th>Bayar</th><th class="num">Omzet</th><th class="num">Bagi hasil</th></tr></thead>
+        <thead><tr><th>Time</th><th>Code</th><th>Order</th><th>Payment</th><th class="num">Revenue</th><th class="num">Your share</th></tr></thead>
         <tbody>${rows.slice(0,60).map(o=>`<tr>
           <td>${fmtTime(o.createdAt)}<br><span style="color:var(--text-soft);font-size:11.5px">${fmtDay(dayKey(o.createdAt))}</span></td>
           <td><b>${esc(o.code)}</b><br><span style="color:var(--text-soft);font-size:11.5px">${esc(o.cust.dog||o.cust.name)}</span></td>
           <td>${esc(o.sizeName)}${o.addons.length?` +${o.addons.length}`:''}<br><span style="color:var(--text-soft);font-size:11.5px">${esc((o.pick.protein||[]).map(label).join(', '))}</span></td>
-          <td>${o.collect==='venue'?'<span class="chip cash">Tunai</span>':`<span class="chip paid">${esc(o.paymentLabel)}</span>`}</td>
+          <td>${o.collect==='venue'?'<span class="chip cash">Cash</span>':`<span class="chip paid">${esc(o.paymentLabel)}</span>`}</td>
           <td class="num">${rp(o.total)}</td>
           <td class="num"><b>${rp(o.commission)}</b></td>
         </tr>`).join('')}</tbody></table></div>`
-      :`<div class="empty"><b>Belum ada pesanan</b>Pastikan x-banner QR terpasang di dekat kolam dan pintu masuk.</div>`}
+      :`<div class="empty"><b>No orders yet</b>Check the QR x-banner is up near the pool and the entrance.</div>`}
     </div>
 
-    <div class="step"><b>X-banner venue kamu</b><i>Siap cetak</i></div>
+    <div class="step"><b>Your x-banner</b><i>Print ready</i></div>
     <div class="grid2">
       <div class="card">
-        <p style="margin:0 0 10px;font-size:14px;color:var(--text-soft)">Setiap pesanan dari QR ini tercatat atas nama ${esc(v.name)} dan otomatis dapat bagi hasil ${Math.round(v.rate*100)}%.</p>
+        <p style="margin:0 0 10px;font-size:14px;color:var(--text-soft)">Every order from this QR is credited to ${esc(v.name)} and automatically earns a ${Math.round(v.rate*100)}% share.</p>
         ${bannerArt(v)}
       </div>
       <div class="card">
         <div class="rows">
-          <div class="row"><span>Tautan QR</span><span style="font-weight:600;font-size:12px;word-break:break-all;text-align:right">${esc(orderLink(v.code))}</span></div>
-          <div class="row"><span>Rekening pembayaran</span><span style="font-weight:600;font-size:12.5px;text-align:right">${esc(v.payout)}</span></div>
-          <div class="row"><span>Siklus transfer</span><span>Mingguan, setiap Senin</span></div>
+          <div class="row"><span>QR link</span><span style="font-weight:600;font-size:12px;word-break:break-all;text-align:right">${esc(orderLink(v.code))}</span></div>
+          <div class="row"><span>Payout account</span><span style="font-weight:600;font-size:12.5px;text-align:right">${esc(v.payout)}</span></div>
+          <div class="row"><span>Payout cycle</span><span>Weekly, every Monday</span></div>
         </div>
         <hr class="sep">
         <div class="inline">
-          <button class="btn ghost sm" id="copyLink">Salin tautan</button>
-          <button class="btn ghost sm" id="printBanner">Cetak x-banner</button>
-          <button class="btn ghost sm" id="csv">Unduh CSV</button>
+          <button class="btn ghost sm" id="copyLink">Copy link</button>
+          <button class="btn ghost sm" id="printBanner">Print x-banner</button>
+          <button class="btn ghost sm" id="csv">Download CSV</button>
         </div>
       </div>
     </div>
-    <p class="foot">Angka diperbarui langsung begitu pesanan masuk dari QR venue.</p>
+    <p class="foot">Figures update as soon as an order comes in from your QR.</p>
   </div>`;
 }
 
@@ -1162,26 +1162,26 @@ function editVenueCard(v){
   const n = ordersFor(v.code).length;
   return `
   <div class="card" style="border-color:var(--ink)">
-    <div class="row" style="margin-bottom:10px"><span><b>Ubah ${esc(v.name)}</b></span>
-      <span class="chip neutral">${n} pesanan tercatat</span></div>
+    <div class="row" style="margin-bottom:10px"><span><b>Edit ${esc(v.name)}</b></span>
+      <span class="chip neutral">${n} orders recorded</span></div>
     <div class="grid2">
       <div>
-        <label class="field"><span>Nama venue</span><input type="text" id="veName" value="${esc(v.name)}"></label>
-        <label class="field"><span>Jenis</span><input type="text" id="veKind" value="${esc(v.kind||'')}"></label>
-        <label class="field"><span>Kota</span><input type="text" id="veCity" value="${esc(v.city||'')}"></label>
+        <label class="field"><span>Venue name</span><input type="text" id="veName" value="${esc(v.name)}"></label>
+        <label class="field"><span>Type</span><input type="text" id="veKind" value="${esc(v.kind||'')}"></label>
+        <label class="field"><span>City</span><input type="text" id="veCity" value="${esc(v.city||'')}"></label>
       </div>
       <div>
-        <label class="field"><span>PIN dashboard</span><input type="text" id="vePin" value="${esc(v.pin||'')}" inputmode="numeric"></label>
-        <label class="field"><span>Rekening pembayaran</span><input type="text" id="vePayout" value="${esc(v.payout||'')}"></label>
+        <label class="field"><span>Dashboard PIN</span><input type="text" id="vePin" value="${esc(v.pin||'')}" inputmode="numeric"></label>
+        <label class="field"><span>Payout account</span><input type="text" id="vePayout" value="${esc(v.payout||'')}"></label>
         <label class="field"><span>Status</span>
-          <select id="veActive"><option value="1" ${v.active!==false?'selected':''}>Aktif</option><option value="0" ${v.active===false?'selected':''}>Nonaktif — QR berhenti menerima pesanan</option></select></label>
+          <select id="veActive"><option value="1" ${v.active!==false?'selected':''}>Active</option><option value="0" ${v.active===false?'selected':''}>Inactive — QR stops taking orders</option></select></label>
       </div>
     </div>
-    <div class="note"><b>Kode venue ${esc(v.code)} tidak bisa diubah</b>Kode ini sudah tercetak di QR x-banner dan menempel di ${n} pesanan. Mengubahnya akan memutus riwayat bagi hasil.</div>
+    <div class="note"><b>Venue code ${esc(v.code)} cannot be changed</b>It is printed inside the QR x-banner and attached to ${n} orders. Changing it would break the revenue-share history.</div>
     <div class="inline" style="margin-top:12px">
-      <button class="btn sm" id="veSave">Simpan perubahan</button>
-      <button class="btn ghost sm" id="veCancel">Batal</button>
-      <button class="btn danger sm" id="veDelete">Hapus venue</button>
+      <button class="btn sm" id="veSave">Save changes</button>
+      <button class="btn ghost sm" id="veCancel">Cancel</button>
+      <button class="btn danger sm" id="veDelete">Delete venue</button>
     </div>
   </div>`;
 }
@@ -1212,38 +1212,38 @@ function viewHQ(){
   return `
   <div class="dash-top"><div class="wrap wide">
     <div class="dash-head">
-      <div><h2>Pawsly HQ</h2><p>Jaringan venue, bagi hasil, dan penyelesaian pembayaran</p></div>
-      <button class="out" id="logout">Keluar</button>
+      <div><h2>Pawsly HQ</h2><p>Venue network, revenue share and settlement</p></div>
+      <button class="out" id="logout">Sign out</button>
     </div>
   </div></div>
 
   <div class="wrap wide">
     <div class="kpis">
-      <div class="kpi hero"><div class="k">Omzet hari ini</div><div class="v">${rpk(today.gmv)}</div><div class="n">${today.n} pesanan di semua venue</div></div>
-      <div class="kpi"><div class="k">Omzet 14 hari</div><div class="v">${rpk(t.gmv)}</div><div class="n">${t.n} pesanan</div></div>
-      <div class="kpi"><div class="k">Bagi hasil terutang</div><div class="v">${rpk(payable)}</div><div class="n">ditransfer ke venue</div></div>
-      <div class="kpi"><div class="k">Setoran tunai tertahan</div><div class="v">${rpk(receivable)}</div><div class="n">ditagih dari venue</div></div>
+      <div class="kpi hero"><div class="k">Revenue today</div><div class="v">${rpk(today.gmv)}</div><div class="n">${today.n} orders across all venues</div></div>
+      <div class="kpi"><div class="k">Revenue, 14 days</div><div class="v">${rpk(t.gmv)}</div><div class="n">${t.n} orders</div></div>
+      <div class="kpi"><div class="k">Share owed to venues</div><div class="v">${rpk(payable)}</div><div class="n">for Pawsly to transfer</div></div>
+      <div class="kpi"><div class="k">Cash held by venues</div><div class="v">${rpk(receivable)}</div><div class="n">for Pawsly to collect</div></div>
     </div>
 
-    <div class="card chartwrap"><div class="row" style="margin-bottom:8px"><span><b>Omzet jaringan, 14 hari</b></span></div>${chart(byDay(all,14),'gmv')}</div>
+    <div class="card chartwrap"><div class="row" style="margin-bottom:8px"><span><b>Network revenue, 14 days</b></span></div>${chart(byDay(all,14),'gmv')}</div>
 
-    <div class="step"><b>Venue mitra</b><i>${DB.venues.length} aktif</i></div>
+    <div class="step"><b>Partner venues</b><i>${DB.venues.length} listed</i></div>
     <div class="card" style="padding:14px 10px">
       <div class="tscroll"><table>
-        <thead><tr><th>Venue</th><th class="num">Bagi hasil</th><th class="num">Pesanan</th><th class="num">Omzet 14 hari</th><th class="num">Terutang</th><th></th></tr></thead>
+        <thead><tr><th>Venue</th><th class="num">Share</th><th class="num">Orders</th><th class="num">Revenue 14d</th><th class="num">Owed</th><th></th></tr></thead>
         <tbody>${DB.venues.map(v=>{
           const list = ordersFor(v.code);
           const due = list.filter(o=>!o.settled && o.collect==='pawsly').reduce((s,o)=>s+o.commission,0);
           const cash = list.filter(o=>!o.settled && o.collect==='venue').reduce((s,o)=>s+o.total-o.commission,0);
           return `<tr>
-            <td><b>${esc(v.name)}</b>${v.active===false?' <span class="chip neutral">nonaktif</span>':''}<br><span style="color:var(--text-soft);font-size:11.5px">${esc(v.code)} · ${esc(v.city)}</span></td>
-            <td class="num"><input type="number" min="0" max="40" step="1" value="${Math.round(v.rate*100)}" data-rate="${esc(v.code)}" style="width:66px;text-align:right;padding:5px 7px" aria-label="Bagi hasil ${esc(v.name)}">%</td>
+            <td><b>${esc(v.name)}</b>${v.active===false?' <span class="chip neutral">inactive</span>':''}<br><span style="color:var(--text-soft);font-size:11.5px">${esc(v.code)} · ${esc(v.city)}</span></td>
+            <td class="num"><input type="number" min="0" max="40" step="1" value="${Math.round(v.rate*100)}" data-rate="${esc(v.code)}" style="width:66px;text-align:right;padding:5px 7px" aria-label="Revenue share for ${esc(v.name)}">%</td>
             <td class="num">${list.length}</td>
             <td class="num">${rp(totals(list).gmv)}</td>
-            <td class="num">${due?`<b>${rp(due)}</b>`:'—'}${cash?`<br><span class="chip cash" style="margin-top:3px">tunai ${rpk(cash)}</span>`:''}</td>
+            <td class="num">${due?`<b>${rp(due)}</b>`:'—'}${cash?`<br><span class="chip cash" style="margin-top:3px">cash ${rpk(cash)}</span>`:''}</td>
             <td class="num"><div class="inline" style="justify-content:flex-end">
-              ${(due||cash)?`<button class="btn ghost sm" data-settle="${esc(v.code)}">Tandai lunas</button>`:''}
-              <button class="btn ghost sm" data-edit="${esc(v.code)}">Ubah</button>
+              ${(due||cash)?`<button class="btn ghost sm" data-settle="${esc(v.code)}">Mark settled</button>`:''}
+              <button class="btn ghost sm" data-edit="${esc(v.code)}">Edit</button>
             </div></td>
           </tr>`;
         }).join('')}</tbody></table></div>
@@ -1251,58 +1251,58 @@ function viewHQ(){
 
     ${S.editVenue && venue(S.editVenue) ? editVenueCard(venue(S.editVenue)) : ''}
 
-    <div class="step"><b>Tambah venue mitra</b></div>
+    <div class="step"><b>Add a partner venue</b></div>
     <div class="card">
       <div class="grid2">
         <div>
-          <label class="field"><span>Nama venue</span><input type="text" id="nName" placeholder="Contoh: Happy Tails Serpong"></label>
-          <label class="field"><span>Jenis & kota</span><input type="text" id="nKind" placeholder="Dog pool · Serpong"></label>
+          <label class="field"><span>Venue name</span><input type="text" id="nName" placeholder="e.g. Happy Tails Serpong"></label>
+          <label class="field"><span>Type & city</span><input type="text" id="nKind" placeholder="Dog pool · Serpong"></label>
         </div>
         <div>
-          <label class="field"><span>Bagi hasil (%)</span><input type="number" id="nRate" value="15" min="0" max="40"></label>
-          <label class="field"><span>Rekening pembayaran</span><input type="text" id="nPayout" placeholder="BCA 1234567890 · PT ..."></label>
+          <label class="field"><span>Revenue share (%)</span><input type="number" id="nRate" value="15" min="0" max="40"></label>
+          <label class="field"><span>Payout account</span><input type="text" id="nPayout" placeholder="BCA 1234567890 · PT ..."></label>
         </div>
       </div>
-      <button class="btn block" id="addVenue">Buat venue & QR</button>
-      <p class="lvl">Kode venue dan PIN dashboard dibuat otomatis.</p>
+      <button class="btn block" id="addVenue">Create venue & QR</button>
+      <p class="lvl">The venue code and dashboard PIN are generated automatically.</p>
     </div>
 
-    <div class="step"><b>Penyimpanan data</b><i>${esc(STORE.label())}</i></div>
+    <div class="step"><b>Data storage</b><i>${esc(STORE.label())}</i></div>
     <div class="card">
       ${STORE.mode==='cloud' ? `
-        <div class="note"><b>Terhubung ke Supabase</b>Pesanan dari HP pengunjung langsung muncul di dashboard venue, di perangkat mana pun. Dashboard menyegarkan sendiri tiap 20 detik.</div>
+        <div class="note"><b>Connected to Supabase</b>Orders placed on a visitor’s phone appear on the venue dashboard on any device. Dashboards refresh themselves every 20 seconds.</div>
       ` : `
-        <div class="note"><b>${STORE.mode==='device'?'Tersimpan di perangkat ini saja':'Belum tersimpan'}</b>
+        <div class="note"><b>${STORE.mode==='device'?'Saved on this device only':'Not being saved'}</b>
         ${STORE.mode==='device'
-          ? 'Cukup untuk demo di satu HP, tapi venue tidak akan melihat pesanan yang dibuat di perangkat lain. Hubungkan Supabase untuk pilot sungguhan.'
-          : 'Browser ini memblokir penyimpanan, jadi data hilang saat halaman dimuat ulang.'}</div>
+          ? 'Fine for a demo on one phone, but a venue will not see orders placed on any other device. Connect Supabase for a real pilot.'
+          : 'This browser is blocking storage, so data is lost when the page reloads.'}</div>
       `}
       <label class="field" style="margin-top:12px"><span>Supabase Project URL</span>
         <input type="text" id="sbUrl" placeholder="https://xxxxxxxx.supabase.co" value="${esc(STORE.cfg.url||'')}"></label>
-      <label class="field"><span>Anon public key <em>— kunci publik, aman di sisi browser</em></span>
+      <label class="field"><span>Anon public key <em>— a public key, safe to keep in the browser</em></span>
         <input type="text" id="sbKey" placeholder="eyJhbGciOi..." value="${esc(STORE.cfg.key||'')}"></label>
       <div class="inline">
-        <button class="btn ghost sm" id="sbSave">${STORE.mode==='cloud'?'Perbarui koneksi':'Hubungkan Supabase'}</button>
-        ${STORE.mode==='cloud'?`<button class="btn ghost sm" id="sbSeed">Kirim data saat ini ke server</button>
-        <button class="btn danger sm" id="sbOff">Putuskan</button>`:''}
+        <button class="btn ghost sm" id="sbSave">${STORE.mode==='cloud'?'Update connection':'Connect Supabase'}</button>
+        ${STORE.mode==='cloud'?`<button class="btn ghost sm" id="sbSeed">Push current data to the server</button>
+        <button class="btn danger sm" id="sbOff">Disconnect</button>`:''}
       </div>
-      <p class="lvl">Jalankan dulu <b>supabase-setup.sql</b> di SQL Editor Supabase untuk membuat tabelnya.</p>
+      <p class="lvl">Run <b>supabase-setup.sql</b> in the Supabase SQL editor first to create the tables.</p>
     </div>
 
-    <div class="step"><b>Pengaturan</b></div>
+    <div class="step"><b>Settings</b></div>
     <div class="card">
-      <label class="field"><span>Alamat dasar untuk QR <em>— tempel URL publik setelah website di-deploy</em></span>
+      <label class="field"><span>Base address for QR codes <em>— paste the public URL after deploying</em></span>
         <input type="text" id="baseUrl" value="${esc(DB.config.baseUrl||'')}"></label>
-      <label class="field"><span>Endpoint notifikasi WhatsApp <em>— URL Cloudflare Worker, bukan token Fonnte</em></span>
+      <label class="field"><span>WhatsApp notification endpoint <em>— the Cloudflare Worker URL, not your Fonnte token</em></span>
         <input type="text" id="notifyUrl" placeholder="https://pawsly-wa.xxx.workers.dev" value="${esc(DB.config.notifyUrl||'')}"></label>
-      <p class="lvl">${STORE.mode==='cloud' ? (DB.config.notifyUrl?'Notifikasi aktif untuk pesanan baru.':'Kosongkan jika belum pakai Fonnte.') : 'Notifikasi WhatsApp butuh koneksi Supabase dulu.'}</p>
+      <p class="lvl">${STORE.mode==='cloud' ? (DB.config.notifyUrl?'Notifications are on for new orders.':'Leave empty if you are not using Fonnte yet.') : 'WhatsApp notifications need a Supabase connection first.'}</p>
       <div class="inline">
-        <button class="btn ghost sm" id="saveBase">Simpan alamat</button>
-        <button class="btn ghost sm" id="csvAll">Unduh CSV semua pesanan</button>
-        <button class="btn danger sm" id="reset">Hapus data demo</button>
+        <button class="btn ghost sm" id="saveBase">Save settings</button>
+        <button class="btn ghost sm" id="csvAll">Download all orders as CSV</button>
+        <button class="btn danger sm" id="reset">Reset demo data</button>
       </div>
     </div>
-    <p class="foot">Prototipe. Pembayaran disimulasikan — belum terhubung ke payment gateway.</p>
+    <p class="foot">Prototype. Payments are simulated — not yet connected to a payment gateway.</p>
   </div>`;
 }
 
@@ -1310,19 +1310,19 @@ function viewHQ(){
    CSV
    ============================================================ */
 function downloadCsv(list, name){
-  const head = ['kode','waktu','venue','porsi','protein','organ','sayuran','karbohidrat','tambahan','metode','omzet','persen','bagi_hasil','status_bayar'];
+  const head = ['code','time','venue','size','protein','organ','vegetables','carbs','addons','payment','revenue','share_pct','venue_share','settlement'];
   const body = list.map(o=>[
-    o.code, new Date(o.createdAt).toLocaleString('id-ID'), o.venueCode||'-', o.sizeName,
+    o.code, new Date(o.createdAt).toLocaleString('en-GB'), o.venueCode||'-', o.sizeName,
     (o.pick.protein||[]).map(label).join('|'), (o.pick.organ||[]).map(label).join('|'),
     (o.pick.sayuran||[]).map(label).join('|'), (o.pick.karbohidrat||[]).map(label).join('|'),
     o.addons.map(a=>a.label).join('|'), o.paymentLabel, o.total, Math.round(o.rate*100), o.commission,
-    o.settled?'lunas':'belum',
+    o.settled?'settled':'pending',
   ].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
   const blob = new Blob(['\uFEFF'+[head.join(','),...body].join('\n')],{type:'text/csv;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = name; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
-  toast('CSV diunduh');
+  toast('CSV downloaded');
 }
 
 /* ============================================================
@@ -1349,17 +1349,17 @@ function render(){
 function viewHqLogin(){
   return `<div class="wrap"><header class="mast">
     <h1 class="logo" style="font-size:34px">${logoMark(34,'HQ')}</h1>
-    <h2 class="h1" style="font-size:26px">Konsol internal</h2></header>
+    <h2 class="h1" style="font-size:26px">Internal console</h2></header>
     <div class="card">
-      <label class="field"><span>Kata sandi</span><input type="password" id="hqPin" placeholder="••••••••"></label>
-      <button class="btn block" id="doHq">Masuk</button>
-      <p class="lvl">Kata sandi demo: <b>pawsly2026</b></p>
+      <label class="field"><span>Password</span><input type="password" id="hqPin" placeholder="••••••••"></label>
+      <button class="btn block" id="doHq">Sign in</button>
+      <p class="lvl">Demo password: <b>pawsly2026</b></p>
     </div></div>`;
 }
 
 function renderSwitcher(){
   const sw = $('#switcher');
-  const tabs = [['order','Pesan'],['partner','Venue'],['hq','HQ']];
+  const tabs = [['order','Order'],['partner','Venue'],['hq','HQ']];
   sw.innerHTML = tabs.map(([k,l])=>`<button data-route="${k}" aria-current="${S.route===k}">${l}</button>`).join('');
 }
 
@@ -1373,7 +1373,7 @@ document.addEventListener('click', async (e)=>{
   if(d.recipe){
     const r = RECIPES.find(x=>x.id===d.recipe);
     S.pick = JSON.parse(JSON.stringify(r.pick)); S.addons = [...r.addons];
-    render(); toast(r.title + ' dipilih'); return;
+    render(); toast(r.title + ' selected'); return;
   }
   if(d.g){
     const g = GROUPS.find(x=>x.id===d.g);
@@ -1381,7 +1381,7 @@ document.addEventListener('click', async (e)=>{
     const i = sel.indexOf(d.i);
     if(i>=0) sel.splice(i,1);
     else if(sel.length<g.max) sel.push(d.i);
-    else { toast(`Maksimum ${g.max} ${g.title.toLowerCase()}`); return; }
+    else { toast(`Maximum ${g.max} ${g.title.toLowerCase()}`); return; }
     render(); return;
   }
   if(d.addon){
@@ -1406,42 +1406,42 @@ document.addEventListener('click', async (e)=>{
       const code = $('#lCode').value, pin = $('#lPin').value.trim();
       const v = venue(code);
       if(v && pin===v.pin){ S.session=code; S.tab='today'; render(); window.scrollTo(0,0); }
-      else { toast('PIN salah untuk venue ini'); $('#lPin').focus(); }
+      else { toast('Wrong PIN for this venue'); $('#lPin').focus(); }
       break;
     }
     case 'doHq': {
       if($('#hqPin').value.trim()==='pawsly2026'){ S.hq=true; render(); window.scrollTo(0,0); }
-      else { toast('Kata sandi salah'); }
+      else { toast('Wrong password'); }
       break;
     }
     case 'logout': S.session=null; S.hq=false; render(); break;
     case 'copyLink': {
       const link = orderLink(S.session);
-      try{ await navigator.clipboard.writeText(link); toast('Tautan disalin'); }
+      try{ await navigator.clipboard.writeText(link); toast('Link copied'); }
       catch(err){ toast(link); }
       break;
     }
     case 'printBanner': printBanner(); break;
     case 'csv':    downloadCsv(ordersFor(S.session), `pawsly-${S.session}.csv`); break;
-    case 'csvAll': downloadCsv(DB.orders, 'pawsly-semua-pesanan.csv'); break;
+    case 'csvAll': downloadCsv(DB.orders, 'pawsly-all-orders.csv'); break;
     case 'sbSave': {
       const url = $('#sbUrl').value.trim().replace(/\/+$/,''), key = $('#sbKey').value.trim();
-      if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)){ toast('URL harus seperti https://xxxx.supabase.co'); break; }
-      if(key.length < 40){ toast('Anon key tampak belum lengkap'); break; }
+      if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)){ toast('URL should look like https://xxxx.supabase.co'); break; }
+      if(key.length < 40){ toast('That anon key looks incomplete'); break; }
       try{ localStorage.setItem(CONN, JSON.stringify({url,key})); }
-      catch(e){ toast('Browser ini memblokir penyimpanan'); break; }
+      catch(e){ toast('This browser is blocking storage'); break; }
       STORE.cfg = {url,key}; STORE.mode = 'cloud';
       try{
         const d = await STORE.loadAll();
-        if(d.venues.length){ DB.venues = d.venues; DB.orders = d.orders; toast(`Terhubung — ${d.orders.length} pesanan dimuat`); }
-        else toast('Terhubung. Tabel masih kosong — kirim data saat ini untuk mengisinya.');
-      }catch(e){ toast('Gagal: '+e.message+' — sudah jalankan SQL-nya?'); }
+        if(d.venues.length){ DB.venues = d.venues; DB.orders = d.orders; toast(`Connected — ${d.orders.length} orders loaded`); }
+        else toast('Connected. The tables are empty — push your current data to fill them.');
+      }catch(e){ toast('Failed: '+e.message+' — did you run the SQL?'); }
       render(); poll(); break;
     }
     case 'sbSeed': {
-      const b2 = $('#sbSeed'); b2.disabled = true; b2.textContent = 'Mengirim…';
-      try{ await STORE.pushAll(); toast(`${DB.venues.length} venue & ${DB.orders.length} pesanan terkirim`); }
-      catch(e){ toast('Gagal: '+e.message); }
+      const b2 = $('#sbSeed'); b2.disabled = true; b2.textContent = 'Pushing…';
+      try{ await STORE.pushAll(); toast(`${DB.venues.length} venues & ${DB.orders.length} orders pushed`); }
+      catch(e){ toast('Push failed: '+e.message); }
       render(); break;
     }
     case 'sbOff': {
@@ -1449,61 +1449,61 @@ document.addEventListener('click', async (e)=>{
       STORE.cfg = {url:'',key:''}; STORE.boot();
       const d2 = await STORE.loadAll();
       if(d2 && d2.venues && d2.venues.length){ DB.venues = d2.venues; DB.orders = d2.orders; }
-      clearInterval(pollT); render(); toast('Koneksi diputus — kembali ke penyimpanan perangkat');
+      clearInterval(pollT); render(); toast('Disconnected — back to device storage');
       break;
     }
     case 'saveBase':
       DB.config.baseUrl = $('#baseUrl').value.trim();
       DB.config.notifyUrl = $('#notifyUrl').value.trim().replace(/\/+$/,'');
-      STORE.saveCfg(); render(); toast('Pengaturan disimpan'); break;
+      STORE.saveCfg(); render(); toast('Settings saved'); break;
     case 'veSave': {
       const v = venue(S.editVenue); if(!v) break;
       const nm = $('#veName').value.trim();
-      if(!nm){ toast('Nama venue tidak boleh kosong'); break; }
+      if(!nm){ toast('Venue name cannot be empty'); break; }
       v.name = nm;
       v.kind = $('#veKind').value.trim();
       v.city = $('#veCity').value.trim();
       v.pin  = $('#vePin').value.trim();
-      v.payout = $('#vePayout').value.trim() || 'Belum diisi';
+      v.payout = $('#vePayout').value.trim() || 'Not set';
       v.active = $('#veActive').value === '1';
       await STORE.saveVenue(v);
-      S.editVenue = null; render(); toast(`${nm} diperbarui`);
+      S.editVenue = null; render(); toast(`${nm} updated`);
       break;
     }
     case 'veCancel': S.editVenue = null; render(); break;
     case 'veDelete': {
       const v = venue(S.editVenue); if(!v) break;
       const n = ordersFor(v.code).length;
-      if(!confirm(`Hapus ${v.name}? ${n} pesanan akan kehilangan atribusi venue dan bagi hasilnya tidak bisa dihitung ulang. Untuk menghentikan pesanan baru tanpa kehilangan riwayat, pilih Nonaktif saja.`)) break;
+      if(!confirm(`Delete ${v.name}? Its ${n} orders will lose their venue attribution and the revenue share can never be recalculated. To stop new orders without losing the history, set it to Inactive instead.`)) break;
       await STORE.deleteVenue(v.code);
-      S.editVenue = null; render(); toast('Venue dihapus');
+      S.editVenue = null; render(); toast('Venue deleted');
       break;
     }
     case 'addVenue': {
       const name = $('#nName').value.trim();
-      if(!name){ toast('Isi nama venue'); break; }
+      if(!name){ toast('Enter a venue name'); break; }
       const kind = $('#nKind').value.trim() || 'Dog park';
       const code = name.toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,14) + '-' + rid(2);
       const v = { code, name, kind, city: kind.split('·').pop().trim(), pin:String(1000+Math.floor(Math.random()*8999)),
         rate: Math.min(0.4, Math.max(0, (parseFloat($('#nRate').value)||15)/100)),
-        payout: $('#nPayout').value.trim() || 'Belum diisi', active:true };
+        payout: $('#nPayout').value.trim() || 'Not set', active:true };
       DB.venues.push(v); await STORE.saveVenue(v); render();
-      toast(`${name} dibuat — kode ${code}, PIN ${v.pin}`);
+      toast(`${name} created — code ${code}, PIN ${v.pin}`);
       break;
     }
     case 'reset': {
-      if(!confirm('Hapus semua venue dan pesanan, lalu muat ulang contoh data?')) break;
-      try{ await STORE.wipe(); }catch(e){ toast('Gagal hapus di server: '+e.message); break; }
+      if(!confirm('Delete every venue and order, then reload the sample data?')) break;
+      try{ await STORE.wipe(); }catch(e){ toast('Server delete failed: '+e.message); break; }
       const cfg = DB.config; DB = seed(); DB.config = cfg;
-      if(STORE.mode==='cloud'){ try{ await STORE.pushAll(); }catch(e){ toast('Gagal kirim: '+e.message); } }
+      if(STORE.mode==='cloud'){ try{ await STORE.pushAll(); }catch(e){ toast('Push failed: '+e.message); } }
       else await STORE.persist();
-      S.session=null; S.venueCode=null; render(); toast('Data demo dimuat ulang');
+      S.session=null; S.venueCode=null; render(); toast('Demo data reloaded');
       break;
     }
   }
 
   if(d.settle){
-    await STORE.settle(d.settle); render(); toast('Ditandai lunas');
+    await STORE.settle(d.settle); render(); toast('Marked settled');
   }
 });
 
@@ -1512,7 +1512,7 @@ document.addEventListener('change', async (e)=>{
   if(r){
     const v = venue(r);
     v.rate = Math.min(0.4, Math.max(0, (parseFloat(e.target.value)||0)/100));
-    await STORE.saveVenue(v); render(); toast(`${v.name}: bagi hasil ${Math.round(v.rate*100)}%`);
+    await STORE.saveVenue(v); render(); toast(`${v.name}: ${Math.round(v.rate*100)}% revenue share`);
   }
 });
 
@@ -1524,8 +1524,8 @@ function keepForm(){
 function printBanner(){
   const el = $('#xbanner'); if(!el) return;
   const w = window.open('', '_blank', 'width=700,height=900');
-  if(!w){ toast('Izinkan pop-up untuk mencetak'); return; }
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>X-banner Pawsly</title>
+  if(!w){ toast('Allow pop-ups to print'); return; }
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Pawsly x-banner</title>
   <style>body{margin:0;background:#FDF1DC;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh}
   .xb{text-align:center;padding:40px}.xb svg{width:300px;height:300px}
   :root{--ink:#12351F;--text-soft:#4A6B57;--display:'Trebuchet MS',system-ui,sans-serif}
@@ -1546,7 +1546,7 @@ function printBanner(){
   const vn = v ? venue(v) : null;
   if(vn && vn.active !== false) S.venueCode = v;          // inactive QR stops taking orders
   else if(vn) S.closedVenue = vn.name;
-  else if(v) toast('Kode venue tidak dikenal');
+  else if(v) toast('Unknown venue code');
   if(location.hash.includes('partner')) S.route='partner';
   if(location.hash.includes('hq')) S.route='hq';
   render();
