@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pawsly — Pesan di Venue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --ink:#12351F;
+  --ink-2:#1D5435;
+  --ink-3:#2F6B45;
+  --cream:#FDF1DC;
+  --cream-2:#FAE4C2;
+  --bone:#FFFBF2;
+  --marigold:#E89C2A;
+  --marigold-dk:#C87A14;
+  --line:rgba(18,53,31,.16);
+  --line-strong:rgba(18,53,31,.32);
+  --text:#12351F;
+  --text-soft:#4A6B57;
+  --surface:#FFFBF2;
+  --page:#FDF1DC;
+  --panel:#FAE4C2;
+  --pill-text:#FFFBF2;
+  --good:#1D7A4C;
+  --warn:#B8701A;
+  --bad:#A33327;
+  --shadow:0 2px 0 rgba(18,53,31,.10);
+  --r-s:10px; --r-m:18px; --r-l:28px;
+  --display:"Baloo 2", ui-rounded, "SF Pro Rounded", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Nunito Sans", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --ink:#F2E4C9;
+    --ink-2:#8FD4A8;
+    --ink-3:#6FBE8C;
+    --cream:#0E2316;
+    --cream-2:#17301F;
+    --bone:#14291B;
+    --marigold:#F0A93C;
+    --marigold-dk:#E89C2A;
+    --line:rgba(242,228,201,.18);
+    --line-strong:rgba(242,228,201,.34);
+    --text:#F2E4C9;
+    --text-soft:#A8BFAF;
+    --surface:#14291B;
+    --page:#0E2316;
+    --panel:#17301F;
+    --pill-text:#0E2316;
+    --good:#6FD39A;
+    --warn:#F0A93C;
+    --bad:#E88877;
+    --shadow:0 2px 0 rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--page);
+  color:var(--text);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:var(--ink-2)}
+:focus-visible{outline:3px solid var(--marigold);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- shell ---------- */
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 120px}
+.wrap.wide{max-width:1040px}
+.hidden{display:none!important}
+
+/* ---------- venue ribbon ---------- */
+.ribbon{
+  background:var(--ink);color:#FFFBF2;
+  padding:8px 16px;font-size:13.5px;font-weight:700;
+  display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;
+}
+.ribbon .dot{width:7px;height:7px;border-radius:50%;background:var(--marigold);flex:none}
+.ribbon small{font-weight:600;opacity:.75}
+
+/* ---------- masthead ---------- */
+.mast{text-align:center;padding:22px 0 10px}
+.logo{
+  font-family:var(--display);font-weight:800;font-size:44px;line-height:.9;
+  letter-spacing:-.02em;color:var(--ink);margin:0;
+}
+.logo .paws{display:block;font-size:14px;letter-spacing:.3em;margin-bottom:2px;color:var(--ink-2)}
+.tag{font-size:11px;letter-spacing:.18em;font-weight:700;color:var(--text-soft);margin:4px 0 0;text-transform:uppercase}
+.h1{
+  font-family:var(--display);font-weight:800;font-size:clamp(28px,8vw,40px);
+  line-height:1;margin:18px 0 4px;color:var(--ink);
+}
+.lede{color:var(--text-soft);margin:0 auto;max-width:44ch;font-size:15px}
+
+/* ---------- step heading ---------- */
+.step{display:flex;align-items:baseline;gap:10px;margin:32px 0 12px}
+.step b{
+  font-family:var(--display);font-size:22px;font-weight:800;color:var(--ink);line-height:1.1
+}
+.step i{
+  font-style:normal;font-size:12.5px;font-weight:700;color:var(--marigold-dk);
+  background:var(--cream-2);border-radius:999px;padding:3px 9px;white-space:nowrap
+}
+
+/* ---------- size cards ---------- */
+.sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.size{
+  background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);
+  padding:12px 8px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;
+  transition:border-color .12s, transform .12s;
+}
+.size[aria-pressed="true"]{border-color:var(--ink);background:var(--cream-2)}
+.size[aria-pressed="true"] .bowl{transform:translateY(-2px)}
+.size .nm{font-family:var(--display);font-weight:800;font-size:17px;color:var(--ink);line-height:1}
+.size .px{font-weight:900;font-size:13.5px;color:var(--ink-2)}
+.size .sub{font-size:10.5px;color:var(--text-soft);line-height:1.25;min-height:2.4em}
+
+/* drawn bowl */
+.bowl{position:relative;width:100%;max-width:86px;aspect-ratio:1/.78;transition:transform .15s}
+.bowl .food{
+  position:absolute;left:14%;right:14%;top:4%;height:34%;
+  border-radius:50% 50% 40% 40%;
+  background:
+    radial-gradient(circle at 20% 60%, #6E8F3F 0 14%, transparent 15%),
+    radial-gradient(circle at 46% 36%, #8C5A2B 0 17%, transparent 18%),
+    radial-gradient(circle at 70% 62%, #E07B2A 0 13%, transparent 14%),
+    radial-gradient(circle at 33% 22%, #D9A441 0 11%, transparent 12%),
+    radial-gradient(circle at 82% 34%, #4F7A33 0 10%, transparent 11%),
+    #A9762F;
+}
+.bowl .body{
+  position:absolute;left:4%;right:4%;top:28%;bottom:0;
+  background:linear-gradient(180deg,var(--bone) 0%, var(--cream-2) 100%);
+  border:2px solid var(--line-strong);
+  border-radius:12px 12px 46% 46% / 8px 8px 60% 60%;
+  clip-path:polygon(0 0,100% 0,88% 100%,12% 100%);
+}
+.bowl .mark{
+  position:absolute;left:0;right:0;top:52%;text-align:center;
+  font-family:var(--display);font-weight:800;font-size:11px;color:var(--ink);opacity:.75
+}
+.size.s .bowl{max-width:62px}
+.size.m .bowl{max-width:76px}
+.size.l .bowl{max-width:92px}
+
+/* ---------- recipe chips ---------- */
+.recipes{display:grid;gap:10px}
+.recipe{
+  display:flex;gap:12px;align-items:center;text-align:left;width:100%;
+  background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);padding:12px 14px
+}
+.recipe:hover{border-color:var(--line-strong)}
+.recipe .n{
+  flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#FFFBF2;
+  display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:16px
+}
+.recipe .t{font-family:var(--display);font-weight:700;font-size:17px;color:var(--ink);line-height:1.15}
+.recipe .d{font-size:12.5px;color:var(--text-soft)}
+
+/* ---------- ingredient groups ---------- */
+.group{margin:18px 0 0;background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);overflow:hidden}
+.group > header{
+  background:var(--ink);color:#FFFBF2;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px
+}
+.group > header h3{font-family:var(--display);font-weight:700;font-size:16px;margin:0;letter-spacing:.01em}
+.group > header span{font-size:12px;font-weight:700;opacity:.8}
+.group.full > header span{color:var(--marigold);opacity:1}
+.picks{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:12px 10px}
+@media (max-width:420px){.picks{grid-template-columns:repeat(3,1fr)}}
+.pick{
+  display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 2px 9px;
+  border:2px solid transparent;border-radius:14px;transition:border-color .12s,background .12s
+}
+.pick[aria-pressed="true"]{border-color:var(--ink);background:var(--cream-2)}
+.pick[disabled]{opacity:.34}
+.pick .med{
+  width:46px;height:46px;border-radius:50%;background:var(--bone);
+  border:2px solid var(--line);position:relative;overflow:hidden;flex:none
+}
+.pick[aria-pressed="true"] .med{border-color:var(--ink)}
+.pick .lb{font-size:11.5px;font-weight:700;line-height:1.2;text-align:center;color:var(--text)}
+.pick .chk{
+  position:absolute;right:-3px;top:-3px;width:17px;height:17px;border-radius:50%;
+  background:var(--marigold);color:#12351F;font-size:11px;font-weight:900;display:none;place-items:center
+}
+.pick[aria-pressed="true"] .chk{display:grid}
+.medwrap{position:relative}
+
+/* ---------- addons ---------- */
+.addon{
+  display:flex;align-items:center;gap:12px;background:var(--surface);
+  border:2px solid var(--line);border-radius:var(--r-m);padding:11px 14px;width:100%;text-align:left
+}
+.addon[aria-pressed="true"]{border-color:var(--ink);background:var(--cream-2)}
+.addon .t{font-weight:700;font-size:15px}
+.addon .d{font-size:12.5px;color:var(--text-soft)}
+.addon .p{margin-left:auto;font-weight:900;color:var(--ink-2);white-space:nowrap}
+
+/* ---------- forms ---------- */
+.field{display:block;margin:12px 0}
+.field > span{display:block;font-size:13px;font-weight:700;margin-bottom:5px;color:var(--text)}
+.field > span em{font-style:normal;font-weight:600;color:var(--text-soft)}
+input[type=text],input[type=tel],input[type=number],input[type=password],select,textarea{
+  width:100%;background:var(--bone);border:2px solid var(--line);border-radius:var(--r-s);
+  padding:10px 12px;color:var(--text)
+}
+input::placeholder,textarea::placeholder{color:var(--text-soft);opacity:.7}
+textarea{min-height:68px;resize:vertical}
+.radios{display:grid;gap:8px}
+.radio{
+  display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:2px solid var(--line);
+  border-radius:var(--r-s);padding:11px 13px;width:100%;text-align:left
+}
+.radio[aria-pressed="true"]{border-color:var(--ink);background:var(--cream-2)}
+.radio .mk{
+  flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--line-strong);margin-top:2px;
+  display:grid;place-items:center
+}
+.radio[aria-pressed="true"] .mk{border-color:var(--ink)}
+.radio[aria-pressed="true"] .mk::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--ink)}
+.radio .t{font-weight:700;font-size:14.5px;line-height:1.25}
+.radio .d{font-size:12.5px;color:var(--text-soft)}
+.radio .p{margin-left:auto;font-weight:800;font-size:13.5px;white-space:nowrap}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--ink);color:#FFFBF2;border-radius:999px;padding:13px 22px;
+  font-family:var(--display);font-weight:700;font-size:17px;box-shadow:var(--shadow)
+}
+.btn.block{display:flex;width:100%}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line-strong);box-shadow:none}
+.btn.gold{background:var(--marigold);color:#12351F}
+.btn.sm{padding:8px 15px;font-size:14.5px}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+.btn.danger{background:transparent;color:var(--bad);border:2px solid var(--bad);box-shadow:none}
+
+/* ---------- sticky bar ---------- */
+.sticky{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:var(--surface);border-top:2px solid var(--line-strong);
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+}
+.sticky .inner{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.sticky .sum{line-height:1.2}
+.sticky .sum b{font-family:var(--display);font-size:19px;display:block;color:var(--ink)}
+.sticky .sum span{font-size:11.5px;color:var(--text-soft)}
+.sticky .btn{margin-left:auto;flex:none}
+
+/* ---------- receipt / summary ---------- */
+.card{background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);padding:16px}
+.card + .card{margin-top:12px}
+.rows{display:grid;gap:7px;font-size:14.5px}
+.row{display:flex;gap:12px;justify-content:space-between;align-items:baseline}
+.row span:last-child{font-weight:700;white-space:nowrap}
+.row.total{border-top:2px dashed var(--line-strong);padding-top:9px;margin-top:3px;font-size:17px}
+.row.total span{font-family:var(--display);font-weight:800}
+.row.muted span{color:var(--text-soft);font-weight:600}
+.tix{
+  text-align:center;background:var(--ink);color:#FFFBF2;border-radius:var(--r-m);padding:22px 16px
+}
+.tix .code{font-family:var(--display);font-weight:800;font-size:38px;letter-spacing:.04em;line-height:1}
+.tix .lbl{font-size:12.5px;opacity:.8;margin-top:4px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;
+  font-size:12px;font-weight:800
+}
+.chip.paid{background:rgba(29,122,76,.16);color:var(--good)}
+.chip.pending{background:rgba(184,112,26,.16);color:var(--warn)}
+.chip.cash{background:rgba(163,51,39,.14);color:var(--bad)}
+.chip.neutral{background:var(--cream-2);color:var(--text-soft)}
+
+.bowlline{font-size:13.5px;color:var(--text-soft);line-height:1.45}
+.bowlline b{color:var(--text)}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:4px;background:var(--cream-2);padding:4px;border-radius:999px;margin:14px 0}
+.tabs button{
+  flex:1;padding:8px 6px;border-radius:999px;font-weight:800;font-size:13.5px;color:var(--text-soft)
+}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+/* ---------- dashboard ---------- */
+.dash-top{background:var(--ink);color:#FFFBF2;padding:18px 0 56px;margin-bottom:-44px}
+.dash-top .wrap{padding-bottom:0}
+.dash-top h2{font-family:var(--display);font-size:26px;margin:0;font-weight:800}
+.dash-top p{margin:2px 0 0;font-size:13.5px;opacity:.78}
+.dash-top .out{margin-left:auto;color:#FFFBF2;border:2px solid rgba(255,251,242,.35);border-radius:999px;padding:6px 14px;font-weight:700;font-size:13.5px}
+.dash-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+@media(max-width:620px){.dash-top .dash-head > div:first-child{padding-right:78px}}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:700px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);padding:13px 14px}
+.kpi .k{font-size:12px;font-weight:700;color:var(--text-soft)}
+.kpi .v{font-family:var(--display);font-weight:800;font-size:25px;color:var(--ink);line-height:1.15;margin-top:2px}
+.kpi .n{font-size:11.5px;color:var(--text-soft)}
+.kpi.hero{background:var(--marigold);border-color:var(--marigold-dk)}
+.kpi.hero .k,.kpi.hero .n{color:#3A2A08}
+.kpi.hero .v{color:#12351F}
+
+.chartwrap{margin-top:12px}
+svg.chart{display:block;width:100%;height:170px;overflow:visible}
+.chart .bar{fill:var(--ink-3)}
+.chart .bar.today{fill:var(--marigold)}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart text{font-size:9.5px;fill:var(--text-soft);font-family:var(--body);font-weight:700}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{
+  text-align:left;font-size:11.5px;color:var(--text-soft);font-weight:800;
+  padding:0 8px 7px;border-bottom:2px solid var(--line)
+}
+td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;white-space:nowrap}
+td b{font-weight:800}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.note{
+  background:var(--cream-2);border-left:4px solid var(--marigold);border-radius:0 var(--r-s) var(--r-s) 0;
+  padding:11px 14px;font-size:13.5px;color:var(--text)
+}
+.note b{display:block;margin-bottom:2px}
+
+/* ---------- banner preview ---------- */
+.xb{
+  background:var(--cream);border:2px solid var(--line-strong);border-radius:var(--r-m);
+  padding:26px 20px;text-align:center;max-width:320px;margin:0 auto
+}
+.xb .k{font-family:var(--display);font-weight:800;font-size:27px;color:var(--ink);line-height:1.05;margin:10px 0 2px}
+.xb .s{font-size:13px;color:var(--text-soft);margin-bottom:16px}
+.xb .qr{background:#FFFBF2;border-radius:14px;padding:12px;display:inline-block;border:2px solid var(--ink)}
+.xb .qr svg{display:block;width:170px;height:170px}
+.xb .v{margin-top:14px;font-weight:800;font-size:14px;color:var(--ink)}
+.xb .f{font-size:11.5px;color:var(--text-soft);margin-top:3px;word-break:break-all}
+
+/* ---------- misc ---------- */
+.switcher{
+  position:fixed;right:10px;top:10px;z-index:60;display:flex;gap:4px;
+  background:var(--surface);border:2px solid var(--line-strong);border-radius:999px;padding:3px
+}
+.switcher button{padding:5px 11px;border-radius:999px;font-size:12px;font-weight:800;color:var(--text-soft)}
+.switcher button[aria-current="true"]{background:var(--ink);color:#FFFBF2}
+.empty{text-align:center;padding:34px 18px;color:var(--text-soft)}
+.empty b{display:block;font-family:var(--display);font-size:19px;color:var(--ink);margin-bottom:4px}
+.foot{text-align:center;font-size:12.5px;color:var(--text-soft);margin-top:28px}
+.toast{
+  position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:80;
+  background:var(--ink);color:#FFFBF2;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;
+  box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:88vw;text-align:center
+}
+.grid2{display:grid;gap:12px}
+@media(min-width:760px){.grid2{grid-template-columns:1.25fr .75fr;align-items:start}}
+hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
+.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lvl{font-size:12.5px;color:var(--text-soft);margin:6px 0 0}
+</style>
+</head>
+<body>
+<div id="switcher" class="switcher"></div>
+<main id="app" aria-live="polite"></main>
+<div id="sticky"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+/* ============================================================
+   Pawsly — venue QR ordering + partner revenue share
+   ============================================================ */
+
+const KEY = 'pawsly:v1';
+const DEFAULT_RATE = 0.15;        // 15% to the venue
+
+/* ---------- catalogue ---------- */
+const SIZES = [
+  { id:'S', name:'Small',  price:26000,  cls:'s', sub:'Porsi kecil, cinta besar' },
+  { id:'M', name:'Medium', price:57500,  cls:'m', sub:'Porsi pas, nutrisi mantap' },
+  { id:'L', name:'Large',  price:115000, cls:'l', sub:'Lebih banyak cinta, nutrisi lengkap' },
+];
+
+const GROUPS = [
+  { id:'protein', title:'Protein', max:2, items:[
+    { id:'ayam',   label:'Ayam',   c1:'#F6CFC9', c2:'#E3A79E', shape:'blob' },
+    { id:'sapi',   label:'Sapi',   c1:'#C2342B', c2:'#8E201A', shape:'dice' },
+    { id:'pork',   label:'Pork',   c1:'#E79A9A', c2:'#F3DCD4', shape:'dice' },
+    { id:'lamb',   label:'Lamb',   c1:'#A82E2E', c2:'#D98B7E', shape:'blob' },
+    { id:'rabbit', label:'Rabbit', c1:'#F0D6CB', c2:'#DCB4A4', shape:'blob' },
+  ]},
+  { id:'organ', title:'Organ', max:2, items:[
+    { id:'liver_ayam', label:'Liver Ayam', c1:'#6B2016', c2:'#3F100A', shape:'blob' },
+    { id:'liver_sapi', label:'Liver Sapi', c1:'#55180F', c2:'#2E0A06', shape:'blob' },
+  ]},
+  { id:'sayuran', title:'Sayuran', max:2, items:[
+    { id:'wortel',      label:'Wortel',      c1:'#E8731F', c2:'#C7540E', shape:'floret' },
+    { id:'brokoli',     label:'Brokoli',     c1:'#3F7A2E', c2:'#27551C', shape:'floret' },
+    { id:'edamame',     label:'Edamame',     c1:'#8FBE4A', c2:'#5E8F2A', shape:'grain' },
+    { id:'kembang_kol', label:'Kembang Kol', c1:'#EFE3C8', c2:'#D4C39C', shape:'floret' },
+  ]},
+  { id:'karbohidrat', title:'Karbohidrat', max:2, items:[
+    { id:'oats',       label:'Rolled Oats', c1:'#D9BE8A', c2:'#B99A61', shape:'grain' },
+    { id:'labu',       label:'Labu Kuning', c1:'#E89A2A', c2:'#C47812', shape:'dice' },
+    { id:'ubi_madu',   label:'Ubi Madu',    c1:'#DD6B20', c2:'#B24D0D', shape:'dice' },
+    { id:'ubi_ungu',   label:'Ubi Ungu',    c1:'#6B3FA0', c2:'#47266E', shape:'dice' },
+  ]},
+];
+
+const ADDONS = [
+  { id:'potion', label:'Pawsly Potion', price:25000, desc:'Suplemen minyak ikan untuk bulu & kulit' },
+  { id:'topper', label:'Extra Protein Topper', price:15000, desc:'Tambahan 50g protein pilihan' },
+];
+
+const RECIPES = [
+  { id:'tears', n:1, title:'Bye Bye Tears Stain', desc:'Ayam · Ati Ayam · Rolled Oats · Wortel',
+    pick:{ protein:['ayam'], organ:['liver_ayam'], sayuran:['wortel'], karbohidrat:['oats'] }, addons:[] },
+  { id:'bulu', n:2, title:'Bye Bye Bulu Rontok', desc:'Sapi · Liver Sapi · Ubi Madu · Wortel + Pawsly Potion',
+    pick:{ protein:['sapi'], organ:['liver_sapi'], sayuran:['wortel'], karbohidrat:['ubi_madu'] }, addons:['potion'] },
+];
+
+const PAYMENTS = [
+  { id:'qris',  label:'QRIS',            desc:'Semua e-wallet & mobile banking', collect:'pawsly' },
+  { id:'gopay', label:'GoPay',           desc:'Bayar dari aplikasi Gojek',       collect:'pawsly' },
+  { id:'ovo',   label:'OVO',             desc:'Bayar dari aplikasi OVO',         collect:'pawsly' },
+  { id:'dana',  label:'DANA',            desc:'Bayar dari aplikasi DANA',        collect:'pawsly' },
+  { id:'bca',   label:'Transfer BCA',    desc:'Virtual account, cek otomatis',   collect:'pawsly' },
+  { id:'cash',  label:'Tunai di counter', desc:'Bayar langsung ke kasir venue',  collect:'venue' },
+];
+
+const FULFIL = [
+  { id:'counter',  label:'Ambil di counter',   desc:'Dipanggil saat pesanan siap' },
+  { id:'poolside', label:'Antar ke pool deck', desc:'Tambah Rp 5.000',    fee:5000 },
+];
+
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rp  = n => 'Rp ' + Math.round(n||0).toLocaleString('id-ID');
+const rpk = n => n>=1e6 ? 'Rp ' + (n/1e6).toFixed(n>=1e7?0:1).replace('.',',') + ' jt'
+                : n>=1e3 ? 'Rp ' + Math.round(n/1e3) + 'rb' : rp(n);
+const dayKey = d => { const x=new Date(d); const p=n=>String(n).padStart(2,'0');
+                      return `${x.getFullYear()}-${p(x.getMonth()+1)}-${p(x.getDate())}`; };
+const todayKey = () => dayKey(new Date());
+const fmtDay = k => new Date(k+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'});
+const fmtTime = iso => new Date(iso).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+const rid = n => Array.from({length:n},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+const itemById = id => GROUPS.flatMap(g=>g.items).find(i=>i.id===id) || ADDONS.find(a=>a.id===id);
+const label = id => (itemById(id)||{label:id}).label;
+
+function medallion(it){
+  const dots = {
+    dice:   [[30,34,22],[66,44,20],[46,70,19]],
+    blob:   [[36,40,27],[66,58,23],[44,74,16]],
+    floret: [[32,36,18],[58,30,16],[70,56,19],[40,66,18],[56,72,14]],
+    grain:  [[28,38,13],[50,30,12],[68,44,13],[38,58,12],[60,64,13],[44,74,11]],
+  }[it.shape] || [[50,50,28]];
+  const layers = dots.map((d,i)=>`radial-gradient(circle at ${d[0]}% ${d[1]}%, ${i%2?it.c2:it.c1} 0 ${d[2]}%, transparent ${d[2]+1}%)`);
+  return layers.join(',') + `, color-mix(in srgb, ${it.c1} 18%, transparent)`;
+}
+
+/* ---------- state ---------- */
+let DB = null;          // { venues, orders, config }
+let S = {               // view state
+  route:'order', venueCode:null, stage:'menu',
+  size:'M', pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],
+  fulfil:'counter', payment:'qris',
+  cust:{name:'',phone:'',dog:''}, note:'',
+  lastOrder:null, session:null, hq:false, tab:'today',
+};
+
+/* ---------- storage: cloud → device → memory ----------
+   No config  = localStorage (one device, survives refresh)
+   Supabase   = every device sees the same orders
+   Blocked    = in-memory, demo only                      */
+
+const CONN = 'pawsly:conn';
+const CFGK = 'pawsly:cfg';
+const ORDER_COLS = 'id,code,venue_code,created_at,size,size_name,pick,addons,fulfil,fee,'
+                 + 'payment,payment_label,collect,status,cust_name,dog_name,phone_mask,note,'
+                 + 'subtotal,total,rate,commission,settled,notified';
+
+const maskPhone = p => { const d=String(p||'').replace(/\D/g,''); return d.length>3 ? '\u2022\u2022\u2022\u2022'+d.slice(-4) : ''; };
+
+const toRowVenue = v => ({ code:v.code, name:v.name, kind:v.kind, city:v.city, pin:v.pin, rate:v.rate, payout:v.payout, active:v.active!==false });
+const fromRowVenue = r => ({ code:r.code, name:r.name, kind:r.kind||'', city:r.city||'', pin:String(r.pin||''), rate:Number(r.rate)||0, payout:r.payout||'Belum diisi', active:r.active!==false });
+
+const toRowOrder = o => ({
+  id:o.id, code:o.code, venue_code:o.venueCode, created_at:o.createdAt,
+  size:o.size, size_name:o.sizeName, pick:o.pick, addons:o.addons,
+  fulfil:o.fulfil, fee:o.fee, payment:o.payment, payment_label:o.paymentLabel,
+  collect:o.collect, status:o.status,
+  cust_name:o.cust.name, dog_name:o.cust.dog,
+  phone:o.cust.phone||'', phone_mask:maskPhone(o.cust.phone),
+  note:o.note||'', subtotal:o.subtotal, total:o.total,
+  rate:o.rate, commission:o.commission, settled:!!o.settled,
+});
+const fromRowOrder = r => ({
+  id:r.id, code:r.code, venueCode:r.venue_code, createdAt:r.created_at,
+  size:r.size, sizeName:r.size_name, pick:r.pick||{}, addons:r.addons||[],
+  fulfil:r.fulfil, fee:r.fee||0, payment:r.payment, paymentLabel:r.payment_label,
+  collect:r.collect, status:r.status,
+  cust:{ name:r.cust_name||'', dog:r.dog_name||'', phone:r.phone_mask||'' },
+  note:r.note||'', subtotal:r.subtotal||0, total:r.total||0,
+  rate:Number(r.rate)||0, commission:r.commission||0, settled:!!r.settled, notified:!!r.notified,
+});
+
+const STORE = {
+  mode:'memory', canLocal:false, cfg:{url:'',key:''},
+
+  boot(){
+    try{
+      localStorage.setItem('pawsly:probe','1'); localStorage.removeItem('pawsly:probe');
+      this.canLocal = true;
+      const c = JSON.parse(localStorage.getItem(CONN)||'null');
+      if(c && c.url && c.key) this.cfg = c;
+    }catch(e){ this.canLocal = false; }
+    this.mode = (this.cfg.url && this.cfg.key) ? 'cloud' : (this.canLocal ? 'device' : 'memory');
+  },
+  label(){ return { cloud:'Supabase — semua perangkat', device:'Perangkat ini saja', memory:'Sementara — tidak tersimpan' }[this.mode]; },
+
+  async api(path, opts={}){
+    const r = await fetch(this.cfg.url.replace(/\/+$/,'') + '/rest/v1/' + path, Object.assign({}, opts, {
+      headers: Object.assign({
+        apikey:this.cfg.key, Authorization:'Bearer '+this.cfg.key,
+        'Content-Type':'application/json', Prefer:'return=minimal',
+      }, opts.headers||{}),
+    }));
+    if(!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0,140));
+    return r.status===204 ? null : r.json();
+  },
+  get read(){ return { headers:{ Prefer:'return=representation' } }; },
+
+  localCfg(){
+    let c={}; try{ c = JSON.parse(localStorage.getItem(CFGK)||'{}'); }catch(e){}
+    return Object.assign({ rate:DEFAULT_RATE, notifyUrl:'', baseUrl: location.href.split('#')[0].split('?')[0] }, c);
+  },
+  saveCfg(){ try{ localStorage.setItem(CFGK, JSON.stringify({ baseUrl:DB.config.baseUrl, notifyUrl:DB.config.notifyUrl })); }catch(e){} },
+
+  async loadAll(){
+    if(this.mode==='cloud'){
+      const [v,o] = await Promise.all([
+        this.api('venues?select=*&order=name.asc', this.read),
+        this.api('orders?select='+ORDER_COLS+'&order=created_at.asc&limit=3000', this.read),
+      ]);
+      return { venues:v.map(fromRowVenue), orders:o.map(fromRowOrder) };
+    }
+    if(this.mode==='device'){
+      try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    }
+    return null;
+  },
+
+  async persist(){
+    if(this.mode!=='device') return;
+    try{ localStorage.setItem(KEY, JSON.stringify({ venues:DB.venues, orders:DB.orders.slice(-800) })); }
+    catch(e){ toast('Penyimpanan perangkat penuh'); }
+  },
+
+  async addOrder(o){
+    DB.orders.push(o);
+    if(this.mode!=='cloud') return this.persist();
+    try{ await this.api('orders', { method:'POST', body:JSON.stringify(toRowOrder(o)) }); }
+    catch(e){ toast('Pesanan tersimpan lokal, server gagal: '+e.message); }
+  },
+
+  async saveVenue(v){
+    if(this.mode!=='cloud') return this.persist();
+    try{ await this.api('venues?on_conflict=code', { method:'POST', headers:{ Prefer:'resolution=merge-duplicates' }, body:JSON.stringify(toRowVenue(v)) }); }
+    catch(e){ toast('Gagal simpan venue: '+e.message); }
+  },
+
+  async settle(code){
+    ordersFor(code).forEach(o=>o.settled=true);
+    if(this.mode!=='cloud') return this.persist();
+    try{ await this.api('orders?venue_code=eq.'+encodeURIComponent(code), { method:'PATCH', body:JSON.stringify({ settled:true }) }); }
+    catch(e){ toast('Gagal update server: '+e.message); }
+  },
+
+  async pushAll(){
+    await this.api('venues?on_conflict=code', { method:'POST', headers:{ Prefer:'resolution=merge-duplicates' }, body:JSON.stringify(DB.venues.map(toRowVenue)) });
+    for(let i=0;i<DB.orders.length;i+=150){
+      await this.api('orders?on_conflict=id', { method:'POST', headers:{ Prefer:'resolution=merge-duplicates' }, body:JSON.stringify(DB.orders.slice(i,i+150).map(toRowOrder)) });
+    }
+  },
+
+  async wipe(){
+    if(this.mode!=='cloud') return this.persist();
+    await this.api('orders?id=not.is.null', { method:'DELETE' });
+    await this.api('venues?code=not.is.null', { method:'DELETE' });
+  },
+};
+
+/* Best effort: the order is already saved before this runs, so a WhatsApp
+   failure never costs the customer their order. Only an order code goes out --
+   the Worker reads the number from Supabase and writes the message itself. */
+async function notify(o){
+  const url = (DB.config.notifyUrl||'').trim();
+  if(!url || STORE.mode!=='cloud') return;
+  try{
+    const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ code:o.code }) });
+    if(!r.ok) console.warn('notify', r.status, (await r.text()).slice(0,120));
+  }catch(e){ console.warn('notify failed', e); }
+}
+
+async function load(){
+  STORE.boot();
+  let data = null;
+  try{ data = await STORE.loadAll(); }
+  catch(e){
+    toast('Server tidak terjangkau — pakai data perangkat');
+    STORE.mode = STORE.canLocal ? 'device' : 'memory';
+    try{ data = await STORE.loadAll(); }catch(e2){}
+  }
+  const fresh = !data || !data.venues || !data.venues.length;
+  DB = fresh ? seed() : data;
+  DB.config = STORE.localCfg();
+  if(!DB.orders) DB.orders = [];
+  if(!DB.venues || !DB.venues.length) DB.venues = seed().venues;
+  if(fresh) await STORE.persist();
+}
+
+let pollT = null;
+function poll(){
+  clearInterval(pollT);
+  if(STORE.mode!=='cloud') return;
+  pollT = setInterval(async ()=>{
+    if(S.route==='order' || (!S.session && !S.hq)) return;
+    if(document.querySelector('input:focus, textarea:focus')) return;
+    try{
+      const rows = await STORE.api('orders?select='+ORDER_COLS+'&order=created_at.asc&limit=3000', STORE.read);
+      if(rows.length !== DB.orders.length){ DB.orders = rows.map(fromRowOrder); render(); }
+    }catch(e){}
+  }, 20000);
+}
+
+function seed(){
+  const venues = [
+    { code:'PAWPARK-BSD', name:'Paw Park BSD',        kind:'Dog pool & play park', city:'BSD City',       pin:'1510', rate:0.15, payout:'BCA 2290xxxx81 · PT Paw Park Nusantara', active:true },
+    { code:'SPLASH-KMG',  name:'Splash Paws Kemang',  kind:'Swimming pool',        city:'Jakarta Selatan',pin:'2208', rate:0.15, payout:'Mandiri 1270xxxx44 · CV Splash Paws',    active:true },
+    { code:'WOOF-BTR',    name:'Woof Garden Bintaro', kind:'Off-leash park & café',city:'Bintaro',        pin:'3390', rate:0.12, payout:'BCA 5410xxxx09 · Woof Garden',          active:true },
+  ];
+  const orders = [];
+  const names = ['Dira','Bagas','Nadya','Reno','Kiki','Tomi','Sasha','Yoga','Mila','Fajar','Intan','Bram','Sinta','Danu'];
+  const dogs  = ['Mochi','Bubu','Kopi','Luna','Bolt','Nori','Cimol','Zuzu','Oreo','Pablo','Gembul','Sushi'];
+  for(let d=13; d>=0; d--){
+    const n = d===0 ? 3 + Math.floor(Math.random()*4) : 2 + Math.floor(Math.random()*6);
+    for(let i=0;i<n;i++){
+      const v = venues[Math.random()<0.5?0:(Math.random()<0.6?1:2)];
+      const size = SIZES[Math.random()<.3?0:(Math.random()<.65?1:2)];
+      const pay = PAYMENTS[Math.floor(Math.random()*PAYMENTS.length)];
+      const ful = Math.random()<.35 ? FULFIL[1] : FULFIL[0];
+      const add = Math.random()<.3 ? [ADDONS[Math.floor(Math.random()*ADDONS.length)]] : [];
+      const when = new Date(); when.setDate(when.getDate()-d);
+      when.setHours(9+Math.floor(Math.random()*9), Math.floor(Math.random()*60), 0, 0);
+      const subtotal = size.price + add.reduce((s,a)=>s+a.price,0);
+      const fee = ful.fee||0;
+      const rate = v.rate;
+      orders.push({
+        id: 'o'+when.getTime()+i,
+        code: 'PW-'+rid(4),
+        venueCode: v.code,
+        createdAt: when.toISOString(),
+        size: size.id, sizeName: size.name,
+        pick: samplePick(),
+        addons: add.map(a=>({id:a.id,label:a.label,price:a.price})),
+        fulfil: ful.id, fee,
+        payment: pay.id, paymentLabel: pay.label, collect: pay.collect,
+        status: d===0 && i===0 ? 'preparing' : 'served',
+        cust:{ name:names[Math.floor(Math.random()*names.length)], phone:'08xx-xxxx-'+(1000+Math.floor(Math.random()*8999)), dog:dogs[Math.floor(Math.random()*dogs.length)] },
+        subtotal, total: subtotal+fee,
+        rate, commission: Math.round(subtotal*rate),
+        settled: d>6,
+      });
+    }
+  }
+  orders.sort((a,b)=> new Date(a.createdAt)-new Date(b.createdAt));
+  return { venues, orders, config:{ rate:DEFAULT_RATE }, seededAt:new Date().toISOString() };
+}
+function samplePick(){
+  const p = {};
+  GROUPS.forEach(g=>{
+    const k = 1 + (Math.random()<.45?1:0);
+    p[g.id] = [...g.items].sort(()=>Math.random()-.5).slice(0,Math.min(k,g.items.length)).map(i=>i.id);
+  });
+  return p;
+}
+
+/* ---------- derived ---------- */
+const venue = code => DB.venues.find(v=>v.code===code);
+const ordersFor = code => DB.orders.filter(o=>o.venueCode===code);
+function totals(list){
+  const gmv = list.reduce((s,o)=>s+o.total,0);
+  const com = list.reduce((s,o)=>s+o.commission,0);
+  const cash = list.filter(o=>o.collect==='venue');
+  const cashHeld = cash.reduce((s,o)=>s+o.total,0);
+  const cashCom = cash.reduce((s,o)=>s+o.commission,0);
+  return { n:list.length, gmv, com, cashHeld, owedToPawsly: cashHeld-cashCom, avg: list.length? gmv/list.length : 0 };
+}
+function byDay(list, days=14){
+  const out = [];
+  for(let d=days-1; d>=0; d--){
+    const dt = new Date(); dt.setDate(dt.getDate()-d);
+    const k = dayKey(dt);
+    const rows = list.filter(o=>dayKey(o.createdAt)===k);
+    out.push({ k, ...totals(rows) });
+  }
+  return out;
+}
+
+/* ---------- small ui ---------- */
+let toastT;
+function toast(msg){
+  const old = $('.toast'); if(old) old.remove();
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg; el.setAttribute('role','status');
+  document.body.appendChild(el);
+  clearTimeout(toastT); toastT = setTimeout(()=>el.remove(), 2600);
+}
+function qrSvg(text, px=170){
+  if(typeof qrcode !== 'function') return `<div style="width:${px}px;height:${px}px;display:grid;place-items:center;font-size:11px;padding:8px;text-align:center">QR tidak termuat.<br>Pakai tautan di bawah.</div>`;
+  try{
+    const q = qrcode(0,'M'); q.addData(text); q.make();
+    return q.createSvgTag({ cellSize:4, margin:1, scalable:true });
+  }catch(e){ return '<div style="padding:12px;font-size:11px">Tautan terlalu panjang untuk QR.</div>'; }
+}
+function orderLink(code){
+  const base = (DB.config.baseUrl||'').replace(/[?#].*$/,'');
+  return base + '?v=' + encodeURIComponent(code);
+}
+
+/* ============================================================
+   Customer flow
+   ============================================================ */
+
+function priceNow(){
+  const size = SIZES.find(s=>s.id===S.size);
+  const addon = S.addons.reduce((t,id)=>t+(ADDONS.find(a=>a.id===id)||{price:0}).price,0);
+  const fee = (FULFIL.find(f=>f.id===S.fulfil)||{}).fee||0;
+  const subtotal = size.price + addon;
+  return { size, addon, fee, subtotal, total:subtotal+fee };
+}
+function bowlReady(){
+  return S.pick.protein.length>0 && S.pick.karbohidrat.length>0;
+}
+function bowlText(pick){
+  return GROUPS.map(g=>{
+    const list=(pick[g.id]||[]).map(label);
+    return list.length? `<b>${g.title}:</b> ${esc(list.join(', '))}` : null;
+  }).filter(Boolean).join(' · ');
+}
+
+function viewMenu(){
+  const v = venue(S.venueCode);
+  return `
+  ${v ? `<div class="ribbon"><span class="dot"></span>Kamu memesan di <b>&nbsp;${esc(v.name)}</b><small>&nbsp;· ${esc(v.city)}</small></div>` : ''}
+  <div class="wrap">
+    <header class="mast">
+      <h1 class="logo"><span class="paws">🐾 🐾</span>pawsly</h1>
+      <p class="tag">Your pet's personal chef</p>
+      <h2 class="h1">Racik mangkuk anjingmu</h2>
+      <p class="lede">Masakan segar, dimasak hari ini. Pilih porsi, lalu campur isi sesukamu.</p>
+    </header>
+
+    <section>
+      <div class="step"><b>Pilih porsi</b><i>Langkah 1</i></div>
+      <div class="sizes">
+        ${SIZES.map(s=>`
+          <button class="size ${s.cls}" data-size="${s.id}" aria-pressed="${S.size===s.id}">
+            <span class="bowl"><span class="food"></span><span class="body"></span><span class="mark">pawsly</span></span>
+            <span class="nm">${s.name}</span>
+            <span class="px">${rp(s.price)}</span>
+            <span class="sub">${s.sub}</span>
+          </button>`).join('')}
+      </div>
+      <p class="lvl">Isian di bawah sudah termasuk harga porsi. Maksimum 2 pilihan per kategori.</p>
+    </section>
+
+    <section>
+      <div class="step"><b>Resep andalan dapur</b><i>Jalan pintas</i></div>
+      <div class="recipes">
+        ${RECIPES.map(r=>`
+          <button class="recipe" data-recipe="${r.id}">
+            <span class="n">${r.n}</span>
+            <span><span class="t">${esc(r.title)}</span><br><span class="d">${esc(r.desc)}</span></span>
+          </button>`).join('')}
+      </div>
+    </section>
+
+    <section>
+      <div class="step"><b>Racik sendiri</b><i>Langkah 2</i></div>
+      ${GROUPS.map(g=>{
+        const sel = S.pick[g.id]||[];
+        const full = sel.length>=g.max;
+        return `
+        <div class="group ${full?'full':''}">
+          <header>
+            <h3>${g.title}</h3>
+            <span>${sel.length}/${g.max} dipilih</span>
+          </header>
+          <div class="picks">
+            ${g.items.map(it=>{
+              const on = sel.includes(it.id);
+              return `<button class="pick" data-g="${g.id}" data-i="${it.id}" aria-pressed="${on}" ${(!on&&full)?'disabled':''}>
+                <span class="medwrap"><span class="med" style="background:${medallion(it)}"></span><span class="chk">✓</span></span>
+                <span class="lb">${esc(it.label)}</span>
+              </button>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </section>
+
+    <section>
+      <div class="step"><b>Tambahan</b><i>Opsional</i></div>
+      <div class="recipes">
+        ${ADDONS.map(a=>`
+          <button class="addon" data-addon="${a.id}" aria-pressed="${S.addons.includes(a.id)}">
+            <span><span class="t">${esc(a.label)}</span><br><span class="d">${esc(a.desc)}</span></span>
+            <span class="p">+${rp(a.price)}</span>
+          </button>`).join('')}
+      </div>
+    </section>
+
+    <p class="foot">🐾 More love, more nutrition, for your best friend.</p>
+  </div>`;
+}
+
+function stickyMenu(){
+  const p = priceNow();
+  const ready = bowlReady();
+  return `<div class="sticky"><div class="inner">
+    <span class="sum"><b>${rp(p.subtotal)}</b><span>${p.size.name}${S.addons.length?` + ${S.addons.length} tambahan`:''}</span></span>
+    <button class="btn" id="toCheckout" ${ready?'':'disabled'}>${ready?'Lanjut bayar':'Pilih protein & karbo'}</button>
+  </div></div>`;
+}
+
+function viewCheckout(){
+  const v = venue(S.venueCode);
+  const p = priceNow();
+  return `
+  ${v ? `<div class="ribbon"><span class="dot"></span>Pesanan untuk <b>&nbsp;${esc(v.name)}</b></div>` : ''}
+  <div class="wrap">
+    <header class="mast">
+      <h2 class="h1" style="margin-top:8px">Selesaikan pesanan</h2>
+    </header>
+
+    <div class="card">
+      <div class="row"><span><b>${p.size.name} Bowl</b></span><span>${rp(p.size.price)}</span></div>
+      <p class="bowlline" style="margin:6px 0 0">${bowlText(S.pick)}</p>
+      ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row" style="margin-top:7px"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
+      <div style="margin-top:10px"><button class="btn ghost sm" id="backMenu">Ubah isian</button></div>
+    </div>
+
+    <div class="step"><b>Pengambilan</b></div>
+    <div class="radios">
+      ${FULFIL.map(f=>`
+        <button class="radio" data-ful="${f.id}" aria-pressed="${S.fulfil===f.id}">
+          <span class="mk"></span>
+          <span><span class="t">${esc(f.label)}</span><br><span class="d">${esc(f.desc)}</span></span>
+        </button>`).join('')}
+    </div>
+
+    <div class="step"><b>Data pemesan</b></div>
+    <div class="card">
+      <label class="field"><span>Nama kamu</span><input type="text" id="cName" value="${esc(S.cust.name)}" placeholder="Nama panggilan"></label>
+      <label class="field"><span>Nomor WhatsApp <em>— untuk notifikasi pesanan siap</em></span><input type="tel" id="cPhone" value="${esc(S.cust.phone)}" placeholder="08xx xxxx xxxx" inputmode="numeric"></label>
+      <label class="field"><span>Nama anjing</span><input type="text" id="cDog" value="${esc(S.cust.dog)}" placeholder="Dipanggil saat pesanan siap"></label>
+      <label class="field"><span>Catatan dapur <em>— alergi, tekstur, dll</em></span><textarea id="cNote" placeholder="Contoh: potong kecil, tanpa garam">${esc(S.note)}</textarea></label>
+    </div>
+
+    <div class="step"><b>Metode pembayaran</b></div>
+    <div class="radios">
+      ${PAYMENTS.map(m=>`
+        <button class="radio" data-pay="${m.id}" aria-pressed="${S.payment===m.id}">
+          <span class="mk"></span>
+          <span><span class="t">${esc(m.label)}</span><br><span class="d">${esc(m.desc)}</span></span>
+        </button>`).join('')}
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="rows">
+        <div class="row"><span>${p.size.name} Bowl</span><span>${rp(p.size.price)}</span></div>
+        ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
+        ${p.fee?`<div class="row"><span>Antar ke pool deck</span><span>${rp(p.fee)}</span></div>`:''}
+        <div class="row total"><span>Total</span><span>${rp(p.total)}</span></div>
+      </div>
+    </div>
+
+    <p class="foot">Dapur Pawsly masak setelah pembayaran dikonfirmasi.</p>
+  </div>`;
+}
+
+function stickyCheckout(){
+  const p = priceNow();
+  const cash = S.payment==='cash';
+  return `<div class="sticky"><div class="inner">
+    <span class="sum"><b>${rp(p.total)}</b><span>${cash?'Bayar di kasir venue':'Pembayaran online'}</span></span>
+    <button class="btn gold" id="payNow">${cash?'Buat pesanan':'Bayar sekarang'}</button>
+  </div></div>`;
+}
+
+async function placeOrder(){
+  const name = ($('#cName')||{}).value?.trim() || '';
+  const phone = ($('#cPhone')||{}).value?.trim() || '';
+  if(!name || phone.replace(/\D/g,'').length < 9){
+    toast('Isi nama dan nomor WhatsApp yang valid');
+    const bad = !name ? $('#cName') : $('#cPhone'); if(bad) bad.focus();
+    return;
+  }
+  S.cust = { name, phone, dog: ($('#cDog')||{}).value?.trim()||'' };
+  S.note = ($('#cNote')||{}).value?.trim()||'';
+
+  const p = priceNow();
+  const v = venue(S.venueCode);
+  const rate = v ? v.rate : 0;
+  const pay = PAYMENTS.find(m=>m.id===S.payment);
+  const btn = $('#payNow'); if(btn){ btn.disabled = true; btn.textContent = 'Memproses…'; }
+
+  const order = {
+    id:'o'+Date.now(), code:'PW-'+rid(4),
+    venueCode: S.venueCode || null,
+    createdAt: new Date().toISOString(),
+    size:S.size, sizeName:p.size.name,
+    pick: JSON.parse(JSON.stringify(S.pick)),
+    addons: S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return {id:a.id,label:a.label,price:a.price};}),
+    fulfil:S.fulfil, fee:p.fee,
+    payment:pay.id, paymentLabel:pay.label, collect:pay.collect,
+    status: pay.collect==='venue' ? 'awaiting_cash' : 'preparing',
+    cust:{...S.cust}, note:S.note,
+    subtotal:p.subtotal, total:p.total,
+    rate, commission: Math.round(p.subtotal*rate),
+    settled:false,
+  };
+  await STORE.addOrder(order);
+  notify(order);
+  S.lastOrder = order; S.stage = 'done';
+  render();
+  window.scrollTo(0,0);
+}
+
+function viewDone(){
+  const o = S.lastOrder;
+  const v = venue(o.venueCode);
+  const cash = o.collect==='venue';
+  return `
+  <div class="wrap">
+    <header class="mast"><h2 class="h1">${cash?'Pesanan dibuat':'Pembayaran diterima'}</h2>
+    <p class="lede">${cash?'Tunjukkan kode ini di kasir venue untuk membayar.':'Dapur sudah mulai memasak.'}</p></header>
+
+    <div class="tix">
+      <div class="code">${esc(o.code)}</div>
+      <div class="lbl">Sebutkan kode ini saat pengambilan</div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="rows">
+        <div class="row"><span>${esc(o.sizeName)} Bowl${o.addons.length?` + ${o.addons.map(a=>esc(a.label)).join(', ')}`:''}</span><span>${rp(o.subtotal)}</span></div>
+        ${o.fee?`<div class="row"><span>Antar ke pool deck</span><span>${rp(o.fee)}</span></div>`:''}
+        <div class="row total"><span>Total</span><span>${rp(o.total)}</span></div>
+        <div class="row muted"><span>${esc(o.paymentLabel)}</span><span>${cash?'<span class="chip cash">Bayar di kasir</span>':'<span class="chip paid">Lunas</span>'}</span></div>
+      </div>
+      <hr class="sep">
+      <p class="bowlline">${bowlText(o.pick)}</p>
+      ${o.note?`<p class="bowlline" style="margin-top:6px"><b>Catatan:</b> ${esc(o.note)}</p>`:''}
+      ${v?`<p class="bowlline" style="margin-top:6px"><b>Venue:</b> ${esc(v.name)} — ${esc(FULFIL.find(f=>f.id===o.fulfil).label)}</p>`:''}
+    </div>
+
+    ${v?`<div class="note" style="margin-top:12px"><b>Terima kasih sudah pesan dari ${esc(v.name)}</b>
+      ${Math.round(v.rate*100)}% dari pesanan ini kembali ke venue untuk merawat fasilitas anjingmu.</div>`:''}
+
+    <div style="margin-top:16px;display:grid;gap:8px">
+      <button class="btn block" id="again">Pesan lagi</button>
+      ${v?`<button class="btn ghost block" id="gotoPartner">Lihat dashboard venue (demo)</button>`:''}
+    </div>
+    <p class="foot">Status pesanan dikirim ke WhatsApp ${esc(o.cust.phone)}.</p>
+  </div>`;
+}
+
+function viewNoVenue(){
+  return `
+  <div class="wrap">
+    <header class="mast">
+      <h1 class="logo"><span class="paws">🐾 🐾</span>pawsly</h1>
+      <p class="tag">Your pet's personal chef</p>
+      <h2 class="h1">Pindai QR di venue</h2>
+      <p class="lede">Pemesanan Pawsly dibuka lewat QR pada x-banner di kolam atau taman anjing. Pilih venue di bawah untuk mencoba alurnya.</p>
+    </header>
+    <div class="recipes">
+      ${DB.venues.filter(v=>v.active).map(v=>`
+        <button class="recipe" data-venue="${esc(v.code)}">
+          <span class="n">🐾</span>
+          <span><span class="t">${esc(v.name)}</span><br><span class="d">${esc(v.kind)} · ${esc(v.city)}</span></span>
+        </button>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   Partner dashboard
+   ============================================================ */
+
+function chart(series, key='gmv'){
+  const w=100, h=100, max=Math.max(1,...series.map(d=>d[key]));
+  const bw = w/series.length;
+  const bars = series.map((d,i)=>{
+    const bh = (d[key]/max)*78;
+    const last = i===series.length-1;
+    return `<rect class="bar ${last?'today':''}" x="${(i*bw+bw*0.17).toFixed(2)}" y="${(84-bh).toFixed(2)}" width="${(bw*0.66).toFixed(2)}" height="${Math.max(bh,0.6).toFixed(2)}" rx="1.2">
+      <title>${fmtDay(d.k)} — ${rp(d[key])} · ${d.n} pesanan</title></rect>`;
+  }).join('');
+  const labels = series.map((d,i)=> (i%3===0||i===series.length-1)
+    ? `<text x="${(i*bw+bw/2).toFixed(2)}" y="95" text-anchor="middle">${fmtDay(d.k).replace(' ','\u00a0')}</text>` : '').join('');
+  return `<svg class="chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img"
+    aria-label="Pendapatan ${series.length} hari terakhir, tertinggi ${rp(max)}">
+    <line class="gl" x1="0" y1="84.5" x2="100" y2="84.5"/>
+    <line class="gl" x1="0" y1="45" x2="100" y2="45" stroke-dasharray="1.5 1.5"/>
+    ${bars}${labels}</svg>`;
+}
+
+function viewLogin(){
+  return `
+  <div class="wrap">
+    <header class="mast">
+      <h1 class="logo" style="font-size:34px"><span class="paws">🐾</span>pawsly <span style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--text-soft)">partner</span></h1>
+      <h2 class="h1" style="font-size:26px">Masuk ke dashboard venue</h2>
+      <p class="lede">Lihat pesanan dan bagi hasil dari QR venue kamu, diperbarui setiap pesanan masuk.</p>
+    </header>
+    <div class="card">
+      <label class="field"><span>Kode venue</span>
+        <select id="lCode">${DB.venues.map(v=>`<option value="${esc(v.code)}">${esc(v.name)} — ${esc(v.code)}</option>`).join('')}</select>
+      </label>
+      <label class="field"><span>PIN</span><input type="password" id="lPin" inputmode="numeric" placeholder="4 digit"></label>
+      <button class="btn block" id="doLogin">Masuk</button>
+      <p class="lvl">PIN demo: Paw Park BSD <b>1510</b> · Splash Paws <b>2208</b> · Woof Garden <b>3390</b></p>
+    </div>
+  </div>`;
+}
+
+function viewPartner(){
+  const v = venue(S.session);
+  const all = ordersFor(v.code);
+  const days = byDay(all, 14);
+  const today = all.filter(o=>dayKey(o.createdAt)===todayKey());
+  const t = totals(today);
+  const m = totals(all.filter(o=>new Date(o.createdAt).getMonth()===new Date().getMonth()));
+  const unsettled = all.filter(o=>!o.settled && o.collect==='pawsly');
+  const cashUnsettled = all.filter(o=>!o.settled && o.collect==='venue');
+  const owedToVenue = unsettled.reduce((s,o)=>s+o.commission,0);
+  const owedToPawsly = cashUnsettled.reduce((s,o)=>s+o.total-o.commission,0);
+  const rows = (S.tab==='today'?today:all).slice().reverse();
+
+  return `
+  <div class="dash-top"><div class="wrap wide">
+    <div class="dash-head">
+      <div>
+        <h2>${esc(v.name)}</h2>
+        <p>${esc(v.kind)} · bagi hasil ${Math.round(v.rate*100)}% · kode ${esc(v.code)}</p>
+      </div>
+      <button class="out" id="logout">Keluar</button>
+    </div>
+  </div></div>
+
+  <div class="wrap wide">
+    <div class="kpis">
+      <div class="kpi hero"><div class="k">Bagi hasil hari ini</div><div class="v">${rp(t.com)}</div><div class="n">${Math.round(v.rate*100)}% dari ${rp(t.gmv)}</div></div>
+      <div class="kpi"><div class="k">Pesanan hari ini</div><div class="v">${t.n}</div><div class="n">rata-rata ${rp(t.avg)}</div></div>
+      <div class="kpi"><div class="k">Bagi hasil bulan ini</div><div class="v">${rpk(m.com)}</div><div class="n">${m.n} pesanan · ${rpk(m.gmv)} omzet</div></div>
+      <div class="kpi"><div class="k">Menunggu transfer</div><div class="v">${rpk(owedToVenue)}</div><div class="n">${unsettled.length} pesanan belum dibayarkan</div></div>
+    </div>
+
+    <div class="card chartwrap">
+      <div class="row" style="margin-bottom:8px"><span><b>Omzet 14 hari terakhir</b></span><span style="font-weight:600;color:var(--text-soft);font-size:12.5px">batang kuning = hari ini</span></div>
+      ${chart(days,'gmv')}
+    </div>
+
+    ${owedToPawsly>0?`<div class="note" style="margin-top:12px"><b>Setoran tunai ${rp(owedToPawsly)}</b>
+      ${cashUnsettled.length} pesanan dibayar tunai di kasir kamu. Kamu simpan bagi hasilnya, sisanya disetor ke Pawsly saat kurir mengambil.</div>`:''}
+
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="${S.tab==='today'}" data-tab="today">Hari ini (${today.length})</button>
+      <button role="tab" aria-selected="${S.tab==='all'}" data-tab="all">Semua (${all.length})</button>
+    </div>
+
+    <div class="card" style="padding:14px 10px">
+      ${rows.length?`<div class="tscroll"><table>
+        <thead><tr><th>Waktu</th><th>Kode</th><th>Pesanan</th><th>Bayar</th><th class="num">Omzet</th><th class="num">Bagi hasil</th></tr></thead>
+        <tbody>${rows.slice(0,60).map(o=>`<tr>
+          <td>${fmtTime(o.createdAt)}<br><span style="color:var(--text-soft);font-size:11.5px">${fmtDay(dayKey(o.createdAt))}</span></td>
+          <td><b>${esc(o.code)}</b><br><span style="color:var(--text-soft);font-size:11.5px">${esc(o.cust.dog||o.cust.name)}</span></td>
+          <td>${esc(o.sizeName)}${o.addons.length?` +${o.addons.length}`:''}<br><span style="color:var(--text-soft);font-size:11.5px">${esc((o.pick.protein||[]).map(label).join(', '))}</span></td>
+          <td>${o.collect==='venue'?'<span class="chip cash">Tunai</span>':`<span class="chip paid">${esc(o.paymentLabel)}</span>`}</td>
+          <td class="num">${rp(o.total)}</td>
+          <td class="num"><b>${rp(o.commission)}</b></td>
+        </tr>`).join('')}</tbody></table></div>`
+      :`<div class="empty"><b>Belum ada pesanan</b>Pastikan x-banner QR terpasang di dekat kolam dan pintu masuk.</div>`}
+    </div>
+
+    <div class="step"><b>X-banner venue kamu</b><i>Siap cetak</i></div>
+    <div class="grid2">
+      <div class="card">
+        <p style="margin:0 0 10px;font-size:14px;color:var(--text-soft)">Setiap pesanan dari QR ini tercatat atas nama ${esc(v.name)} dan otomatis dapat bagi hasil ${Math.round(v.rate*100)}%.</p>
+        ${bannerArt(v)}
+      </div>
+      <div class="card">
+        <div class="rows">
+          <div class="row"><span>Tautan QR</span><span style="font-weight:600;font-size:12px;word-break:break-all;text-align:right">${esc(orderLink(v.code))}</span></div>
+          <div class="row"><span>Rekening pembayaran</span><span style="font-weight:600;font-size:12.5px;text-align:right">${esc(v.payout)}</span></div>
+          <div class="row"><span>Siklus transfer</span><span>Mingguan, setiap Senin</span></div>
+        </div>
+        <hr class="sep">
+        <div class="inline">
+          <button class="btn ghost sm" id="copyLink">Salin tautan</button>
+          <button class="btn ghost sm" id="printBanner">Cetak x-banner</button>
+          <button class="btn ghost sm" id="csv">Unduh CSV</button>
+        </div>
+      </div>
+    </div>
+    <p class="foot">Angka diperbarui langsung begitu pesanan masuk dari QR venue.</p>
+  </div>`;
+}
+
+function bannerArt(v){
+  const link = orderLink(v.code);
+  return `<div class="xb" id="xbanner">
+    <div style="font-family:var(--display);font-weight:800;font-size:30px;color:var(--ink);line-height:1">🐾 pawsly</div>
+    <div style="font-size:10px;letter-spacing:.18em;font-weight:700;color:var(--text-soft)">YOUR PET'S PERSONAL CHEF</div>
+    <div class="k">Lapar setelah berenang?</div>
+    <div class="s">Pindai, racik mangkuknya, ambil di counter</div>
+    <div class="qr">${qrSvg(link)}</div>
+    <div class="v">${esc(v.name)}</div>
+    <div class="f">${esc(link)}</div>
+  </div>`;
+}
+
+/* ============================================================
+   Pawsly HQ
+   ============================================================ */
+function viewHQ(){
+  const all = DB.orders;
+  const t = totals(all);
+  const today = totals(all.filter(o=>dayKey(o.createdAt)===todayKey()));
+  const payable = all.filter(o=>!o.settled && o.collect==='pawsly').reduce((s,o)=>s+o.commission,0);
+  const receivable = all.filter(o=>!o.settled && o.collect==='venue').reduce((s,o)=>s+o.total-o.commission,0);
+
+  return `
+  <div class="dash-top"><div class="wrap wide">
+    <div class="dash-head">
+      <div><h2>Pawsly HQ</h2><p>Jaringan venue, bagi hasil, dan penyelesaian pembayaran</p></div>
+      <button class="out" id="logout">Keluar</button>
+    </div>
+  </div></div>
+
+  <div class="wrap wide">
+    <div class="kpis">
+      <div class="kpi hero"><div class="k">Omzet hari ini</div><div class="v">${rpk(today.gmv)}</div><div class="n">${today.n} pesanan di semua venue</div></div>
+      <div class="kpi"><div class="k">Omzet 14 hari</div><div class="v">${rpk(t.gmv)}</div><div class="n">${t.n} pesanan</div></div>
+      <div class="kpi"><div class="k">Bagi hasil terutang</div><div class="v">${rpk(payable)}</div><div class="n">ditransfer ke venue</div></div>
+      <div class="kpi"><div class="k">Setoran tunai tertahan</div><div class="v">${rpk(receivable)}</div><div class="n">ditagih dari venue</div></div>
+    </div>
+
+    <div class="card chartwrap"><div class="row" style="margin-bottom:8px"><span><b>Omzet jaringan, 14 hari</b></span></div>${chart(byDay(all,14),'gmv')}</div>
+
+    <div class="step"><b>Venue mitra</b><i>${DB.venues.length} aktif</i></div>
+    <div class="card" style="padding:14px 10px">
+      <div class="tscroll"><table>
+        <thead><tr><th>Venue</th><th class="num">Bagi hasil</th><th class="num">Pesanan</th><th class="num">Omzet 14 hari</th><th class="num">Terutang</th><th></th></tr></thead>
+        <tbody>${DB.venues.map(v=>{
+          const list = ordersFor(v.code);
+          const due = list.filter(o=>!o.settled && o.collect==='pawsly').reduce((s,o)=>s+o.commission,0);
+          const cash = list.filter(o=>!o.settled && o.collect==='venue').reduce((s,o)=>s+o.total-o.commission,0);
+          return `<tr>
+            <td><b>${esc(v.name)}</b><br><span style="color:var(--text-soft);font-size:11.5px">${esc(v.code)} · ${esc(v.city)}</span></td>
+            <td class="num"><input type="number" min="0" max="40" step="1" value="${Math.round(v.rate*100)}" data-rate="${esc(v.code)}" style="width:66px;text-align:right;padding:5px 7px" aria-label="Bagi hasil ${esc(v.name)}">%</td>
+            <td class="num">${list.length}</td>
+            <td class="num">${rp(totals(list).gmv)}</td>
+            <td class="num">${due?`<b>${rp(due)}</b>`:'—'}${cash?`<br><span class="chip cash" style="margin-top:3px">tunai ${rpk(cash)}</span>`:''}</td>
+            <td class="num">${(due||cash)?`<button class="btn ghost sm" data-settle="${esc(v.code)}">Tandai lunas</button>`:''}</td>
+          </tr>`;
+        }).join('')}</tbody></table></div>
+    </div>
+
+    <div class="step"><b>Tambah venue mitra</b></div>
+    <div class="card">
+      <div class="grid2">
+        <div>
+          <label class="field"><span>Nama venue</span><input type="text" id="nName" placeholder="Contoh: Happy Tails Serpong"></label>
+          <label class="field"><span>Jenis & kota</span><input type="text" id="nKind" placeholder="Dog pool · Serpong"></label>
+        </div>
+        <div>
+          <label class="field"><span>Bagi hasil (%)</span><input type="number" id="nRate" value="15" min="0" max="40"></label>
+          <label class="field"><span>Rekening pembayaran</span><input type="text" id="nPayout" placeholder="BCA 1234567890 · PT ..."></label>
+        </div>
+      </div>
+      <button class="btn block" id="addVenue">Buat venue & QR</button>
+      <p class="lvl">Kode venue dan PIN dashboard dibuat otomatis.</p>
+    </div>
+
+    <div class="step"><b>Penyimpanan data</b><i>${esc(STORE.label())}</i></div>
+    <div class="card">
+      ${STORE.mode==='cloud' ? `
+        <div class="note"><b>Terhubung ke Supabase</b>Pesanan dari HP pengunjung langsung muncul di dashboard venue, di perangkat mana pun. Dashboard menyegarkan sendiri tiap 20 detik.</div>
+      ` : `
+        <div class="note"><b>${STORE.mode==='device'?'Tersimpan di perangkat ini saja':'Belum tersimpan'}</b>
+        ${STORE.mode==='device'
+          ? 'Cukup untuk demo di satu HP, tapi venue tidak akan melihat pesanan yang dibuat di perangkat lain. Hubungkan Supabase untuk pilot sungguhan.'
+          : 'Browser ini memblokir penyimpanan, jadi data hilang saat halaman dimuat ulang.'}</div>
+      `}
+      <label class="field" style="margin-top:12px"><span>Supabase Project URL</span>
+        <input type="text" id="sbUrl" placeholder="https://xxxxxxxx.supabase.co" value="${esc(STORE.cfg.url||'')}"></label>
+      <label class="field"><span>Anon public key <em>— kunci publik, aman di sisi browser</em></span>
+        <input type="text" id="sbKey" placeholder="eyJhbGciOi..." value="${esc(STORE.cfg.key||'')}"></label>
+      <div class="inline">
+        <button class="btn ghost sm" id="sbSave">${STORE.mode==='cloud'?'Perbarui koneksi':'Hubungkan Supabase'}</button>
+        ${STORE.mode==='cloud'?`<button class="btn ghost sm" id="sbSeed">Kirim data saat ini ke server</button>
+        <button class="btn danger sm" id="sbOff">Putuskan</button>`:''}
+      </div>
+      <p class="lvl">Jalankan dulu <b>supabase-setup.sql</b> di SQL Editor Supabase untuk membuat tabelnya.</p>
+    </div>
+
+    <div class="step"><b>Pengaturan</b></div>
+    <div class="card">
+      <label class="field"><span>Alamat dasar untuk QR <em>— tempel URL publik setelah website di-deploy</em></span>
+        <input type="text" id="baseUrl" value="${esc(DB.config.baseUrl||'')}"></label>
+      <label class="field"><span>Endpoint notifikasi WhatsApp <em>— URL Cloudflare Worker, bukan token Fonnte</em></span>
+        <input type="text" id="notifyUrl" placeholder="https://pawsly-wa.xxx.workers.dev" value="${esc(DB.config.notifyUrl||'')}"></label>
+      <p class="lvl">${STORE.mode==='cloud' ? (DB.config.notifyUrl?'Notifikasi aktif untuk pesanan baru.':'Kosongkan jika belum pakai Fonnte.') : 'Notifikasi WhatsApp butuh koneksi Supabase dulu.'}</p>
+      <div class="inline">
+        <button class="btn ghost sm" id="saveBase">Simpan alamat</button>
+        <button class="btn ghost sm" id="csvAll">Unduh CSV semua pesanan</button>
+        <button class="btn danger sm" id="reset">Hapus data demo</button>
+      </div>
+    </div>
+    <p class="foot">Prototipe. Pembayaran disimulasikan — belum terhubung ke payment gateway.</p>
+  </div>`;
+}
+
+/* ============================================================
+   CSV
+   ============================================================ */
+function downloadCsv(list, name){
+  const head = ['kode','waktu','venue','porsi','protein','organ','sayuran','karbohidrat','tambahan','metode','omzet','persen','bagi_hasil','status_bayar'];
+  const body = list.map(o=>[
+    o.code, new Date(o.createdAt).toLocaleString('id-ID'), o.venueCode||'-', o.sizeName,
+    (o.pick.protein||[]).map(label).join('|'), (o.pick.organ||[]).map(label).join('|'),
+    (o.pick.sayuran||[]).map(label).join('|'), (o.pick.karbohidrat||[]).map(label).join('|'),
+    o.addons.map(a=>a.label).join('|'), o.paymentLabel, o.total, Math.round(o.rate*100), o.commission,
+    o.settled?'lunas':'belum',
+  ].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
+  const blob = new Blob(['\uFEFF'+[head.join(','),...body].join('\n')],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  toast('CSV diunduh');
+}
+
+/* ============================================================
+   Router + events
+   ============================================================ */
+function render(){
+  const app = $('#app'), st = $('#sticky');
+  let html='', sticky='';
+  if(S.route==='partner'){
+    html = S.session ? viewPartner() : viewLogin();
+  }else if(S.route==='hq'){
+    html = S.hq ? viewHQ() : viewHqLogin();
+  }else{
+    if(!S.venueCode) html = viewNoVenue();
+    else if(S.stage==='menu'){ html = viewMenu(); sticky = stickyMenu(); }
+    else if(S.stage==='checkout'){ html = viewCheckout(); sticky = stickyCheckout(); }
+    else html = viewDone();
+  }
+  app.innerHTML = html;
+  st.innerHTML = sticky;
+  renderSwitcher();
+}
+
+function viewHqLogin(){
+  return `<div class="wrap"><header class="mast">
+    <h1 class="logo" style="font-size:34px"><span class="paws">🐾</span>pawsly <span style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--text-soft)">HQ</span></h1>
+    <h2 class="h1" style="font-size:26px">Konsol internal</h2></header>
+    <div class="card">
+      <label class="field"><span>Kata sandi</span><input type="password" id="hqPin" placeholder="••••••••"></label>
+      <button class="btn block" id="doHq">Masuk</button>
+      <p class="lvl">Kata sandi demo: <b>pawsly2026</b></p>
+    </div></div>`;
+}
+
+function renderSwitcher(){
+  const sw = $('#switcher');
+  const tabs = [['order','Pesan'],['partner','Venue'],['hq','HQ']];
+  sw.innerHTML = tabs.map(([k,l])=>`<button data-route="${k}" aria-current="${S.route===k}">${l}</button>`).join('');
+}
+
+document.addEventListener('click', async (e)=>{
+  const b = e.target.closest('button'); if(!b) return;
+  const d = b.dataset;
+
+  if(d.route){ S.route = d.route; if(d.route==='order') S.stage = S.lastOrder&&S.stage==='done'?'done':'menu'; render(); window.scrollTo(0,0); return; }
+  if(d.venue){ S.venueCode = d.venue; S.stage='menu'; render(); return; }
+  if(d.size){ S.size = d.size; render(); return; }
+  if(d.recipe){
+    const r = RECIPES.find(x=>x.id===d.recipe);
+    S.pick = JSON.parse(JSON.stringify(r.pick)); S.addons = [...r.addons];
+    render(); toast(r.title + ' dipilih'); return;
+  }
+  if(d.g){
+    const g = GROUPS.find(x=>x.id===d.g);
+    const sel = S.pick[d.g];
+    const i = sel.indexOf(d.i);
+    if(i>=0) sel.splice(i,1);
+    else if(sel.length<g.max) sel.push(d.i);
+    else { toast(`Maksimum ${g.max} ${g.title.toLowerCase()}`); return; }
+    render(); return;
+  }
+  if(d.addon){
+    const i = S.addons.indexOf(d.addon);
+    i>=0 ? S.addons.splice(i,1) : S.addons.push(d.addon);
+    render(); return;
+  }
+  if(d.ful){ S.fulfil = d.ful; keepForm(); render(); return; }
+  if(d.pay){ S.payment = d.pay; keepForm(); render(); return; }
+  if(d.tab){ S.tab = d.tab; render(); return; }
+
+  switch(b.id){
+    case 'toCheckout': S.stage='checkout'; render(); window.scrollTo(0,0); break;
+    case 'backMenu':   keepForm(); S.stage='menu'; render(); window.scrollTo(0,0); break;
+    case 'payNow':     await placeOrder(); break;
+    case 'again':
+      S.pick={protein:[],organ:[],sayuran:[],karbohidrat:[]}; S.addons=[]; S.stage='menu'; S.lastOrder=null;
+      render(); window.scrollTo(0,0); break;
+    case 'gotoPartner': S.session = S.lastOrder.venueCode; S.route='partner'; render(); window.scrollTo(0,0); break;
+    case 'doLogin': {
+      const code = $('#lCode').value, pin = $('#lPin').value.trim();
+      const v = venue(code);
+      if(v && pin===v.pin){ S.session=code; S.tab='today'; render(); window.scrollTo(0,0); }
+      else { toast('PIN salah untuk venue ini'); $('#lPin').focus(); }
+      break;
+    }
+    case 'doHq': {
+      if($('#hqPin').value.trim()==='pawsly2026'){ S.hq=true; render(); window.scrollTo(0,0); }
+      else { toast('Kata sandi salah'); }
+      break;
+    }
+    case 'logout': S.session=null; S.hq=false; render(); break;
+    case 'copyLink': {
+      const link = orderLink(S.session);
+      try{ await navigator.clipboard.writeText(link); toast('Tautan disalin'); }
+      catch(err){ toast(link); }
+      break;
+    }
+    case 'printBanner': printBanner(); break;
+    case 'csv':    downloadCsv(ordersFor(S.session), `pawsly-${S.session}.csv`); break;
+    case 'csvAll': downloadCsv(DB.orders, 'pawsly-semua-pesanan.csv'); break;
+    case 'sbSave': {
+      const url = $('#sbUrl').value.trim().replace(/\/+$/,''), key = $('#sbKey').value.trim();
+      if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)){ toast('URL harus seperti https://xxxx.supabase.co'); break; }
+      if(key.length < 40){ toast('Anon key tampak belum lengkap'); break; }
+      try{ localStorage.setItem(CONN, JSON.stringify({url,key})); }
+      catch(e){ toast('Browser ini memblokir penyimpanan'); break; }
+      STORE.cfg = {url,key}; STORE.mode = 'cloud';
+      try{
+        const d = await STORE.loadAll();
+        if(d.venues.length){ DB.venues = d.venues; DB.orders = d.orders; toast(`Terhubung — ${d.orders.length} pesanan dimuat`); }
+        else toast('Terhubung. Tabel masih kosong — kirim data saat ini untuk mengisinya.');
+      }catch(e){ toast('Gagal: '+e.message+' — sudah jalankan SQL-nya?'); }
+      render(); poll(); break;
+    }
+    case 'sbSeed': {
+      const b2 = $('#sbSeed'); b2.disabled = true; b2.textContent = 'Mengirim…';
+      try{ await STORE.pushAll(); toast(`${DB.venues.length} venue & ${DB.orders.length} pesanan terkirim`); }
+      catch(e){ toast('Gagal: '+e.message); }
+      render(); break;
+    }
+    case 'sbOff': {
+      try{ localStorage.removeItem(CONN); }catch(e){}
+      STORE.cfg = {url:'',key:''}; STORE.boot();
+      const d2 = await STORE.loadAll();
+      if(d2 && d2.venues && d2.venues.length){ DB.venues = d2.venues; DB.orders = d2.orders; }
+      clearInterval(pollT); render(); toast('Koneksi diputus — kembali ke penyimpanan perangkat');
+      break;
+    }
+    case 'saveBase':
+      DB.config.baseUrl = $('#baseUrl').value.trim();
+      DB.config.notifyUrl = $('#notifyUrl').value.trim().replace(/\/+$/,'');
+      STORE.saveCfg(); render(); toast('Pengaturan disimpan'); break;
+    case 'addVenue': {
+      const name = $('#nName').value.trim();
+      if(!name){ toast('Isi nama venue'); break; }
+      const kind = $('#nKind').value.trim() || 'Dog park';
+      const code = name.toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,14) + '-' + rid(2);
+      const v = { code, name, kind, city: kind.split('·').pop().trim(), pin:String(1000+Math.floor(Math.random()*8999)),
+        rate: Math.min(0.4, Math.max(0, (parseFloat($('#nRate').value)||15)/100)),
+        payout: $('#nPayout').value.trim() || 'Belum diisi', active:true };
+      DB.venues.push(v); await STORE.saveVenue(v); render();
+      toast(`${name} dibuat — kode ${code}, PIN ${v.pin}`);
+      break;
+    }
+    case 'reset': {
+      if(!confirm('Hapus semua venue dan pesanan, lalu muat ulang contoh data?')) break;
+      try{ await STORE.wipe(); }catch(e){ toast('Gagal hapus di server: '+e.message); break; }
+      const cfg = DB.config; DB = seed(); DB.config = cfg;
+      if(STORE.mode==='cloud'){ try{ await STORE.pushAll(); }catch(e){ toast('Gagal kirim: '+e.message); } }
+      else await STORE.persist();
+      S.session=null; S.venueCode=null; render(); toast('Data demo dimuat ulang');
+      break;
+    }
+  }
+
+  if(d.settle){
+    await STORE.settle(d.settle); render(); toast('Ditandai lunas');
+  }
+});
+
+document.addEventListener('change', async (e)=>{
+  const r = e.target.dataset.rate;
+  if(r){
+    const v = venue(r);
+    v.rate = Math.min(0.4, Math.max(0, (parseFloat(e.target.value)||0)/100));
+    await STORE.saveVenue(v); render(); toast(`${v.name}: bagi hasil ${Math.round(v.rate*100)}%`);
+  }
+});
+
+function keepForm(){
+  if($('#cName')) S.cust = { name:$('#cName').value, phone:$('#cPhone').value, dog:$('#cDog').value };
+  if($('#cNote')) S.note = $('#cNote').value;
+}
+
+function printBanner(){
+  const el = $('#xbanner'); if(!el) return;
+  const w = window.open('', '_blank', 'width=700,height=900');
+  if(!w){ toast('Izinkan pop-up untuk mencetak'); return; }
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>X-banner Pawsly</title>
+  <style>body{margin:0;background:#FDF1DC;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh}
+  .xb{text-align:center;padding:40px}.xb svg{width:300px;height:300px}
+  :root{--ink:#12351F;--text-soft:#4A6B57;--display:'Trebuchet MS',system-ui,sans-serif}
+  .k{font-size:38px;font-weight:800;color:#12351F;margin:16px 0 4px}.s{color:#4A6B57}
+  .qr{background:#fff;padding:16px;display:inline-block;border:3px solid #12351F;border-radius:18px;margin-top:18px}
+  .v{font-weight:800;color:#12351F;margin-top:16px;font-size:20px}.f{font-size:12px;color:#4A6B57}</style></head>
+  <body>${el.outerHTML.replace(/class="xb"/,'class="xb"')}</body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(), 400);
+}
+
+/* ---------- boot ---------- */
+(async function boot(){
+  const params = new URLSearchParams(location.search);
+  const hash = new URLSearchParams(location.hash.replace(/^#\/?/, ''));
+  await load();
+  const v = params.get('v') || hash.get('v');
+  if(v && venue(v)) { S.venueCode = v; }
+  else if(v) { toast('Kode venue tidak dikenal'); }
+  if(location.hash.includes('partner')) S.route='partner';
+  if(location.hash.includes('hq')) S.route='hq';
+  render();
+  poll();
+})();
+
+</script>
+</body>
+</html>
