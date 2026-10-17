@@ -402,6 +402,8 @@ const BRAND = {
   tagline: "Your pet's personal chef",    // small caps line under the logo
   logo:    'Logo.png',                    // must match the uploaded filename EXACTLY, capitals included
   logoH:   120,                           // logo height in px (also capped at 86vw so phones never clip it)
+  qrisImage: 'qris.png',                  // your static QRIS sticker, sitting next to index.html
+  payeeName: 'Pawsly Gourmet',            // the account name customers should expect to see
   promoTitle: 'Freshly cooked, right here at the park',
   promoLine:  'Pick a portion, mix the toppings, collect at the counter',
   bannerHeadline: 'Give The Very best for your Pet',   // the big line on the printed x-banner
@@ -462,12 +464,15 @@ const RECIPES = [
 // Trim or extend freely -- the selected default is always the first entry,
 // so deleting a method can no longer leave the checkout with nothing selected.
 const PAYMENTS = [
-  // 'collect' decides which way the money flows, so it drives the whole revenue split:
-  //   'pawsly' -> Pawsly receives the payment and owes the venue its share
-  //   'venue'  -> the venue receives it, keeps its share, and owes Pawsly the rest
-  // Set QRIS to 'venue' if you are using the venue's own static QRIS sticker.
-  { id:'qris',  label:'QRIS',           desc:'Scan with any e-wallet or mobile banking app', collect:'pawsly' },
-  { id:'bca',   label:'BCA Transfer',   desc:'Virtual account, checked automatically',       collect:'pawsly' },
+  // collect : 'pawsly' = you receive the money and owe the venue its share
+  //           'venue'  = the venue receives it, keeps its share, owes you the rest
+  //                      (use this if the QRIS sticker is the venue's own)
+  // uniq    : add a 2-digit verification code to the amount so your admin can
+  //           match a payment to an order. Turn OFF once a gateway confirms
+  //           payments automatically -- then the exact amount no longer matters.
+  // showQr  : display BRAND.qrisImage on the checkout screen.
+  { id:'qris', label:'QRIS',         desc:'Scan with any e-wallet or mobile banking app', collect:'pawsly', uniq:true, showQr:true },
+  { id:'bca',  label:'BCA Transfer', desc:'Transfer the exact amount shown',              collect:'pawsly', uniq:true },
 ];
 
 const FULFIL = [
@@ -490,9 +495,6 @@ const itemById = id => GROUPS.flatMap(g=>g.items).find(i=>i.id===id) || ADDONS.f
 const label = id => (itemById(id)||{label:id}).label;
 
 function medallion(it){
-  // Single quotes matter: this lands inside style="..." so double quotes would
-  // close the attribute early and the photo would silently never load.
-  if(it.img) return `center/cover no-repeat url('${String(it.img).replace(/['"\\]/g,'')}')`;
   const dots = {
     dice:   [[30,34,22],[66,44,20],[46,70,19]],
     blob:   [[36,40,27],[66,58,23],[44,74,16]],
@@ -500,7 +502,11 @@ function medallion(it){
     grain:  [[28,38,13],[50,30,12],[68,44,13],[38,58,12],[60,64,13],[44,74,11]],
   }[it.shape] || [[50,50,28]];
   const layers = dots.map((d,i)=>`radial-gradient(circle at ${d[0]}% ${d[1]}%, ${i%2?it.c2:it.c1} 0 ${d[2]}%, transparent ${d[2]+1}%)`);
-  return layers.join(',') + `, color-mix(in srgb, ${it.c1} 18%, transparent)`;
+  const drawn = layers.join(',') + `, color-mix(in srgb, ${it.c1} 18%, transparent)`;
+  // Photo first, drawn version underneath. If the file 404s the browser just
+  // skips that layer and the drawn ingredient shows instead of an empty circle.
+  // Single quotes are required: this sits inside style="..." .
+  return it.img ? `url('${String(it.img).replace(/['"\\]/g,'')}') center/cover no-repeat, ${drawn}` : drawn;
 }
 
 /* ---------- state ---------- */
@@ -508,7 +514,7 @@ let DB = null;          // { venues, orders, config }
 let S = {               // view state
   route:'order', venueCode:null, stage:'menu',
   size:'M', pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],
-  fulfil:FULFIL[0].id, payment:PAYMENTS[0].id,
+  fulfil:FULFIL[0].id, payment:PAYMENTS[0].id, uniq:null,
   cust:{name:'',phone:'',dog:''}, note:'',
   lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null,
 };
@@ -618,6 +624,14 @@ const STORE = {
     ordersFor(code).forEach(o=>o.settled=true);
     if(this.mode!=='cloud') return this.persist();
     try{ await this.api('orders?venue_code=eq.'+encodeURIComponent(code), { method:'PATCH', body:JSON.stringify({ settled:true }) }); }
+    catch(e){ toast('Server update failed: '+e.message); }
+  },
+
+  async settleOrder(id){
+    const o = DB.orders.find(x=>x.id===id); if(!o) return;
+    o.settled = true;
+    if(this.mode!=='cloud') return this.persist();
+    try{ await this.api('orders?id=eq.'+encodeURIComponent(id), { method:'PATCH', body:JSON.stringify({ settled:true }) }); }
     catch(e){ toast('Server update failed: '+e.message); }
   },
 
@@ -731,6 +745,14 @@ function seed(){
     }
   }
   orders.sort((a,b)=> new Date(a.createdAt)-new Date(b.createdAt));
+  // Give the unsettled demo orders verification codes too, drawn from one shuffled
+  // pool so the HQ reconciliation list has no duplicate amounts to confuse anyone.
+  const pool = Array.from({length:99},(_,i)=>i+1).sort(()=>Math.random()-0.5);
+  orders.forEach(o=>{
+    const m = PAYMENTS.find(x=>x.id===o.payment);
+    if(m && m.uniq && !o.settled && pool.length){ o.uniq = pool.pop(); o.payTotal = o.total + o.uniq; }
+    else { o.uniq = 0; o.payTotal = o.total; }
+  });
   return { venues, orders, config:{ rate:DEFAULT_RATE }, seededAt:new Date().toISOString() };
 }
 function samplePick(){
@@ -789,12 +811,32 @@ function orderLink(code){
    Customer flow
    ============================================================ */
 
+function drawnBowl(){
+  return `<span class="bowl"><span class="food"></span><span class="body"></span><span class="mark">pawsly</span></span>`;
+}
+function bowlFallback(el){ el.outerHTML = drawnBowl(); }
+
 function priceNow(){
-  const size = SIZES.find(s=>s.id===S.size);
+  const size = SIZES.find(s=>s.id===S.size) || SIZES[0];
   const addon = S.addons.reduce((t,id)=>t+(ADDONS.find(a=>a.id===id)||{price:0}).price,0);
   const fee = (FULFIL.find(f=>f.id===S.fulfil)||{}).fee||0;
   const subtotal = size.price + addon;
-  return { size, addon, fee, subtotal, total:subtotal+fee };
+  const total = subtotal + fee;
+  const pay = PAYMENTS.find(m=>m.id===S.payment) || PAYMENTS[0];
+  const uniq = pay.uniq ? (S.uniq || 0) : 0;
+  return { size, addon, fee, subtotal, total, pay, uniq, payTotal: total + uniq };
+}
+
+/* A 2-digit code appended to the amount so a bank or QRIS entry maps to exactly
+   one order: Rp 115,000 becomes Rp 115,012. Only codes already attached to an
+   unsettled order are off-limits, so numbers are recycled once reconciled.
+   The code is NOT revenue -- commission is still taken on the food subtotal. */
+function pickUniq(){
+  const used = new Set(DB.orders.filter(o=>!o.settled && o.uniq).map(o=>o.uniq));
+  const free = [];
+  for(let i=1;i<=99;i++) if(!used.has(i)) free.push(i);
+  return free.length ? free[Math.floor(Math.random()*free.length)]
+                     : 1 + Math.floor(Math.random()*99);
 }
 function bowlReady(){
   return S.pick.protein.length>0 && S.pick.karbohidrat.length>0;
@@ -824,8 +866,8 @@ function viewMenu(){
       <div class="sizes">
         ${SIZES.map(s=>`
           <button class="size ${s.cls}" data-size="${s.id}" aria-pressed="${S.size===s.id}">
-            ${s.img ? `<img class="bowlimg ${s.cls}" src="${esc(s.img)}" alt="" loading="lazy">`
-                    : `<span class="bowl"><span class="food"></span><span class="body"></span><span class="mark">pawsly</span></span>`}
+            ${s.img ? `<img class="bowlimg ${s.cls}" src="${esc(s.img)}" alt="" loading="lazy" onerror="bowlFallback(this)">`
+                    : drawnBowl()}
             <span class="nm">${s.name}</span>
             <span class="px">${rp(s.price)}</span>
             <span class="sub">${s.sub}</span>
@@ -941,8 +983,17 @@ function viewCheckout(){
         <div class="row"><span>${p.size.name} Bowl</span><span>${rp(p.size.price)}</span></div>
         ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
         ${p.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(p.fee)}</span></div>`:''}
-        <div class="row total"><span>Total</span><span>${rp(p.total)}</span></div>
+        ${p.uniq ? `<div class="row"><span>Subtotal</span><span>${rp(p.total)}</span></div>
+        <div class="row"><span>Verification code</span><span>+ ${String(p.uniq).padStart(2,'0')}</span></div>
+        <div class="row total"><span>Transfer exactly</span><span>${rp(p.payTotal)}</span></div>`
+        : `<div class="row total"><span>Total</span><span>${rp(p.total)}</span></div>`}
       </div>
+      ${p.uniq ? `<div class="note" style="margin-top:12px"><b>Pay the exact amount, down to the last 2 digits</b>
+        Those digits are how we match your payment to this order. Rounding to ${rp(p.total)} will delay it.</div>` : ''}
+      ${p.pay.showQr && BRAND.qrisImage ? `<div style="text-align:center;margin-top:14px">
+        <img src="${esc(BRAND.qrisImage)}" alt="QRIS code" style="width:220px;max-width:100%;border-radius:12px;background:#FFFBF2;padding:8px"
+             onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'lvl',textContent:'QRIS code image not found \u2014 ask staff at the counter.'}))">
+        <p class="lvl">Scan with any e-wallet, then enter ${rp(p.payTotal)}</p></div>` : ''}
     </div>
 
     <p class="foot">Pawsly Kitchen will prepare and cook after payment is confirmed</p>
@@ -953,7 +1004,7 @@ function stickyCheckout(){
   const p = priceNow();
   const cash = S.payment==='cash';
   return `<div class="sticky"><div class="inner">
-    <span class="sum"><b>${rp(p.total)}</b><span>${cash?'Pay at the venue counter':'Paid online'}</span></span>
+    <span class="sum"><b>${rp(p.payTotal)}</b><span>${cash?'Pay at the venue counter':(p.uniq?'Exact amount, incl. code':'Paid online')}</span></span>
     <button class="btn gold" id="payNow">${cash?'Place order':'Pay now'}</button>
   </div></div>`;
 }
@@ -986,7 +1037,7 @@ async function placeOrder(){
     payment:pay.id, paymentLabel:pay.label, collect:pay.collect,
     status: pay.collect==='venue' ? 'awaiting_cash' : 'preparing',
     cust:{...S.cust}, note:S.note,
-    subtotal:p.subtotal, total:p.total,
+    subtotal:p.subtotal, total:p.total, uniq:p.uniq, payTotal:p.payTotal,
     rate, commission: Math.round(p.subtotal*rate),
     settled:false,
   };
@@ -1009,13 +1060,18 @@ function viewDone(){
     <div class="tix">
       <div class="code">${esc(o.code)}</div>
       <div class="lbl">Give this code when you collect</div>
+      ${o.uniq ? `<div style="margin-top:14px;border-top:1px solid rgba(255,251,242,.25);padding-top:12px">
+        <div style="font-family:var(--display);font-weight:800;font-size:26px">${rp(o.payTotal)}</div>
+        <div class="lbl">Transfer this exact amount to ${esc(BRAND.payeeName||BRAND.name)}</div></div>` : ''}
     </div>
 
     <div class="card" style="margin-top:12px">
       <div class="rows">
         <div class="row"><span>${esc(o.sizeName)} Bowl${o.addons.length?` + ${o.addons.map(a=>esc(a.label)).join(', ')}`:''}</span><span>${rp(o.subtotal)}</span></div>
         ${o.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(o.fee)}</span></div>`:''}
-        <div class="row total"><span>Total</span><span>${rp(o.total)}</span></div>
+        ${o.uniq ? `<div class="row"><span>Verification code</span><span>+ ${String(o.uniq).padStart(2,'0')}</span></div>
+        <div class="row total"><span>Transfer exactly</span><span>${rp(o.payTotal||o.total)}</span></div>`
+        : `<div class="row total"><span>Total</span><span>${rp(o.total)}</span></div>`}
         <div class="row muted"><span>${esc(o.paymentLabel)}</span><span>${cash?'<span class="chip cash">Pay at counter</span>':'<span class="chip paid">Paid</span>'}</span></div>
       </div>
       <hr class="sep">
@@ -1049,8 +1105,8 @@ function viewNoVenue(){
     <div class="recipes">
       ${DB.venues.filter(v=>v.active).map(v=>`
         <button class="recipe" data-venue="${esc(v.code)}">
-          <span class="n">🐾</span>
-          <span><span class="t">${esc(v.name)}</span><br><span class="d">${esc(v.kind)} · ${esc(v.city)}</span></span>
+          <span class="n">${esc((v.name||'?').charAt(0).toUpperCase())}</span>
+          <span><span class="t">${esc(v.name)}</span><br><span class="d">${esc([v.kind, v.city].filter(Boolean).join(' \u00b7 '))}</span></span>
         </button>`).join('')}
     </div>
   </div>`;
@@ -1279,7 +1335,8 @@ function viewHQ(){
       <div class="grid2">
         <div>
           <label class="field"><span>Venue name</span><input type="text" id="nName" placeholder="e.g. Happy Tails Serpong"></label>
-          <label class="field"><span>Type & city</span><input type="text" id="nKind" placeholder="Dog pool · Serpong"></label>
+          <label class="field"><span>Type</span><input type="text" id="nKind" placeholder="Dog pool & play park"></label>
+          <label class="field"><span>City</span><input type="text" id="nCity" placeholder="Gading Serpong"></label>
         </div>
         <div>
           <label class="field"><span>Revenue share (%)</span><input type="number" id="nRate" value="15" min="0" max="40"></label>
@@ -1289,6 +1346,26 @@ function viewHQ(){
       <button class="btn block" id="addVenue">Create venue & QR</button>
       <p class="lvl">The venue code and dashboard PIN are generated automatically.</p>
     </div>
+
+    ${(()=>{
+      const pending = all.filter(o=>!o.settled && o.collect==='pawsly' && o.uniq)
+                        .sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+      return `
+      <div class="step"><b>Payments to verify</b><i>${pending.length} waiting</i></div>
+      <div class="card" style="padding:14px 10px">
+        ${pending.length ? `<div class="tscroll"><table>
+          <thead><tr><th>Look for this amount</th><th>Order</th><th>Branch</th><th>Placed</th><th></th></tr></thead>
+          <tbody>${pending.slice(0,40).map(o=>`<tr>
+            <td><b style="font-size:15px">${rp(o.payTotal||o.total)}</b><br><span style="color:var(--text-soft);font-size:11.5px">${esc(o.paymentLabel)}</span></td>
+            <td><b>${esc(o.code)}</b><br><span style="color:var(--text-soft);font-size:11.5px">${esc(o.cust.name||'')}</span></td>
+            <td>${esc((venue(o.venueCode)||{name:'\u2014'}).name)}</td>
+            <td>${fmtTime(o.createdAt)}<br><span style="color:var(--text-soft);font-size:11.5px">${fmtDay(dayKey(o.createdAt))}</span></td>
+            <td class="num"><button class="btn ghost sm" data-paid="${esc(o.id)}">Received</button></td>
+          </tr>`).join('')}</tbody></table></div>
+          <p class="lvl" style="padding:0 8px">Match the exact amount on your bank or QRIS statement, then mark it received. The last 2 digits identify the order.</p>`
+        : `<div class="empty"><b>Nothing waiting</b>Every payment that needed checking has been marked received.</div>`}
+      </div>`;
+    })()}
 
     <div class="step"><b>QR codes for every branch</b><i>Print ready</i></div>
     <div class="card">
@@ -1348,12 +1425,12 @@ function viewHQ(){
    CSV
    ============================================================ */
 function downloadCsv(list, name){
-  const head = ['code','time','venue','size','protein','organ','vegetables','carbs','addons','payment','revenue','share_pct','venue_share','settlement'];
+  const head = ['code','time','venue','size','protein','organ','vegetables','carbs','addons','payment','revenue','pay_amount','share_pct','venue_share','settlement'];
   const body = list.map(o=>[
     o.code, new Date(o.createdAt).toLocaleString('en-GB'), o.venueCode||'-', o.sizeName,
     (o.pick.protein||[]).map(label).join('|'), (o.pick.organ||[]).map(label).join('|'),
     (o.pick.sayuran||[]).map(label).join('|'), (o.pick.karbohidrat||[]).map(label).join('|'),
-    o.addons.map(a=>a.label).join('|'), o.paymentLabel, o.total, Math.round(o.rate*100), o.commission,
+    o.addons.map(a=>a.label).join('|'), o.paymentLabel, o.total, o.payTotal||o.total, Math.round(o.rate*100), o.commission,
     o.settled?'settled':'pending',
   ].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
   const blob = new Blob(['\uFEFF'+[head.join(','),...body].join('\n')],{type:'text/csv;charset=utf-8'});
@@ -1432,14 +1509,15 @@ document.addEventListener('click', async (e)=>{
   if(d.tab){ S.tab = d.tab; render(); return; }
   if(d.edit){ S.editVenue = (S.editVenue===d.edit ? null : d.edit); render(); return; }
   if(d.print){ printBanner(d.print); return; }
+  if(d.paid){ await STORE.settleOrder(d.paid); render(); toast('Marked received'); return; }
 
   switch(b.id){
-    case 'toCheckout': S.stage='checkout'; render(); window.scrollTo(0,0); break;
+    case 'toCheckout': S.uniq = pickUniq(); S.stage='checkout'; render(); window.scrollTo(0,0); break;
     case 'backMenu':   keepForm(); S.stage='menu'; render(); window.scrollTo(0,0); break;
     case 'payNow':     await placeOrder(); break;
     case 'again':
       S.pick={protein:[],organ:[],sayuran:[],karbohidrat:[]}; S.addons=[]; S.stage='menu'; S.lastOrder=null;
-      S.payment=PAYMENTS[0].id; S.fulfil=FULFIL[0].id;
+      S.payment=PAYMENTS[0].id; S.fulfil=FULFIL[0].id; S.uniq=null;
       render(); window.scrollTo(0,0); break;
     case 'gotoPartner': S.session = S.lastOrder.venueCode; S.route='partner'; render(); window.scrollTo(0,0); break;
     case 'doLogin': {
@@ -1523,7 +1601,7 @@ document.addEventListener('click', async (e)=>{
       if(!name){ toast('Enter a venue name'); break; }
       const kind = $('#nKind').value.trim() || 'Dog park';
       const code = name.toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,14) + '-' + rid(2);
-      const v = { code, name, kind, city: kind.split('·').pop().trim(), pin:String(1000+Math.floor(Math.random()*8999)),
+      const v = { code, name, kind, city: $('#nCity').value.trim(), pin:String(1000+Math.floor(Math.random()*8999)),
         rate: Math.min(0.4, Math.max(0, (parseFloat($('#nRate').value)||15)/100)),
         payout: $('#nPayout').value.trim() || 'Not set', active:true };
       DB.venues.push(v); await STORE.saveVenue(v); render();
