@@ -386,9 +386,9 @@ const DEFAULT_RATE = 0.15;        // 15% to the venue
    ============================================================ */
 const BRAND = {
   name:    'Pawsly Gourmet',              // wordmark text, used when logo is empty
-  tagline: "Your pet's personal chef",    // small caps line under the logo
+  tagline: "",    // small caps line under the logo
   logo:    'Logo.png',                    // must match the uploaded filename EXACTLY, capitals included
-  logoH:   54,                            // logo height in px on the customer page
+  logoH:   200,                            // logo height in px on the customer page
   bannerHeadline: 'Give The Very best for your Pet',   // the big line on the printed x-banner
   bannerSub: 'Pick, Mix, Delivered it to You',
 };
@@ -445,17 +445,11 @@ const RECIPES = [
 ];
 
 const PAYMENTS = [
-  { id:'qris',  label:'QRIS',            desc:'Any e-wallet or mobile banking app', collect:'pawsly' },
-  { id:'gopay', label:'GoPay',           desc:'Pay from the Gojek app',            collect:'pawsly' },
-  { id:'ovo',   label:'OVO',             desc:'Pay from the OVO app',              collect:'pawsly' },
-  { id:'dana',  label:'DANA',            desc:'Pay from the DANA app',             collect:'pawsly' },
   { id:'bca',   label:'BCA Transfer',    desc:'Virtual account, checked automatically', collect:'pawsly' },
-  { id:'cash',  label:'Cash at counter',  desc:'Pay the venue cashier directly',  collect:'venue' },
-];
+  ];
 
 const FULFIL = [
-  { id:'counter',  label:'Pick up at the counter', desc:"We'll call you when it's ready" },
-  { id:'poolside', label:'Deliver to the pool deck', desc:'Adds Rp 5,000', fee:5000 },
+  { id:'counter',  label:'Pick up at the counter', desc:"We'll deliver it to you when it's ready" },
 ];
 
 /* ---------- helpers ---------- */
