@@ -385,12 +385,12 @@ const DEFAULT_RATE = 0.15;        // 15% to the venue
    BRAND — edit these five lines to rebrand the whole app
    ============================================================ */
 const BRAND = {
-  name:    'pawsly',                      // wordmark text, used when logo is empty
+  name:    'Pawsly Gourmet',                      // wordmark text, used when logo is empty
   tagline: "Your pet's personal chef",    // small caps line under the logo
   logo:    '',                            // e.g. 'logo.png' -> upload next to index.html in the repo
   logoH:   54,                            // logo height in px on the customer page
-  bannerHeadline: 'Lapar setelah berenang?',   // the big line on the printed x-banner
-  bannerSub: 'Pindai, racik mangkuknya, ambil di counter',
+  bannerHeadline: 'Give The Very best for your Pet',   // the big line on the printed x-banner
+  bannerSub: 'Pick, Mix, Delivered it to You',
 };
 function logoMark(size, suffix){
   const tail = suffix ? ` <span style="font-family:var(--body);font-size:${Math.round(size*0.42)}px;font-weight:700;color:var(--text-soft)">${esc(suffix)}</span>` : '';
@@ -401,9 +401,9 @@ function logoMark(size, suffix){
 
 /* ---------- catalogue ---------- */
 const SIZES = [
-  { id:'S', name:'Small',  price:26000,  cls:'s', sub:'Porsi kecil, cinta besar' },
-  { id:'M', name:'Medium', price:57500,  cls:'m', sub:'Porsi pas, nutrisi mantap' },
-  { id:'L', name:'Large',  price:115000, cls:'l', sub:'Lebih banyak cinta, nutrisi lengkap' },
+  { id:'S', name:'Small',  price:26000,  cls:'s', sub:'Small Portion, Big Love' },
+  { id:'M', name:'Medium', price:57500,  cls:'m', sub:'Enough, Full Loaded Nutrition' },
+  { id:'L', name:'Large',  price:115000, cls:'l', sub:'Huge Love, Bazzinga Nutrition' },
 ];
 
 const GROUPS = [
@@ -669,10 +669,9 @@ function poll(){
 
 function seed(){
   const venues = [
-    { code:'PAWPARK-BSD', name:'Paw Park BSD',        kind:'Dog pool & play park', city:'BSD City',       pin:'1510', rate:0.15, payout:'BCA 2290xxxx81 · PT Paw Park Nusantara', active:true },
-    { code:'SPLASH-KMG',  name:'Splash Paws Kemang',  kind:'Swimming pool',        city:'Jakarta Selatan',pin:'2208', rate:0.15, payout:'Mandiri 1270xxxx44 · CV Splash Paws',    active:true },
-    { code:'WOOF-BTR',    name:'Woof Garden Bintaro', kind:'Off-leash park & café',city:'Bintaro',        pin:'3390', rate:0.12, payout:'BCA 5410xxxx09 · Woof Garden',          active:true },
-  ];
+    { code:'PAWS', name:'PawS',        kind:'Dog pool & Play park', city:'Gading Serpong',       pin:'1510', rate:0.1, payout:'BCA 2290xxxx81 · PT Paw Park Nusantara', active:true },
+    { code:'Puppy Affair',  name:'Puppy Affair',  kind:'Pet Groomer',        city:'Gading Serpong',pin:'2208', rate:0.1, payout:'Mandiri 1270xxxx44 · CV Splash Paws',    active:true },
+];
   const orders = [];
   const names = ['Dira','Bagas','Nadya','Reno','Kiki','Tomi','Sasha','Yoga','Mila','Fajar','Intan','Bram','Sinta','Danu'];
   const dogs  = ['Mochi','Bubu','Kopi','Luna','Bolt','Nori','Cimol','Zuzu','Oreo','Pablo','Gembul','Sushi'];
@@ -792,11 +791,11 @@ function viewMenu(){
       <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
       <p class="tag">${esc(BRAND.tagline)}</p>
       <h2 class="h1">Racik mangkuk anjingmu</h2>
-      <p class="lede">Masakan segar, dimasak hari ini. Pilih porsi, lalu campur isi sesukamu.</p>
+      <p class="lede">Fresh Ingredients, Cook on the spot, Choose your portion and Mix it</p>
     </header>
 
     <section>
-      <div class="step"><b>Pilih porsi</b><i>Langkah 1</i></div>
+      <div class="step"><b>Choose Size</b><i>Langkah 1</i></div>
       <div class="sizes">
         ${SIZES.map(s=>`
           <button class="size ${s.cls}" data-size="${s.id}" aria-pressed="${S.size===s.id}">
@@ -806,7 +805,7 @@ function viewMenu(){
             <span class="sub">${s.sub}</span>
           </button>`).join('')}
       </div>
-      <p class="lvl">Isian di bawah sudah termasuk harga porsi. Maksimum 2 pilihan per kategori.</p>
+      <p class="lvl">Toppings below already included in the price. Maksimum 2 Toppings per Category.</p>
     </section>
 
     <section>
@@ -920,7 +919,7 @@ function viewCheckout(){
       </div>
     </div>
 
-    <p class="foot">Dapur Pawsly masak setelah pembayaran dikonfirmasi.</p>
+    <p class="foot">Pawsly Kitchen will prepare and cook after payment is confirmed</p>
   </div>`;
 }
 
