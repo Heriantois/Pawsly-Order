@@ -381,6 +381,24 @@ hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
 const KEY = 'pawsly:v1';
 const DEFAULT_RATE = 0.15;        // 15% to the venue
 
+/* ============================================================
+   BRAND — edit these five lines to rebrand the whole app
+   ============================================================ */
+const BRAND = {
+  name:    'pawsly',                      // wordmark text, used when logo is empty
+  tagline: "Your pet's personal chef",    // small caps line under the logo
+  logo:    '',                            // e.g. 'logo.png' -> upload next to index.html in the repo
+  logoH:   54,                            // logo height in px on the customer page
+  bannerHeadline: 'Lapar setelah berenang?',   // the big line on the printed x-banner
+  bannerSub: 'Pindai, racik mangkuknya, ambil di counter',
+};
+function logoMark(size, suffix){
+  const tail = suffix ? ` <span style="font-family:var(--body);font-size:${Math.round(size*0.42)}px;font-weight:700;color:var(--text-soft)">${esc(suffix)}</span>` : '';
+  return (BRAND.logo
+    ? `<img src="${esc(BRAND.logo)}" alt="${esc(BRAND.name)}" style="height:${size}px;width:auto;vertical-align:middle">`
+    : `<span class="paws">\u{1F43E} \u{1F43E}</span>${esc(BRAND.name)}`) + tail;
+}
+
 /* ---------- catalogue ---------- */
 const SIZES = [
   { id:'S', name:'Small',  price:26000,  cls:'s', sub:'Porsi kecil, cinta besar' },
@@ -456,6 +474,7 @@ const itemById = id => GROUPS.flatMap(g=>g.items).find(i=>i.id===id) || ADDONS.f
 const label = id => (itemById(id)||{label:id}).label;
 
 function medallion(it){
+  if(it.img) return `center/cover no-repeat url("${it.img}")`;   // photo wins when present
   const dots = {
     dice:   [[30,34,22],[66,44,20],[46,70,19]],
     blob:   [[36,40,27],[66,58,23],[44,74,16]],
@@ -473,7 +492,7 @@ let S = {               // view state
   size:'M', pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],
   fulfil:'counter', payment:'qris',
   cust:{name:'',phone:'',dog:''}, note:'',
-  lastOrder:null, session:null, hq:false, tab:'today',
+  lastOrder:null, session:null, hq:false, tab:'today', editVenue:null,
 };
 
 /* ---------- storage: cloud → device → memory ----------
@@ -582,6 +601,13 @@ const STORE = {
     if(this.mode!=='cloud') return this.persist();
     try{ await this.api('orders?venue_code=eq.'+encodeURIComponent(code), { method:'PATCH', body:JSON.stringify({ settled:true }) }); }
     catch(e){ toast('Gagal update server: '+e.message); }
+  },
+
+  async deleteVenue(code){
+    DB.venues = DB.venues.filter(v=>v.code!==code);
+    if(this.mode!=='cloud') return this.persist();
+    try{ await this.api('venues?code=eq.'+encodeURIComponent(code), { method:'DELETE' }); }
+    catch(e){ toast('Gagal hapus di server: '+e.message); }
   },
 
   async pushAll(){
@@ -763,8 +789,8 @@ function viewMenu(){
   ${v ? `<div class="ribbon"><span class="dot"></span>Kamu memesan di <b>&nbsp;${esc(v.name)}</b><small>&nbsp;· ${esc(v.city)}</small></div>` : ''}
   <div class="wrap">
     <header class="mast">
-      <h1 class="logo"><span class="paws">🐾 🐾</span>pawsly</h1>
-      <p class="tag">Your pet's personal chef</p>
+      <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
+      <p class="tag">${esc(BRAND.tagline)}</p>
       <h2 class="h1">Racik mangkuk anjingmu</h2>
       <p class="lede">Masakan segar, dimasak hari ini. Pilih porsi, lalu campur isi sesukamu.</p>
     </header>
@@ -988,8 +1014,8 @@ function viewNoVenue(){
   return `
   <div class="wrap">
     <header class="mast">
-      <h1 class="logo"><span class="paws">🐾 🐾</span>pawsly</h1>
-      <p class="tag">Your pet's personal chef</p>
+      <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
+      <p class="tag">${esc(BRAND.tagline)}</p>
       <h2 class="h1">Pindai QR di venue</h2>
       <p class="lede">Pemesanan Pawsly dibuka lewat QR pada x-banner di kolam atau taman anjing. Pilih venue di bawah untuk mencoba alurnya.</p>
     </header>
@@ -1029,7 +1055,7 @@ function viewLogin(){
   return `
   <div class="wrap">
     <header class="mast">
-      <h1 class="logo" style="font-size:34px"><span class="paws">🐾</span>pawsly <span style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--text-soft)">partner</span></h1>
+      <h1 class="logo" style="font-size:34px">${logoMark(34,'partner')}</h1>
       <h2 class="h1" style="font-size:26px">Masuk ke dashboard venue</h2>
       <p class="lede">Lihat pesanan dan bagi hasil dari QR venue kamu, diperbarui setiap pesanan masuk.</p>
     </header>
@@ -1127,13 +1153,41 @@ function viewPartner(){
   </div>`;
 }
 
+function editVenueCard(v){
+  const n = ordersFor(v.code).length;
+  return `
+  <div class="card" style="border-color:var(--ink)">
+    <div class="row" style="margin-bottom:10px"><span><b>Ubah ${esc(v.name)}</b></span>
+      <span class="chip neutral">${n} pesanan tercatat</span></div>
+    <div class="grid2">
+      <div>
+        <label class="field"><span>Nama venue</span><input type="text" id="veName" value="${esc(v.name)}"></label>
+        <label class="field"><span>Jenis</span><input type="text" id="veKind" value="${esc(v.kind||'')}"></label>
+        <label class="field"><span>Kota</span><input type="text" id="veCity" value="${esc(v.city||'')}"></label>
+      </div>
+      <div>
+        <label class="field"><span>PIN dashboard</span><input type="text" id="vePin" value="${esc(v.pin||'')}" inputmode="numeric"></label>
+        <label class="field"><span>Rekening pembayaran</span><input type="text" id="vePayout" value="${esc(v.payout||'')}"></label>
+        <label class="field"><span>Status</span>
+          <select id="veActive"><option value="1" ${v.active!==false?'selected':''}>Aktif</option><option value="0" ${v.active===false?'selected':''}>Nonaktif — QR berhenti menerima pesanan</option></select></label>
+      </div>
+    </div>
+    <div class="note"><b>Kode venue ${esc(v.code)} tidak bisa diubah</b>Kode ini sudah tercetak di QR x-banner dan menempel di ${n} pesanan. Mengubahnya akan memutus riwayat bagi hasil.</div>
+    <div class="inline" style="margin-top:12px">
+      <button class="btn sm" id="veSave">Simpan perubahan</button>
+      <button class="btn ghost sm" id="veCancel">Batal</button>
+      <button class="btn danger sm" id="veDelete">Hapus venue</button>
+    </div>
+  </div>`;
+}
+
 function bannerArt(v){
   const link = orderLink(v.code);
   return `<div class="xb" id="xbanner">
-    <div style="font-family:var(--display);font-weight:800;font-size:30px;color:var(--ink);line-height:1">🐾 pawsly</div>
-    <div style="font-size:10px;letter-spacing:.18em;font-weight:700;color:var(--text-soft)">YOUR PET'S PERSONAL CHEF</div>
-    <div class="k">Lapar setelah berenang?</div>
-    <div class="s">Pindai, racik mangkuknya, ambil di counter</div>
+    <div class="logo" style="font-size:30px">${logoMark(30)}</div>
+    <div style="font-size:10px;letter-spacing:.18em;font-weight:700;color:var(--text-soft)">${esc(BRAND.tagline.toUpperCase())}</div>
+    <div class="k">${esc(BRAND.bannerHeadline)}</div>
+    <div class="s">${esc(BRAND.bannerSub)}</div>
     <div class="qr">${qrSvg(link)}</div>
     <div class="v">${esc(v.name)}</div>
     <div class="f">${esc(link)}</div>
@@ -1182,10 +1236,15 @@ function viewHQ(){
             <td class="num">${list.length}</td>
             <td class="num">${rp(totals(list).gmv)}</td>
             <td class="num">${due?`<b>${rp(due)}</b>`:'—'}${cash?`<br><span class="chip cash" style="margin-top:3px">tunai ${rpk(cash)}</span>`:''}</td>
-            <td class="num">${(due||cash)?`<button class="btn ghost sm" data-settle="${esc(v.code)}">Tandai lunas</button>`:''}</td>
+            <td class="num"><div class="inline" style="justify-content:flex-end">
+              ${(due||cash)?`<button class="btn ghost sm" data-settle="${esc(v.code)}">Tandai lunas</button>`:''}
+              <button class="btn ghost sm" data-edit="${esc(v.code)}">Ubah</button>
+            </div></td>
           </tr>`;
         }).join('')}</tbody></table></div>
     </div>
+
+    ${S.editVenue && venue(S.editVenue) ? editVenueCard(venue(S.editVenue)) : ''}
 
     <div class="step"><b>Tambah venue mitra</b></div>
     <div class="card">
@@ -1284,7 +1343,7 @@ function render(){
 
 function viewHqLogin(){
   return `<div class="wrap"><header class="mast">
-    <h1 class="logo" style="font-size:34px"><span class="paws">🐾</span>pawsly <span style="font-family:var(--body);font-size:15px;font-weight:700;color:var(--text-soft)">HQ</span></h1>
+    <h1 class="logo" style="font-size:34px">${logoMark(34,'HQ')}</h1>
     <h2 class="h1" style="font-size:26px">Konsol internal</h2></header>
     <div class="card">
       <label class="field"><span>Kata sandi</span><input type="password" id="hqPin" placeholder="••••••••"></label>
@@ -1328,6 +1387,7 @@ document.addEventListener('click', async (e)=>{
   if(d.ful){ S.fulfil = d.ful; keepForm(); render(); return; }
   if(d.pay){ S.payment = d.pay; keepForm(); render(); return; }
   if(d.tab){ S.tab = d.tab; render(); return; }
+  if(d.edit){ S.editVenue = (S.editVenue===d.edit ? null : d.edit); render(); return; }
 
   switch(b.id){
     case 'toCheckout': S.stage='checkout'; render(); window.scrollTo(0,0); break;
@@ -1391,6 +1451,29 @@ document.addEventListener('click', async (e)=>{
       DB.config.baseUrl = $('#baseUrl').value.trim();
       DB.config.notifyUrl = $('#notifyUrl').value.trim().replace(/\/+$/,'');
       STORE.saveCfg(); render(); toast('Pengaturan disimpan'); break;
+    case 'veSave': {
+      const v = venue(S.editVenue); if(!v) break;
+      const nm = $('#veName').value.trim();
+      if(!nm){ toast('Nama venue tidak boleh kosong'); break; }
+      v.name = nm;
+      v.kind = $('#veKind').value.trim();
+      v.city = $('#veCity').value.trim();
+      v.pin  = $('#vePin').value.trim();
+      v.payout = $('#vePayout').value.trim() || 'Belum diisi';
+      v.active = $('#veActive').value === '1';
+      await STORE.saveVenue(v);
+      S.editVenue = null; render(); toast(`${nm} diperbarui`);
+      break;
+    }
+    case 'veCancel': S.editVenue = null; render(); break;
+    case 'veDelete': {
+      const v = venue(S.editVenue); if(!v) break;
+      const n = ordersFor(v.code).length;
+      if(!confirm(`Hapus ${v.name}? ${n} pesanan akan kehilangan atribusi venue dan bagi hasilnya tidak bisa dihitung ulang. Untuk menghentikan pesanan baru tanpa kehilangan riwayat, pilih Nonaktif saja.`)) break;
+      await STORE.deleteVenue(v.code);
+      S.editVenue = null; render(); toast('Venue dihapus');
+      break;
+    }
     case 'addVenue': {
       const name = $('#nName').value.trim();
       if(!name){ toast('Isi nama venue'); break; }
