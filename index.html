@@ -385,9 +385,9 @@ const DEFAULT_RATE = 0.15;        // 15% to the venue
    BRAND — edit these five lines to rebrand the whole app
    ============================================================ */
 const BRAND = {
-  name:    'Pawsly Gourmet',                      // wordmark text, used when logo is empty
+  name:    'Pawsly Gourmet',              // wordmark text, used when logo is empty
   tagline: "Your pet's personal chef",    // small caps line under the logo
-  logo:    'Logo.png',                            // e.g. 'logo.png' -> upload next to index.html in the repo
+  logo:    'Logo.png',                    // must match the uploaded filename EXACTLY, capitals included
   logoH:   54,                            // logo height in px on the customer page
   bannerHeadline: 'Give The Very best for your Pet',   // the big line on the printed x-banner
   bannerSub: 'Pick, Mix, Delivered it to You',
@@ -492,7 +492,7 @@ let S = {               // view state
   size:'M', pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],
   fulfil:'counter', payment:'qris',
   cust:{name:'',phone:'',dog:''}, note:'',
-  lastOrder:null, session:null, hq:false, tab:'today', editVenue:null,
+  lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null,
 };
 
 /* ---------- storage: cloud → device → memory ----------
@@ -669,16 +669,19 @@ function poll(){
 
 function seed(){
   const venues = [
-    { code:'PAWS', name:'PawS',        kind:'Dog pool & Play park', city:'Gading Serpong',       pin:'1510', rate:0.1, payout:'BCA 2290xxxx81 · PT Paw Park Nusantara', active:true },
-    { code:'Puppy Affair',  name:'Puppy Affair',  kind:'Pet Groomer',        city:'Gading Serpong',pin:'2208', rate:0.1, payout:'Mandiri 1270xxxx44 · CV Splash Paws',    active:true },
-];
+    { code:'PAWS',         name:'PawS',          kind:'Dog pool & Play park', city:'Gading Serpong', pin:'1510', rate:0.10, payout:'BCA 2290xxxx81 · PT Paw Park Nusantara', active:true },
+    { code:'PUPPY-AFFAIR', name:'Puppy Affair',  kind:'Pet Groomer',          city:'Gading Serpong', pin:'2208', rate:0.10, payout:'Mandiri 1270xxxx44 · CV Splash Paws',    active:true },
+  ];
   const orders = [];
   const names = ['Dira','Bagas','Nadya','Reno','Kiki','Tomi','Sasha','Yoga','Mila','Fajar','Intan','Bram','Sinta','Danu'];
   const dogs  = ['Mochi','Bubu','Kopi','Luna','Bolt','Nori','Cimol','Zuzu','Oreo','Pablo','Gembul','Sushi'];
   for(let d=13; d>=0; d--){
     const n = d===0 ? 3 + Math.floor(Math.random()*4) : 2 + Math.floor(Math.random()*6);
     for(let i=0;i<n;i++){
-      const v = venues[Math.random()<0.5?0:(Math.random()<0.6?1:2)];
+      // Weight the first venue a little heavier, but never index past the list.
+      // (Hardcoding index 2 here broke the moment the venue list dropped to two.)
+      const vi = Math.random() < 0.5 ? 0 : 1 + Math.floor(Math.random() * Math.max(1, venues.length - 1));
+      const v = venues[Math.min(vi, venues.length - 1)];
       const size = SIZES[Math.random()<.3?0:(Math.random()<.65?1:2)];
       const pay = PAYMENTS[Math.floor(Math.random()*PAYMENTS.length)];
       const ful = Math.random()<.35 ? FULFIL[1] : FULFIL[0];
@@ -1015,8 +1018,10 @@ function viewNoVenue(){
     <header class="mast">
       <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
       <p class="tag">${esc(BRAND.tagline)}</p>
-      <h2 class="h1">Pindai QR di venue</h2>
-      <p class="lede">Pemesanan Pawsly dibuka lewat QR pada x-banner di kolam atau taman anjing. Pilih venue di bawah untuk mencoba alurnya.</p>
+      <h2 class="h1">${S.closedVenue ? 'Venue ini sedang tidak aktif' : 'Pindai QR di venue'}</h2>
+      <p class="lede">${S.closedVenue
+        ? `Pawsly sudah tidak melayani pesanan di ${esc(S.closedVenue)}. Pilih venue lain di bawah.`
+        : 'Pemesanan Pawsly dibuka lewat QR pada x-banner di kolam atau taman anjing. Pilih venue di bawah untuk mencoba alurnya.'}</p>
     </header>
     <div class="recipes">
       ${DB.venues.filter(v=>v.active).map(v=>`
@@ -1064,7 +1069,8 @@ function viewLogin(){
       </label>
       <label class="field"><span>PIN</span><input type="password" id="lPin" inputmode="numeric" placeholder="4 digit"></label>
       <button class="btn block" id="doLogin">Masuk</button>
-      <p class="lvl">PIN demo: Paw Park BSD <b>1510</b> · Splash Paws <b>2208</b> · Woof Garden <b>3390</b></p>
+      <!-- DELETE THIS LINE before real partners use the dashboard: it prints every venue PIN in public -->
+      <p class="lvl">PIN demo: ${DB.venues.map(v=>`${esc(v.name)} <b>${esc(v.pin)}</b>`).join(' \u00b7 ')}</p>
     </div>
   </div>`;
 }
@@ -1230,7 +1236,7 @@ function viewHQ(){
           const due = list.filter(o=>!o.settled && o.collect==='pawsly').reduce((s,o)=>s+o.commission,0);
           const cash = list.filter(o=>!o.settled && o.collect==='venue').reduce((s,o)=>s+o.total-o.commission,0);
           return `<tr>
-            <td><b>${esc(v.name)}</b><br><span style="color:var(--text-soft);font-size:11.5px">${esc(v.code)} · ${esc(v.city)}</span></td>
+            <td><b>${esc(v.name)}</b>${v.active===false?' <span class="chip neutral">nonaktif</span>':''}<br><span style="color:var(--text-soft);font-size:11.5px">${esc(v.code)} · ${esc(v.city)}</span></td>
             <td class="num"><input type="number" min="0" max="40" step="1" value="${Math.round(v.rate*100)}" data-rate="${esc(v.code)}" style="width:66px;text-align:right;padding:5px 7px" aria-label="Bagi hasil ${esc(v.name)}">%</td>
             <td class="num">${list.length}</td>
             <td class="num">${rp(totals(list).gmv)}</td>
@@ -1537,8 +1543,10 @@ function printBanner(){
   const hash = new URLSearchParams(location.hash.replace(/^#\/?/, ''));
   await load();
   const v = params.get('v') || hash.get('v');
-  if(v && venue(v)) { S.venueCode = v; }
-  else if(v) { toast('Kode venue tidak dikenal'); }
+  const vn = v ? venue(v) : null;
+  if(vn && vn.active !== false) S.venueCode = v;          // inactive QR stops taking orders
+  else if(vn) S.closedVenue = vn.name;
+  else if(v) toast('Kode venue tidak dikenal');
   if(location.hash.includes('partner')) S.route='partner';
   if(location.hash.includes('hq')) S.route='hq';
   render();
