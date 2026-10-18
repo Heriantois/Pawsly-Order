@@ -61,7 +61,9 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
 body{
+  overflow-x:hidden;
   background:var(--page);
   color:var(--text);
   font-family:var(--body);
@@ -77,6 +79,7 @@ a{color:var(--ink-2)}
 
 /* ---------- shell ---------- */
 .wrap{max-width:560px;margin:0 auto;padding:0 16px 120px}
+@media(max-width:420px){.wrap{padding:0 12px 120px}}
 .wrap.wide{max-width:1040px}
 .hidden{display:none!important}
 
@@ -90,7 +93,7 @@ a{color:var(--ink-2)}
 .ribbon small{font-weight:600;opacity:.75}
 
 /* ---------- masthead ---------- */
-.mast{text-align:center;padding:22px 0 10px}
+.mast{text-align:center;padding:18px 0 10px}
 .logo{
   font-family:var(--display);font-weight:800;font-size:44px;line-height:.9;
   letter-spacing:-.02em;color:var(--ink);margin:0;
@@ -114,7 +117,8 @@ a{color:var(--ink-2)}
 }
 
 /* ---------- size cards ---------- */
-.sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:380px){.size .sub{display:none}}
 .size{
   background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);
   padding:12px 8px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;
@@ -153,10 +157,10 @@ a{color:var(--ink-2)}
 .size.s .bowl{max-width:62px}
 .size.m .bowl{max-width:76px}
 .size.l .bowl{max-width:92px}
-.bowlimg{display:block;width:100%;height:auto;border-radius:9px;background:#FFFBF2}
-.size.s .bowlimg{max-width:70px}
-.size.m .bowlimg{max-width:84px}
-.size.l .bowlimg{max-width:98px}
+.bowlimg{display:block;width:100%;height:auto}
+.size.s .bowlimg{max-width:84px}
+.size.m .bowlimg{max-width:100px}
+.size.l .bowlimg{max-width:116px}
 
 /* ---------- recipe chips ---------- */
 .recipes{display:grid;gap:10px}
@@ -180,8 +184,7 @@ a{color:var(--ink-2)}
 .group > header h3{font-family:var(--display);font-weight:700;font-size:16px;margin:0;letter-spacing:.01em}
 .group > header span{font-size:12px;font-weight:700;opacity:.8}
 .group.full > header span{color:var(--marigold);opacity:1}
-.picks{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:12px 10px}
-@media (max-width:420px){.picks{grid-template-columns:repeat(3,1fr)}}
+.picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;padding:12px 8px}
 .pick{
   display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 2px 9px;
   border:2px solid transparent;border-radius:14px;transition:border-color .12s,background .12s
@@ -189,14 +192,15 @@ a{color:var(--ink-2)}
 .pick[aria-pressed="true"]{border-color:var(--ink);background:var(--cream-2)}
 .pick[disabled]{opacity:.34}
 .pick .med{
-  display:block;width:46px;height:46px;border-radius:50%;background:var(--bone);
+  display:block;width:62px;height:62px;border-radius:50%;background:var(--bone);
   border:2px solid var(--line);position:relative;overflow:hidden;flex:none
 }
 .pick[aria-pressed="true"] .med{border-color:var(--ink)}
-.pick .lb{font-size:11.5px;font-weight:700;line-height:1.2;text-align:center;color:var(--text)}
+.pick .lb{font-size:12px;font-weight:700;line-height:1.2;text-align:center;color:var(--text);hyphens:auto}
 .pick .chk{
-  position:absolute;right:-3px;top:-3px;width:17px;height:17px;border-radius:50%;
-  background:var(--marigold);color:#12351F;font-size:11px;font-weight:900;display:none;place-items:center
+  position:absolute;right:-2px;top:-2px;width:20px;height:20px;border-radius:50%;
+  background:var(--marigold);color:#12351F;font-size:12px;font-weight:900;display:none;place-items:center;
+  box-shadow:0 0 0 2px var(--surface)
 }
 .pick[aria-pressed="true"] .chk{display:grid}
 .medwrap{position:relative;display:inline-block;line-height:0}
@@ -315,13 +319,17 @@ textarea{min-height:68px;resize:vertical}
 .kpi.hero .v{color:#12351F}
 
 .chartwrap{margin-top:12px}
-svg.chart{display:block;width:100%;height:170px;overflow:visible}
-.chart .bar{fill:var(--ink-3)}
-.chart .bar.today{fill:var(--marigold)}
-.chart .gl{stroke:var(--line);stroke-width:1}
-.chart text{font-size:9.5px;fill:var(--text-soft);font-family:var(--body);font-weight:700}
+.bars{display:flex;align-items:flex-end;gap:3px;height:150px}
+.bars .bar{flex:1;display:flex;flex-direction:column;height:100%;min-width:0}
+.bars .col{flex:1;display:flex;align-items:flex-end;background:linear-gradient(var(--line),var(--line)) center/100% 1px no-repeat}
+.bars .fill{width:100%;background:var(--ink-3);border-radius:3px 3px 0 0;min-height:2px}
+.bars .fill.now{background:var(--marigold)}
+.bars .lab{font-size:10px;font-weight:700;color:var(--text-soft);text-align:center;padding-top:5px;
+  overflow:hidden;text-overflow:clip;white-space:nowrap}
+@media(max-width:480px){.bars .bar:nth-child(even) .lab{visibility:hidden}}
+.barscale{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--text-soft);margin-top:6px}
 
-table{width:100%;border-collapse:collapse;font-size:13.5px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:430px}
 th{
   text-align:left;font-size:11.5px;color:var(--text-soft);font-weight:800;
   padding:0 8px 7px;border-bottom:2px solid var(--line)
@@ -351,12 +359,6 @@ td b{font-weight:800}
 .xb .f{font-size:11.5px;color:var(--text-soft);margin-top:3px;word-break:break-all}
 
 /* ---------- misc ---------- */
-.switcher{
-  position:fixed;right:10px;top:10px;z-index:60;display:flex;gap:4px;
-  background:var(--surface);border:2px solid var(--line-strong);border-radius:999px;padding:3px
-}
-.switcher button{padding:5px 11px;border-radius:999px;font-size:12px;font-weight:800;color:var(--text-soft)}
-.switcher button[aria-current="true"]{background:var(--ink);color:#FFFBF2}
 .empty{text-align:center;padding:34px 18px;color:var(--text-soft)}
 .empty b{display:block;font-family:var(--display);font-size:19px;color:var(--ink);margin-bottom:4px}
 .foot{text-align:center;font-size:12.5px;color:var(--text-soft);margin-top:28px}
@@ -370,7 +372,8 @@ td b{font-weight:800}
 hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
 .inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .lvl{font-size:12.5px;color:var(--text-soft);margin:6px 0 0}
-.logo img{max-width:86vw}
+.logo img{max-width:86vw;height:auto}
+.logo{margin-bottom:6px}
 .promo{
   background:var(--marigold);border-radius:var(--r-m);padding:13px 18px;margin:14px 0 2px;
   text-align:center;border:2px solid var(--marigold-dk)
@@ -382,7 +385,6 @@ hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
 </style>
 </head>
 <body>
-<div id="switcher" class="switcher"></div>
 <main id="app" aria-live="polite"></main>
 <div id="sticky"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
@@ -401,7 +403,7 @@ const BRAND = {
   name:    'Pawsly Gourmet',              // wordmark text, used when logo is empty
   tagline: "Your pet's personal chef",    // small caps line under the logo
   logo:    'Logo.png',                    // must match the uploaded filename EXACTLY, capitals included
-  logoH:   120,                           // logo height in px (also capped at 86vw so phones never clip it)
+  logoH:   190,                           // logo height in px (capped at 86vw so phones never clip it)
   qrisImage: 'qris.png',                  // your static QRIS sticker, sitting next to index.html
   payeeName: 'Pawsly Gourmet',            // the account name customers should expect to see
   promoTitle: 'Freshly cooked, right here at the park',
@@ -418,9 +420,9 @@ function logoMark(size, suffix){
 
 /* ---------- catalogue ---------- */
 const SIZES = [
-  { id:'S', name:'Small',  price:26000,  cls:'s', sub:'Small Portion, Big Love',      img:'bowl-small.jpg'  },
-  { id:'M', name:'Medium', price:57500,  cls:'m', sub:'Enough, Full Loaded Nutrition', img:'bowl-medium.jpg' },
-  { id:'L', name:'Large',  price:115000, cls:'l', sub:'Huge Love, Bazzinga Nutrition', img:'bowl-large.jpg'  },
+  { id:'S', name:'Small',  price:26000,  cls:'s', sub:'Small Portion, Big Love',      img:'bowl.png' },
+  { id:'M', name:'Medium', price:57500,  cls:'m', sub:'Enough, Full Loaded Nutrition', img:'bowl.png' },
+  { id:'L', name:'Large',  price:115000, cls:'l', sub:'Huge Love, Bazzinga Nutrition', img:'bowl.png' },
 ];
 
 const GROUPS = [
@@ -519,31 +521,37 @@ let S = {               // view state
   lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null,
 };
 
-/* ---------- storage: cloud → device → memory ----------
-   No config  = localStorage (one device, survives refresh)
-   Supabase   = every device sees the same orders
-   Blocked    = in-memory, demo only                      */
+/* ---------- storage + auth ----------------------------------------
+   Customers never read the orders table. They only call place_order(),
+   a SECURITY DEFINER function, so no customer's name, phone or order
+   history is reachable with the public anon key.
+
+   Dashboards require a real Supabase Auth sign-in. What a signed-in
+   person can see comes from their row in `staff`:
+     role 'hq'    -> every venue
+     role 'venue' -> only their own venue_code
+   Enforced by RLS in the database, not by this file.
+-------------------------------------------------------------------- */
 
 const CONN = 'pawsly:conn';
 const CFGK = 'pawsly:cfg';
+const SESS = 'pawsly:sess';
 const ORDER_COLS = 'id,code,venue_code,created_at,size,size_name,pick,addons,fulfil,fee,'
                  + 'payment,payment_label,collect,status,cust_name,dog_name,phone_mask,note,'
-                 + 'subtotal,total,rate,commission,settled,notified';
+                 + 'subtotal,total,uniq,pay_total,rate,commission,settled,notified';
 
 const maskPhone = p => { const d=String(p||'').replace(/\D/g,''); return d.length>3 ? '\u2022\u2022\u2022\u2022'+d.slice(-4) : ''; };
 
-const toRowVenue = v => ({ code:v.code, name:v.name, kind:v.kind, city:v.city, pin:v.pin, rate:v.rate, payout:v.payout, active:v.active!==false });
-const fromRowVenue = r => ({ code:r.code, name:r.name, kind:r.kind||'', city:r.city||'', pin:String(r.pin||''), rate:Number(r.rate)||0, payout:r.payout||'Not set', active:r.active!==false });
+const toRowVenue = v => ({ code:v.code, name:v.name, kind:v.kind, city:v.city, rate:v.rate, payout:v.payout, active:v.active!==false });
+const fromRowVenue = r => ({ code:r.code, name:r.name, kind:r.kind||'', city:r.city||'', rate:Number(r.rate)||0, payout:r.payout||'Not set', active:r.active!==false });
 
-const toRowOrder = o => ({
-  id:o.id, code:o.code, venue_code:o.venueCode, created_at:o.createdAt,
-  size:o.size, size_name:o.sizeName, pick:o.pick, addons:o.addons,
-  fulfil:o.fulfil, fee:o.fee, payment:o.payment, payment_label:o.paymentLabel,
-  collect:o.collect, status:o.status,
+const orderPayload = o => ({
+  code:o.code, venue_code:o.venueCode, size:o.size, size_name:o.sizeName,
+  pick:o.pick, addons:o.addons, fulfil:o.fulfil, fee:o.fee,
+  payment:o.payment, payment_label:o.paymentLabel, collect:o.collect, status:o.status,
   cust_name:o.cust.name, dog_name:o.cust.dog,
   phone:o.cust.phone||'', phone_mask:maskPhone(o.cust.phone),
-  note:o.note||'', subtotal:o.subtotal, total:o.total,
-  rate:o.rate, commission:o.commission, settled:!!o.settled,
+  note:o.note||'', subtotal:o.subtotal, total:o.total, rate:o.rate, commission:o.commission,
 });
 const fromRowOrder = r => ({
   id:r.id, code:r.code, venueCode:r.venue_code, createdAt:r.created_at,
@@ -552,11 +560,12 @@ const fromRowOrder = r => ({
   collect:r.collect, status:r.status,
   cust:{ name:r.cust_name||'', dog:r.dog_name||'', phone:r.phone_mask||'' },
   note:r.note||'', subtotal:r.subtotal||0, total:r.total||0,
+  uniq:r.uniq||0, payTotal:r.pay_total||r.total||0,
   rate:Number(r.rate)||0, commission:r.commission||0, settled:!!r.settled, notified:!!r.notified,
 });
 
 const STORE = {
-  mode:'memory', canLocal:false, cfg:{url:'',key:''},
+  mode:'memory', canLocal:false, cfg:{url:'',key:''}, session:null,
 
   boot(){
     try{
@@ -564,18 +573,63 @@ const STORE = {
       this.canLocal = true;
       const c = JSON.parse(localStorage.getItem(CONN)||'null');
       if(c && c.url && c.key) this.cfg = c;
+      const s = JSON.parse(localStorage.getItem(SESS)||'null');
+      if(s && s.token) this.session = s;
     }catch(e){ this.canLocal = false; }
     this.mode = (this.cfg.url && this.cfg.key) ? 'cloud' : (this.canLocal ? 'device' : 'memory');
+    if(this.mode !== 'cloud') this.session = null;
   },
-  label(){ return { cloud:'Supabase — all devices', device:'This device only', memory:'Temporary — not saved' }[this.mode]; },
+  get live(){ return this.mode==='cloud'; },
+  get signedIn(){ return !!(this.session && this.session.role); },
+  get isHQ(){ return this.signedIn && this.session.role==='hq'; },
+  label(){ return { cloud:'Supabase \u2014 live', device:'This device only', memory:'Temporary \u2014 not saved' }[this.mode]; },
 
-  async api(path, opts={}){
+  saveSession(){ try{ this.session ? localStorage.setItem(SESS, JSON.stringify(this.session)) : localStorage.removeItem(SESS); }catch(e){} },
+
+  /* ---- auth ---- */
+  async signIn(email, password){
+    const r = await fetch(this.cfg.url.replace(/\/+$/,'') + '/auth/v1/token?grant_type=password', {
+      method:'POST', headers:{ apikey:this.cfg.key, 'Content-Type':'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const d = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(d.error_description || d.msg || d.message || ('sign-in failed ('+r.status+')'));
+    this.session = { token:d.access_token, refresh:d.refresh_token, email:(d.user||{}).email };
+    let rows;
+    try{ rows = await this.api('staff?select=role,venue_code&limit=1', this.read); }
+    catch(e){ this.session=null; throw new Error('Signed in, but the staff table is unreachable \u2014 did you run the SQL?'); }
+    if(!rows || !rows.length){ this.session=null; throw new Error('No staff record for this account. Add a row in the staff table.'); }
+    this.session.role = rows[0].role;
+    this.session.venueCode = rows[0].venue_code;
+    this.saveSession();
+  },
+  async refresh(){
+    if(!this.session || !this.session.refresh) return false;
+    try{
+      const r = await fetch(this.cfg.url.replace(/\/+$/,'') + '/auth/v1/token?grant_type=refresh_token', {
+        method:'POST', headers:{ apikey:this.cfg.key, 'Content-Type':'application/json' },
+        body: JSON.stringify({ refresh_token:this.session.refresh }),
+      });
+      if(!r.ok) return false;
+      const d = await r.json();
+      this.session.token = d.access_token; this.session.refresh = d.refresh_token;
+      this.saveSession();
+      return true;
+    }catch(e){ return false; }
+  },
+  signOut(){ this.session = null; this.saveSession(); },
+
+  /* ---- rest ---- */
+  async api(path, opts={}, retry=true){
+    const auth = this.session && this.session.token ? 'Bearer '+this.session.token : 'Bearer '+this.cfg.key;
     const r = await fetch(this.cfg.url.replace(/\/+$/,'') + '/rest/v1/' + path, Object.assign({}, opts, {
-      headers: Object.assign({
-        apikey:this.cfg.key, Authorization:'Bearer '+this.cfg.key,
-        'Content-Type':'application/json', Prefer:'return=minimal',
-      }, opts.headers||{}),
+      headers: Object.assign({ apikey:this.cfg.key, Authorization:auth, 'Content-Type':'application/json', Prefer:'return=minimal' }, opts.headers||{}),
     }));
+    if(r.status===401 && retry && this.session){
+      if(await this.refresh()) return this.api(path, opts, false);
+      this.signOut();
+      throw new Error('session expired, please sign in again');
+    }
     if(!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0,140));
     return r.status===204 ? null : r.json();
   },
@@ -587,13 +641,16 @@ const STORE = {
   },
   saveCfg(){ try{ localStorage.setItem(CFGK, JSON.stringify({ baseUrl:DB.config.baseUrl, notifyUrl:DB.config.notifyUrl })); }catch(e){} },
 
+  /* ---- reads ---- */
   async loadAll(){
     if(this.mode==='cloud'){
-      const [v,o] = await Promise.all([
-        this.api('venues?select=*&order=name.asc', this.read),
-        this.api('orders?select='+ORDER_COLS+'&order=created_at.asc&limit=3000', this.read),
-      ]);
-      return { venues:v.map(fromRowVenue), orders:o.map(fromRowOrder) };
+      const venues = (await this.api('venues?select=*&order=name.asc', this.read)).map(fromRowVenue);
+      // Orders are only readable with a staff session; customers never fetch them.
+      let orders = [];
+      if(this.signedIn){
+        orders = (await this.api('orders?select='+ORDER_COLS+'&order=created_at.asc&limit=5000', this.read)).map(fromRowOrder);
+      }
+      return { venues, orders };
     }
     if(this.mode==='device'){
       try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
@@ -607,11 +664,21 @@ const STORE = {
     catch(e){ toast('Device storage is full'); }
   },
 
+  /* ---- writes ---- */
   async addOrder(o){
+    if(this.mode!=='cloud'){
+      o.uniq = o.uniq || 0; o.payTotal = o.total + o.uniq;
+      DB.orders.push(o); return this.persist();
+    }
+    // The database assigns the verification code inside one transaction, so two
+    // phones ordering at the same second can never be quoted the same amount.
+    const res = await this.api('rpc/place_order', {
+      method:'POST', headers:{ Prefer:'return=representation' },
+      body: JSON.stringify({ p: orderPayload(o) }),
+    });
+    const d = Array.isArray(res) ? res[0] : res;
+    if(d){ o.id = d.id || o.id; o.uniq = d.uniq || 0; o.payTotal = d.pay_total || o.total; }
     DB.orders.push(o);
-    if(this.mode!=='cloud') return this.persist();
-    try{ await this.api('orders', { method:'POST', body:JSON.stringify(toRowOrder(o)) }); }
-    catch(e){ toast('Order saved locally, server failed: '+e.message); }
   },
 
   async saveVenue(v){
@@ -619,14 +686,12 @@ const STORE = {
     try{ await this.api('venues?on_conflict=code', { method:'POST', headers:{ Prefer:'resolution=merge-duplicates' }, body:JSON.stringify(toRowVenue(v)) }); }
     catch(e){ toast('Could not save venue: '+e.message); }
   },
-
   async settle(code){
     ordersFor(code).forEach(o=>o.settled=true);
     if(this.mode!=='cloud') return this.persist();
     try{ await this.api('orders?venue_code=eq.'+encodeURIComponent(code), { method:'PATCH', body:JSON.stringify({ settled:true }) }); }
     catch(e){ toast('Server update failed: '+e.message); }
   },
-
   async settleOrder(id){
     const o = DB.orders.find(x=>x.id===id); if(!o) return;
     o.settled = true;
@@ -634,34 +699,20 @@ const STORE = {
     try{ await this.api('orders?id=eq.'+encodeURIComponent(id), { method:'PATCH', body:JSON.stringify({ settled:true }) }); }
     catch(e){ toast('Server update failed: '+e.message); }
   },
-
   async deleteVenue(code){
     DB.venues = DB.venues.filter(v=>v.code!==code);
     if(this.mode!=='cloud') return this.persist();
     try{ await this.api('venues?code=eq.'+encodeURIComponent(code), { method:'DELETE' }); }
     catch(e){ toast('Server delete failed: '+e.message); }
   },
-
-  async pushAll(){
-    await this.api('venues?on_conflict=code', { method:'POST', headers:{ Prefer:'resolution=merge-duplicates' }, body:JSON.stringify(DB.venues.map(toRowVenue)) });
-    for(let i=0;i<DB.orders.length;i+=150){
-      await this.api('orders?on_conflict=id', { method:'POST', headers:{ Prefer:'resolution=merge-duplicates' }, body:JSON.stringify(DB.orders.slice(i,i+150).map(toRowOrder)) });
-    }
-  },
-
-  async wipe(){
-    if(this.mode!=='cloud') return this.persist();
-    await this.api('orders?id=not.is.null', { method:'DELETE' });
-    await this.api('venues?code=not.is.null', { method:'DELETE' });
-  },
 };
 
-/* Best effort: the order is already saved before this runs, so a WhatsApp
-   failure never costs the customer their order. Only an order code goes out --
-   the Worker reads the number from Supabase and writes the message itself. */
+/* Best effort, and deliberately after the order is stored: a WhatsApp
+   failure must never cost the customer their order. Only an order code
+   goes out -- the Worker reads the number from the database itself. */
 async function notify(o){
   const url = (DB.config.notifyUrl||'').trim();
-  if(!url || STORE.mode!=='cloud') return;
+  if(!url || !STORE.live) return;
   try{
     const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ code:o.code }) });
     if(!r.ok) console.warn('notify', r.status, (await r.text()).slice(0,120));
@@ -673,95 +724,24 @@ async function load(){
   let data = null;
   try{ data = await STORE.loadAll(); }
   catch(e){
-    toast('Server unreachable — using data from this device');
-    STORE.mode = STORE.canLocal ? 'device' : 'memory';
+    toast('Could not reach the database \u2014 ' + e.message);
     try{ data = await STORE.loadAll(); }catch(e2){}
   }
-  const fresh = !data || !data.venues || !data.venues.length;
-  DB = fresh ? seed() : data;
-  DB.config = STORE.localCfg();
-  if(!DB.orders) DB.orders = [];
-  if(!DB.venues || !DB.venues.length) DB.venues = seed().venues;
-  if(fresh) await STORE.persist();
+  DB = { venues:(data && data.venues) || [], orders:(data && data.orders) || [], config:STORE.localCfg() };
 }
 
 let pollT = null;
 function poll(){
   clearInterval(pollT);
-  if(STORE.mode!=='cloud') return;
+  if(!STORE.live) return;
   pollT = setInterval(async ()=>{
-    if(S.route==='order' || (!S.session && !S.hq)) return;
+    if(S.route==='order' || !STORE.signedIn) return;
     if(document.querySelector('input:focus, textarea:focus')) return;
     try{
-      const rows = await STORE.api('orders?select='+ORDER_COLS+'&order=created_at.asc&limit=3000', STORE.read);
+      const rows = await STORE.api('orders?select='+ORDER_COLS+'&order=created_at.asc&limit=5000', STORE.read);
       if(rows.length !== DB.orders.length){ DB.orders = rows.map(fromRowOrder); render(); }
     }catch(e){}
   }, 20000);
-}
-
-function seed(){
-  const venues = [
-    { code:'PAWS',         name:'PawS',          kind:'Dog pool & Play park', city:'Gading Serpong', pin:'1510', rate:0.10, payout:'BCA 2290xxxx81 · PT PawS Indonesia', active:true },
-    { code:'PUPPY-AFFAIR', name:'Puppy Affair',  kind:'Pet Groomer',          city:'Gading Serpong', pin:'2208', rate:0.10, payout:'Mandiri 1270xxxx44 · CV Puppy Affair',    active:true },
-    { code:'PAWSLY-HQ',    name:'Pawsly HQ',     kind:'Pawsly kitchen & pickup', city:'Gading Serpong', pin:'9001', rate:0,    payout:'— own outlet, nothing to pay out',          active:true },
-  ];
-  const orders = [];
-  const names = ['Dira','Bagas','Nadya','Reno','Kiki','Tomi','Sasha','Yoga','Mila','Fajar','Intan','Bram','Sinta','Danu'];
-  const dogs  = ['Mochi','Bubu','Kopi','Luna','Bolt','Nori','Cimol','Zuzu','Oreo','Pablo','Gembul','Sushi'];
-  for(let d=13; d>=0; d--){
-    const n = d===0 ? 3 + Math.floor(Math.random()*4) : 2 + Math.floor(Math.random()*6);
-    for(let i=0;i<n;i++){
-      // Weight the first venue a little heavier, but never index past the list.
-      // (Hardcoding index 2 here broke the moment the venue list dropped to two.)
-      const vi = Math.random() < 0.5 ? 0 : 1 + Math.floor(Math.random() * Math.max(1, venues.length - 1));
-      const v = venues[Math.min(vi, venues.length - 1)];
-      // Every lookup below is clamped to the array length, so trimming SIZES,
-      // FULFIL or PAYMENTS in the catalogue can never crash the seeder again.
-      const size = SIZES[Math.min(SIZES.length-1, Math.random()<.3?0:(Math.random()<.65?1:2))];
-      const pay = PAYMENTS[Math.floor(Math.random()*PAYMENTS.length)];
-      const ful = FULFIL[Math.min(FULFIL.length-1, Math.random()<.35 ? 1 : 0)];
-      const add = Math.random()<.3 ? [ADDONS[Math.floor(Math.random()*ADDONS.length)]] : [];
-      const when = new Date(); when.setDate(when.getDate()-d);
-      when.setHours(9+Math.floor(Math.random()*9), Math.floor(Math.random()*60), 0, 0);
-      const subtotal = size.price + add.reduce((s,a)=>s+a.price,0);
-      const fee = ful.fee||0;
-      const rate = v.rate;
-      orders.push({
-        id: 'o'+when.getTime()+i,
-        code: 'PW-'+rid(4),
-        venueCode: v.code,
-        createdAt: when.toISOString(),
-        size: size.id, sizeName: size.name,
-        pick: samplePick(),
-        addons: add.map(a=>({id:a.id,label:a.label,price:a.price})),
-        fulfil: ful.id, fee,
-        payment: pay.id, paymentLabel: pay.label, collect: pay.collect,
-        status: d===0 && i===0 ? 'preparing' : 'served',
-        cust:{ name:names[Math.floor(Math.random()*names.length)], phone:'08xx-xxxx-'+(1000+Math.floor(Math.random()*8999)), dog:dogs[Math.floor(Math.random()*dogs.length)] },
-        subtotal, total: subtotal+fee,
-        rate, commission: Math.round(subtotal*rate),
-        settled: d>6,
-      });
-    }
-  }
-  orders.sort((a,b)=> new Date(a.createdAt)-new Date(b.createdAt));
-  // Give the unsettled demo orders verification codes too, drawn from one shuffled
-  // pool so the HQ reconciliation list has no duplicate amounts to confuse anyone.
-  const pool = Array.from({length:99},(_,i)=>i+1).sort(()=>Math.random()-0.5);
-  orders.forEach(o=>{
-    const m = PAYMENTS.find(x=>x.id===o.payment);
-    if(m && m.uniq && !o.settled && pool.length){ o.uniq = pool.pop(); o.payTotal = o.total + o.uniq; }
-    else { o.uniq = 0; o.payTotal = o.total; }
-  });
-  return { venues, orders, config:{ rate:DEFAULT_RATE }, seededAt:new Date().toISOString() };
-}
-function samplePick(){
-  const p = {};
-  GROUPS.forEach(g=>{
-    const k = 1 + (Math.random()<.45?1:0);
-    p[g.id] = [...g.items].sort(()=>Math.random()-.5).slice(0,Math.min(k,g.items.length)).map(i=>i.id);
-  });
-  return p;
 }
 
 /* ---------- derived ---------- */
@@ -855,7 +835,6 @@ function viewMenu(){
   <div class="wrap">
     <header class="mast">
       <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
-      <p class="tag">${esc(BRAND.tagline)}</p>
       <h2 class="h1">Build your dog's bowl</h2>
       <p class="lede">Fresh Ingredients, Cook on the spot, Choose your portion and Mix it</p>
       <div class="promo"><b>${esc(BRAND.promoTitle)}</b><span>${esc(BRAND.promoLine)}</span></div>
@@ -983,17 +962,10 @@ function viewCheckout(){
         <div class="row"><span>${p.size.name} Bowl</span><span>${rp(p.size.price)}</span></div>
         ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
         ${p.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(p.fee)}</span></div>`:''}
-        ${p.uniq ? `<div class="row"><span>Subtotal</span><span>${rp(p.total)}</span></div>
-        <div class="row"><span>Verification code</span><span>+ ${String(p.uniq).padStart(2,'0')}</span></div>
-        <div class="row total"><span>Transfer exactly</span><span>${rp(p.payTotal)}</span></div>`
-        : `<div class="row total"><span>Total</span><span>${rp(p.total)}</span></div>`}
+        <div class="row total"><span>Total</span><span>${rp(p.total)}</span></div>
       </div>
-      ${p.uniq ? `<div class="note" style="margin-top:12px"><b>Pay the exact amount, down to the last 2 digits</b>
-        Those digits are how we match your payment to this order. Rounding to ${rp(p.total)} will delay it.</div>` : ''}
-      ${p.pay.showQr && BRAND.qrisImage ? `<div style="text-align:center;margin-top:14px">
-        <img src="${esc(BRAND.qrisImage)}" alt="QRIS code" style="width:220px;max-width:100%;border-radius:12px;background:#FFFBF2;padding:8px"
-             onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'lvl',textContent:'QRIS code image not found \u2014 ask staff at the counter.'}))">
-        <p class="lvl">Scan with any e-wallet, then enter ${rp(p.payTotal)}</p></div>` : ''}
+      ${p.pay.uniq ? `<div class="note" style="margin-top:12px"><b>Your exact amount comes next</b>
+        We add a 2-digit code to the total so your payment can be matched to this order. Pay that figure, not the rounded one.</div>` : ''}
     </div>
 
     <p class="foot">Pawsly Kitchen will prepare and cook after payment is confirmed</p>
@@ -1004,7 +976,7 @@ function stickyCheckout(){
   const p = priceNow();
   const cash = S.payment==='cash';
   return `<div class="sticky"><div class="inner">
-    <span class="sum"><b>${rp(p.payTotal)}</b><span>${cash?'Pay at the venue counter':(p.uniq?'Exact amount, incl. code':'Paid online')}</span></span>
+    <span class="sum"><b>${rp(p.total)}</b><span>${cash?'Pay at the venue counter':'Amount confirmed next'}</span></span>
     <button class="btn gold" id="payNow">${cash?'Place order':'Pay now'}</button>
   </div></div>`;
 }
@@ -1048,6 +1020,19 @@ async function placeOrder(){
   window.scrollTo(0,0);
 }
 
+function qrisPanel(o){
+  const m = PAYMENTS.find(x=>x.id===o.payment) || {};
+  if(!m.showQr || !BRAND.qrisImage) return '';
+  return `<div class="card" style="margin-top:12px;text-align:center">
+    <b style="font-family:var(--display);font-size:18px">Scan to pay ${rp(o.payTotal||o.total)}</b>
+    <div style="margin-top:10px">
+      <img src="${esc(BRAND.qrisImage)}" alt="QRIS payment code" style="width:240px;max-width:100%;border-radius:12px;background:#FFFBF2;padding:10px"
+           onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'lvl',textContent:'QRIS image not uploaded yet \u2014 ask staff at the counter.'}))">
+    </div>
+    <p class="lvl">Any e-wallet works. Enter the amount above exactly.</p>
+  </div>`;
+}
+
 function viewDone(){
   const o = S.lastOrder;
   const v = venue(o.venueCode);
@@ -1061,9 +1046,12 @@ function viewDone(){
       <div class="code">${esc(o.code)}</div>
       <div class="lbl">Give this code when you collect</div>
       ${o.uniq ? `<div style="margin-top:14px;border-top:1px solid rgba(255,251,242,.25);padding-top:12px">
-        <div style="font-family:var(--display);font-weight:800;font-size:26px">${rp(o.payTotal)}</div>
-        <div class="lbl">Transfer this exact amount to ${esc(BRAND.payeeName||BRAND.name)}</div></div>` : ''}
+        <div style="font-family:var(--display);font-weight:800;font-size:30px">${rp(o.payTotal)}</div>
+        <div class="lbl">Transfer this exact amount to ${esc(BRAND.payeeName||BRAND.name)}<br>
+        The last 2 digits identify your order — please don't round it</div></div>` : ''}
     </div>
+
+    ${qrisPanel(o)}
 
     <div class="card" style="margin-top:12px">
       <div class="rows">
@@ -1085,7 +1073,6 @@ function viewDone(){
 
     <div style="margin-top:16px;display:grid;gap:8px">
       <button class="btn block" id="again">Order again</button>
-      ${v?`<button class="btn ghost block" id="gotoPartner">View venue dashboard (demo)</button>`:''}
     </div>
     <p class="foot">Order updates go to WhatsApp ${esc(o.cust.phone)}.</p>
   </div>`;
@@ -1096,7 +1083,6 @@ function viewNoVenue(){
   <div class="wrap">
     <header class="mast">
       <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
-      <p class="tag">${esc(BRAND.tagline)}</p>
       <h2 class="h1">${S.closedVenue ? 'This venue is not active' : 'Scan the QR at the venue'}</h2>
       <p class="lede">${S.closedVenue
         ? `Pawsly no longer takes orders at ${esc(S.closedVenue)}. Pick another venue below.`
@@ -1117,39 +1103,52 @@ function viewNoVenue(){
    ============================================================ */
 
 function chart(series, key='gmv'){
-  const w=100, h=100, max=Math.max(1,...series.map(d=>d[key]));
-  const bw = w/series.length;
-  const bars = series.map((d,i)=>{
-    const bh = (d[key]/max)*78;
+  const max = Math.max(1, ...series.map(d=>d[key]));
+  return `<div class="bars">${series.map((d,i)=>{
+    const pct = Math.max(2, Math.round(d[key]/max*100));
     const last = i===series.length-1;
-    return `<rect class="bar ${last?'today':''}" x="${(i*bw+bw*0.17).toFixed(2)}" y="${(84-bh).toFixed(2)}" width="${(bw*0.66).toFixed(2)}" height="${Math.max(bh,0.6).toFixed(2)}" rx="1.2">
-      <title>${fmtDay(d.k)} — ${rp(d[key])} · ${d.n} orders</title></rect>`;
-  }).join('');
-  const labels = series.map((d,i)=> (i%3===0||i===series.length-1)
-    ? `<text x="${(i*bw+bw/2).toFixed(2)}" y="95" text-anchor="middle">${fmtDay(d.k).replace(' ','\u00a0')}</text>` : '').join('');
-  return `<svg class="chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img"
-    aria-label="Revenue over the last ${series.length} days, highest ${rp(max)}">
-    <line class="gl" x1="0" y1="84.5" x2="100" y2="84.5"/>
-    <line class="gl" x1="0" y1="45" x2="100" y2="45" stroke-dasharray="1.5 1.5"/>
-    ${bars}${labels}</svg>`;
+    return `<div class="bar" title="${fmtDay(d.k)} \u2014 ${rp(d[key])}, ${d.n} orders">
+      <div class="col"><div class="fill ${last?'now':''}" style="height:${pct}%"></div></div>
+      <div class="lab">${fmtDay(d.k).split(' ')[0]}</div>
+    </div>`;
+  }).join('')}</div>
+  <div class="barscale"><span>${rpk(max)}</span><span>latest ${rp(series[series.length-1][key])}</span></div>`;
 }
 
-function viewLogin(){
+function viewConnect(){
   return `
   <div class="wrap">
     <header class="mast">
-      <h1 class="logo" style="font-size:34px">${logoMark(34,'partner')}</h1>
-      <h2 class="h1" style="font-size:26px">Sign in to your venue dashboard</h2>
-      <p class="lede">See orders and revenue share from your venue QR, updated as each order comes in.</p>
+      <h1 class="logo" style="font-size:78px">${logoMark(78)}</h1>
+      <h2 class="h1" style="font-size:26px">Connect your database</h2>
+      <p class="lede">Staff dashboards read live orders from Supabase. Paste the project details once on this device.</p>
     </header>
     <div class="card">
-      <label class="field"><span>Venue code</span>
-        <select id="lCode">${DB.venues.map(v=>`<option value="${esc(v.code)}">${esc(v.name)} — ${esc(v.code)}</option>`).join('')}</select>
-      </label>
-      <label class="field"><span>PIN</span><input type="password" id="lPin" inputmode="numeric" placeholder="4 digits"></label>
-      <button class="btn block" id="doLogin">Sign in</button>
-      <!-- DELETE THIS LINE before real partners use the dashboard: it prints every venue PIN in public -->
-      <p class="lvl">Demo PINs: ${DB.venues.map(v=>`${esc(v.name)} <b>${esc(v.pin)}</b>`).join(' \u00b7 ')}</p>
+      <label class="field"><span>Supabase Project URL</span>
+        <input type="text" id="sbUrl" placeholder="https://xxxxxxxx.supabase.co" value="${esc(STORE.cfg.url||'')}"></label>
+      <label class="field"><span>Anon public key <em>\u2014 publishable, safe in a browser</em></span>
+        <input type="text" id="sbKey" placeholder="eyJhbGciOi..." value="${esc(STORE.cfg.key||'')}"></label>
+      <button class="btn block" id="sbSave">Connect</button>
+      <p class="lvl">Run <b>supabase-setup.sql</b> in the Supabase SQL editor first.</p>
+    </div>
+  </div>`;
+}
+
+function viewSignIn(){
+  return `
+  <div class="wrap">
+    <header class="mast">
+      <h1 class="logo" style="font-size:78px">${logoMark(78)}</h1>
+      <h2 class="h1" style="font-size:26px">Staff sign in</h2>
+      <p class="lede">Venue partners see their own branch only. Pawsly staff see every branch.</p>
+    </header>
+    <div class="card">
+      <label class="field"><span>Email</span><input type="text" id="aEmail" inputmode="email" autocomplete="username" placeholder="you@example.com"></label>
+      <label class="field"><span>Password</span><input type="password" id="aPass" autocomplete="current-password"></label>
+      <button class="btn block" id="doSignIn">Sign in</button>
+      <p class="lvl">Create accounts in Supabase under Authentication, then add a row in the <b>staff</b> table to say which branch they manage.</p>
+      <hr class="sep">
+      <button class="btn ghost sm" id="sbForget">Use a different database</button>
     </div>
   </div>`;
 }
@@ -1250,7 +1249,6 @@ function editVenueCard(v){
         <label class="field"><span>City</span><input type="text" id="veCity" value="${esc(v.city||'')}"></label>
       </div>
       <div>
-        <label class="field"><span>Dashboard PIN</span><input type="text" id="vePin" value="${esc(v.pin||'')}" inputmode="numeric"></label>
         <label class="field"><span>Payout account</span><input type="text" id="vePayout" value="${esc(v.payout||'')}"></label>
         <label class="field"><span>Status</span>
           <select id="veActive"><option value="1" ${v.active!==false?'selected':''}>Active</option><option value="0" ${v.active===false?'selected':''}>Inactive — QR stops taking orders</option></select></label>
@@ -1303,8 +1301,6 @@ function viewHQ(){
       <div class="kpi"><div class="k">Share owed to venues</div><div class="v">${rpk(payable)}</div><div class="n">for Pawsly to transfer</div></div>
       <div class="kpi"><div class="k">Cash held by venues</div><div class="v">${rpk(receivable)}</div><div class="n">for Pawsly to collect</div></div>
     </div>
-
-    <div class="card chartwrap"><div class="row" style="margin-bottom:8px"><span><b>Network revenue, 14 days</b></span></div>${chart(byDay(all,14),'gmv')}</div>
 
     <div class="step"><b>Partner venues</b><i>${DB.venues.length} listed</i></div>
     <div class="card" style="padding:14px 10px">
@@ -1398,8 +1394,7 @@ function viewHQ(){
         <input type="text" id="sbKey" placeholder="eyJhbGciOi..." value="${esc(STORE.cfg.key||'')}"></label>
       <div class="inline">
         <button class="btn ghost sm" id="sbSave">${STORE.mode==='cloud'?'Update connection':'Connect Supabase'}</button>
-        ${STORE.mode==='cloud'?`<button class="btn ghost sm" id="sbSeed">Push current data to the server</button>
-        <button class="btn danger sm" id="sbOff">Disconnect</button>`:''}
+        ${STORE.mode==='cloud'?`<button class="btn danger sm" id="sbOff">Disconnect</button>`:''}
       </div>
       <p class="lvl">Run <b>supabase-setup.sql</b> in the Supabase SQL editor first to create the tables.</p>
     </div>
@@ -1414,7 +1409,6 @@ function viewHQ(){
       <div class="inline">
         <button class="btn ghost sm" id="saveBase">Save settings</button>
         <button class="btn ghost sm" id="csvAll">Download all orders as CSV</button>
-        <button class="btn danger sm" id="reset">Reset demo data</button>
       </div>
     </div>
     <p class="foot">Prototype. Payments are simulated — not yet connected to a payment gateway.</p>
@@ -1446,10 +1440,12 @@ function downloadCsv(list, name){
 function render(){
   const app = $('#app'), st = $('#sticky');
   let html='', sticky='';
-  if(S.route==='partner'){
-    html = S.session ? viewPartner() : viewLogin();
-  }else if(S.route==='hq'){
-    html = S.hq ? viewHQ() : viewHqLogin();
+  if(S.route==='partner' || S.route==='hq'){
+    if(!STORE.live)            html = viewConnect();
+    else if(!STORE.signedIn)   html = viewSignIn();
+    else if(STORE.isHQ)        html = viewHQ();          // Pawsly staff: every branch
+    else if(S.session)         html = viewPartner();     // venue partner: their branch
+    else                       html = viewSignIn();
   }else{
     if(!S.venueCode) html = viewNoVenue();
     else if(S.stage==='menu'){ html = viewMenu(); sticky = stickyMenu(); }
@@ -1458,24 +1454,6 @@ function render(){
   }
   app.innerHTML = html;
   st.innerHTML = sticky;
-  renderSwitcher();
-}
-
-function viewHqLogin(){
-  return `<div class="wrap"><header class="mast">
-    <h1 class="logo" style="font-size:34px">${logoMark(34,'HQ')}</h1>
-    <h2 class="h1" style="font-size:26px">Internal console</h2></header>
-    <div class="card">
-      <label class="field"><span>Password</span><input type="password" id="hqPin" placeholder="••••••••"></label>
-      <button class="btn block" id="doHq">Sign in</button>
-      <p class="lvl">Demo password: <b>pawsly2026</b></p>
-    </div></div>`;
-}
-
-function renderSwitcher(){
-  const sw = $('#switcher');
-  const tabs = [['order','Order'],['partner','Venue'],['hq','HQ']];
-  sw.innerHTML = tabs.map(([k,l])=>`<button data-route="${k}" aria-current="${S.route===k}">${l}</button>`).join('');
 }
 
 document.addEventListener('click', async (e)=>{
@@ -1512,27 +1490,40 @@ document.addEventListener('click', async (e)=>{
   if(d.paid){ await STORE.settleOrder(d.paid); render(); toast('Marked received'); return; }
 
   switch(b.id){
-    case 'toCheckout': S.uniq = pickUniq(); S.stage='checkout'; render(); window.scrollTo(0,0); break;
+    case 'toCheckout': S.uniq = STORE.live ? 0 : pickUniq(); S.stage='checkout'; render(); window.scrollTo(0,0); break;
     case 'backMenu':   keepForm(); S.stage='menu'; render(); window.scrollTo(0,0); break;
     case 'payNow':     await placeOrder(); break;
     case 'again':
       S.pick={protein:[],organ:[],sayuran:[],karbohidrat:[]}; S.addons=[]; S.stage='menu'; S.lastOrder=null;
       S.payment=PAYMENTS[0].id; S.fulfil=FULFIL[0].id; S.uniq=null;
       render(); window.scrollTo(0,0); break;
-    case 'gotoPartner': S.session = S.lastOrder.venueCode; S.route='partner'; render(); window.scrollTo(0,0); break;
-    case 'doLogin': {
-      const code = $('#lCode').value, pin = $('#lPin').value.trim();
-      const v = venue(code);
-      if(v && pin===v.pin){ S.session=code; S.tab='today'; render(); window.scrollTo(0,0); }
-      else { toast('Wrong PIN for this venue'); $('#lPin').focus(); }
+    case 'doSignIn': {
+      const email = $('#aEmail').value.trim(), pass = $('#aPass').value;
+      if(!email || !pass){ toast('Enter your email and password'); break; }
+      const btn = $('#doSignIn'); btn.disabled = true; btn.textContent = 'Signing in\u2026';
+      try{
+        await STORE.signIn(email, pass);
+        S.session = STORE.session.venueCode || null;
+        S.route = STORE.isHQ ? 'hq' : 'partner';
+        S.tab = 'today';
+        await load();
+        toast('Signed in as ' + (STORE.isHQ ? 'Pawsly staff' : (venue(S.session)||{name:'venue'}).name));
+        render(); poll(); window.scrollTo(0,0);
+      }catch(e){
+        toast(e.message);
+        btn.disabled = false; btn.textContent = 'Sign in';
+      }
       break;
     }
-    case 'doHq': {
-      if($('#hqPin').value.trim()==='pawsly2026'){ S.hq=true; render(); window.scrollTo(0,0); }
-      else { toast('Wrong password'); }
+    case 'sbForget': {
+      try{ localStorage.removeItem(CONN); }catch(e){}
+      STORE.signOut(); STORE.cfg={url:'',key:''}; STORE.boot();
+      await load(); render(); toast('Database details cleared');
       break;
     }
-    case 'logout': S.session=null; S.hq=false; render(); break;
+    case 'logout':
+      STORE.signOut(); S.session=null; clearInterval(pollT);
+      await load(); render(); toast('Signed out'); break;
     case 'copyLink': {
       const link = orderLink(S.session);
       try{ await navigator.clipboard.writeText(link); toast('Link copied'); }
@@ -1549,24 +1540,16 @@ document.addEventListener('click', async (e)=>{
       catch(e){ toast('This browser is blocking storage'); break; }
       STORE.cfg = {url,key}; STORE.mode = 'cloud';
       try{
-        const d = await STORE.loadAll();
-        if(d.venues.length){ DB.venues = d.venues; DB.orders = d.orders; toast(`Connected — ${d.orders.length} orders loaded`); }
-        else toast('Connected. The tables are empty — push your current data to fill them.');
+        await load();
+        toast(`Connected — ${DB.venues.length} venue${DB.venues.length===1?'':'s'} found. Sign in next.`);
       }catch(e){ toast('Failed: '+e.message+' — did you run the SQL?'); }
       render(); poll(); break;
     }
-    case 'sbSeed': {
-      const b2 = $('#sbSeed'); b2.disabled = true; b2.textContent = 'Pushing…';
-      try{ await STORE.pushAll(); toast(`${DB.venues.length} venues & ${DB.orders.length} orders pushed`); }
-      catch(e){ toast('Push failed: '+e.message); }
-      render(); break;
-    }
     case 'sbOff': {
       try{ localStorage.removeItem(CONN); }catch(e){}
-      STORE.cfg = {url:'',key:''}; STORE.boot();
-      const d2 = await STORE.loadAll();
-      if(d2 && d2.venues && d2.venues.length){ DB.venues = d2.venues; DB.orders = d2.orders; }
-      clearInterval(pollT); render(); toast('Disconnected — back to device storage');
+      STORE.signOut(); STORE.cfg = {url:'',key:''}; STORE.boot();
+      clearInterval(pollT); S.session=null;
+      await load(); render(); toast('Disconnected from Supabase');
       break;
     }
     case 'saveBase':
@@ -1580,7 +1563,6 @@ document.addEventListener('click', async (e)=>{
       v.name = nm;
       v.kind = $('#veKind').value.trim();
       v.city = $('#veCity').value.trim();
-      v.pin  = $('#vePin').value.trim();
       v.payout = $('#vePayout').value.trim() || 'Not set';
       v.active = $('#veActive').value === '1';
       await STORE.saveVenue(v);
@@ -1601,20 +1583,11 @@ document.addEventListener('click', async (e)=>{
       if(!name){ toast('Enter a venue name'); break; }
       const kind = $('#nKind').value.trim() || 'Dog park';
       const code = name.toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,14) + '-' + rid(2);
-      const v = { code, name, kind, city: $('#nCity').value.trim(), pin:String(1000+Math.floor(Math.random()*8999)),
+      const v = { code, name, kind, city: $('#nCity').value.trim(),
         rate: Math.min(0.4, Math.max(0, (parseFloat($('#nRate').value)||15)/100)),
         payout: $('#nPayout').value.trim() || 'Not set', active:true };
       DB.venues.push(v); await STORE.saveVenue(v); render();
-      toast(`${name} created — code ${code}, PIN ${v.pin}`);
-      break;
-    }
-    case 'reset': {
-      if(!confirm('Delete every venue and order, then reload the sample data?')) break;
-      try{ await STORE.wipe(); }catch(e){ toast('Server delete failed: '+e.message); break; }
-      const cfg = DB.config; DB = seed(); DB.config = cfg;
-      if(STORE.mode==='cloud'){ try{ await STORE.pushAll(); }catch(e){ toast('Push failed: '+e.message); } }
-      else await STORE.persist();
-      S.session=null; S.venueCode=null; render(); toast('Demo data reloaded');
+      toast(`${name} created — code ${code}. Add its manager to the staff table to grant access.`);
       break;
     }
   }
