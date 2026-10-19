@@ -518,7 +518,7 @@ let S = {               // view state
   size:'M', pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],
   fulfil:FULFIL[0].id, payment:PAYMENTS[0].id, uniq:null,
   cust:{name:'',phone:'',dog:''}, note:'',
-  lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null,
+  lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null, askedFor:'',
 };
 
 /* ---------- storage + auth ----------------------------------------
@@ -767,7 +767,10 @@ function poll(){
 }
 
 /* ---------- derived ---------- */
-const venue = code => DB.venues.find(v=>v.code===code);
+const venue = code => {
+  const k = String(code||'').trim().toUpperCase();
+  return DB.venues.find(v=>String(v.code).toUpperCase()===k);
+};
 const ordersFor = code => DB.orders.filter(o=>o.venueCode===code);
 function totals(list){
   const gmv = list.reduce((s,o)=>s+o.total,0);
@@ -1118,20 +1121,35 @@ function viewDone(){
   </div>`;
 }
 
+function diagTitle(){
+  if(S.closedVenue) return 'This venue is not active';
+  if(!STORE.live) return 'Not connected to the database';
+  if(!DB.venues.length) return 'No branches listed yet';
+  if(S.askedFor) return 'Branch code not recognised';
+  return 'Scan the QR at the venue';
+}
+function diagBody(){
+  if(S.closedVenue) return `Pawsly no longer takes orders at ${esc(S.closedVenue)}. Pick another branch below.`;
+  if(!STORE.live)   return 'This page has no database connection, so it cannot look up any branch. Staff: fill in SUPABASE.url and SUPABASE.key near the top of index.html and commit.';
+  if(!DB.venues.length) return 'The database is connected but has no branches in it. Pawsly staff need to add one from the HQ console.';
+  if(S.askedFor)    return `This link asked for branch "${esc(S.askedFor)}", which is not in the system. Pick a branch below instead.`;
+  return 'Ordering opens from the QR code on the x-banner at the pool or dog park. Or pick a branch below.';
+}
+
 function viewNoVenue(){
   return `
   <div class="wrap">
     <header class="mast">
       <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
-      <h2 class="h1">${S.closedVenue ? 'This venue is not active'
-        : (!DB.venues.length ? 'Not open for orders yet' : 'Scan the QR at the venue')}</h2>
-      <p class="lede">${S.closedVenue
-        ? `Pawsly no longer takes orders at ${esc(S.closedVenue)}. Pick another venue below.`
-        : (!DB.venues.length
-            ? (STORE.live ? 'No branches are listed yet. Pawsly staff need to add one in the HQ console.'
-                          : 'This page is not connected to a database yet. Staff: set SUPABASE.url and SUPABASE.key in index.html.')
-            : 'Ordering opens from the QR code on the x-banner at the pool or dog park. Or pick a branch below.')}</p>
+      <h2 class="h1">${diagTitle()}</h2>
+      <p class="lede">${diagBody()}</p>
     </header>
+    ${(!STORE.live || !DB.venues.length || S.askedFor) ? `<div class="note" style="margin-bottom:14px">
+      <b>Diagnostics</b>
+      Database: ${STORE.live ? 'connected' : '<b>NOT CONNECTED \u2014 SUPABASE.url / SUPABASE.key are empty in index.html</b>'}<br>
+      Branches loaded: ${DB.venues.length}${DB.venues.length?' ('+DB.venues.map(v=>esc(v.code)).join(', ')+')':''}<br>
+      ${S.askedFor ? `Branch code in this link: <b>${esc(S.askedFor)}</b>` : 'No branch code in this link'}
+    </div>` : ''}
     <div class="recipes">
       ${DB.venues.filter(v=>v.active).map(v=>`
         <button class="recipe" data-venue="${esc(v.code)}">
@@ -1685,11 +1703,11 @@ function printBanner(id){
   const params = new URLSearchParams(location.search);
   const hash = new URLSearchParams(location.hash.replace(/^#\/?/, ''));
   await load();
-  const v = params.get('v') || hash.get('v');
+  const v = (params.get('v') || hash.get('v') || '').trim();
   const vn = v ? venue(v) : null;
-  if(vn && vn.active !== false) S.venueCode = v;          // inactive QR stops taking orders
+  S.askedFor = v;                                          // reported on screen if it fails
+  if(vn && vn.active !== false) S.venueCode = vn.code;     // inactive QR stops taking orders
   else if(vn) S.closedVenue = vn.name;
-  else if(v) toast('Unknown venue code');
   if(location.hash.includes('partner')) S.route='partner';
   if(location.hash.includes('hq')) S.route='hq';
   render();
