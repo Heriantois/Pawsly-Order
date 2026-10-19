@@ -353,8 +353,8 @@ td b{font-weight:800}
 }
 .xb .k{font-family:var(--display);font-weight:800;font-size:27px;color:var(--ink);line-height:1.05;margin:10px 0 2px}
 .xb .s{font-size:13px;color:var(--text-soft);margin-bottom:16px}
-.xb .qr{background:#FFFBF2;border-radius:14px;padding:12px;display:inline-block;border:2px solid var(--ink)}
-.xb .qr svg{display:block;width:170px;height:170px}
+.xb .qr{background:#ffffff;border-radius:10px;padding:14px;display:inline-block;border:1px solid rgba(18,53,31,.25)}
+.xb .qr svg{display:block;width:200px;height:200px;max-width:58vw}
 .xb .v{margin-top:14px;font-weight:800;font-size:14px;color:var(--ink)}
 .xb .f{font-size:11.5px;color:var(--text-soft);margin-top:3px;word-break:break-all}
 
@@ -533,6 +533,20 @@ let S = {               // view state
    Enforced by RLS in the database, not by this file.
 -------------------------------------------------------------------- */
 
+/* ============================================================
+   DATABASE — fill these two in and commit. Customers scanning a QR
+   have never configured anything on their phone, so the connection
+   has to ship inside the page.
+
+   The publishable key is MEANT to be public: it carries no privileges
+   of its own, and Row Level Security in supabase-setup.sql is what
+   actually protects the data. Never put the secret key here.
+   ============================================================ */
+const SUPABASE = {
+  url: '',   // e.g. 'https://abcdefgh.supabase.co'
+  key: '',   // 'sb_publishable_...'  (Settings > API Keys)
+};
+
 const CONN = 'pawsly:conn';
 const CFGK = 'pawsly:cfg';
 const SESS = 'pawsly:sess';
@@ -572,10 +586,14 @@ const STORE = {
       localStorage.setItem('pawsly:probe','1'); localStorage.removeItem('pawsly:probe');
       this.canLocal = true;
       const c = JSON.parse(localStorage.getItem(CONN)||'null');
-      if(c && c.url && c.key) this.cfg = c;
+      if(c && c.url && c.key) this.cfg = c;                       // per-device override
+      else if(SUPABASE.url && SUPABASE.key) this.cfg = {...SUPABASE};
       const s = JSON.parse(localStorage.getItem(SESS)||'null');
       if(s && s.token) this.session = s;
-    }catch(e){ this.canLocal = false; }
+    }catch(e){
+      this.canLocal = false;
+      if(SUPABASE.url && SUPABASE.key) this.cfg = {...SUPABASE};   // storage blocked, still works
+    }
     this.mode = (this.cfg.url && this.cfg.key) ? 'cloud' : (this.canLocal ? 'device' : 'memory');
     if(this.mode !== 'cloud') this.session = null;
   },
@@ -779,11 +797,29 @@ function toast(msg){
   document.body.appendChild(el);
   clearTimeout(toastT); toastT = setTimeout(()=>el.remove(), 2600);
 }
-function qrSvg(text, px=170){
-  if(typeof qrcode !== 'function') return `<div style="width:${px}px;height:${px}px;display:grid;place-items:center;font-size:11px;padding:8px;text-align:center">QR did not load.<br>Use the link below.</div>`;
+/* Drawn by hand rather than with createSvgTag, because three things decide
+   whether a phone can actually read this:
+     - a 4-module quiet zone. The spec requires it; scanners use that clear
+       border to find the code. The old margin:1 is why nothing would scan.
+     - pure #000 on pure #fff. Cream at #FFFBF2 cuts contrast for no reason.
+     - shape-rendering=crispEdges, so modules don't get antialiased into grey
+       fringes when the viewBox scales to a fractional pixel size. */
+function qrSvg(text, px=200){
+  if(typeof qrcode !== 'function')
+    return `<div style="width:${px}px;height:${px}px;display:grid;place-items:center;font-size:11px;padding:8px;text-align:center">QR did not load.<br>Use the link below.</div>`;
   try{
-    const q = qrcode(0,'M'); q.addData(text); q.make();
-    return q.createSvgTag({ cellSize:4, margin:1, scalable:true });
+    const q = qrcode(0,'M');
+    q.addData(text);
+    q.make();
+    const n = q.getModuleCount(), quiet = 4, box = n + quiet*2;
+    let d = '';
+    for(let row=0; row<n; row++)
+      for(let col=0; col<n; col++)
+        if(q.isDark(row,col)) d += `M${col+quiet} ${row+quiet}h1v1h-1z`;
+    return `<svg viewBox="0 0 ${box} ${box}" width="${px}" height="${px}" `
+         + `shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="QR code">`
+         + `<rect width="${box}" height="${box}" fill="#ffffff"/>`
+         + `<path d="${d}" fill="#000000"/></svg>`;
   }catch(e){ return '<div style="padding:12px;font-size:11px">Link is too long for a QR code.</div>'; }
 }
 function orderLink(code){
@@ -1087,10 +1123,14 @@ function viewNoVenue(){
   <div class="wrap">
     <header class="mast">
       <h1 class="logo" style="font-size:${BRAND.logoH}px">${logoMark(BRAND.logoH)}</h1>
-      <h2 class="h1">${S.closedVenue ? 'This venue is not active' : 'Scan the QR at the venue'}</h2>
+      <h2 class="h1">${S.closedVenue ? 'This venue is not active'
+        : (!DB.venues.length ? 'Not open for orders yet' : 'Scan the QR at the venue')}</h2>
       <p class="lede">${S.closedVenue
         ? `Pawsly no longer takes orders at ${esc(S.closedVenue)}. Pick another venue below.`
-        : 'Ordering opens from the QR code on the x-banner at the pool or dog park. Pick a venue below to try the flow.'}</p>
+        : (!DB.venues.length
+            ? (STORE.live ? 'No branches are listed yet. Pawsly staff need to add one in the HQ console.'
+                          : 'This page is not connected to a database yet. Staff: set SUPABASE.url and SUPABASE.key in index.html.')
+            : 'Ordering opens from the QR code on the x-banner at the pool or dog park. Or pick a branch below.')}</p>
     </header>
     <div class="recipes">
       ${DB.venues.filter(v=>v.active).map(v=>`
@@ -1628,7 +1668,9 @@ function printBanner(id){
   if(!w){ toast('Allow pop-ups to print'); return; }
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Pawsly x-banner</title>
   <style>body{margin:0;background:#FDF1DC;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh}
-  .xb{text-align:center;padding:40px}.xb svg{width:300px;height:300px}
+  .xb{text-align:center;padding:40px}
+  .xb svg{width:340px;height:340px}
+  .qr{background:#fff;padding:18px;display:inline-block;border-radius:12px}
   :root{--ink:#12351F;--text-soft:#4A6B57;--display:'Trebuchet MS',system-ui,sans-serif}
   .k{font-size:38px;font-weight:800;color:#12351F;margin:16px 0 4px}.s{color:#4A6B57}
   .qr{background:#fff;padding:16px;display:inline-block;border:3px solid #12351F;border-radius:18px;margin-top:18px}
