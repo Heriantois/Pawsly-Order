@@ -621,9 +621,13 @@ const STORE = {
 
   /* ---- rest ---- */
   async api(path, opts={}, retry=true){
-    const auth = this.session && this.session.token ? 'Bearer '+this.session.token : 'Bearer '+this.cfg.key;
+    // The project key always travels on `apikey`. Authorization carries the
+    // signed-in user's JWT and NOTHING else -- a publishable key put there
+    // gets parsed as a JWT and rejected with "Invalid JWT".
+    const head = { apikey:this.cfg.key, 'Content-Type':'application/json', Prefer:'return=minimal' };
+    if(this.session && this.session.token) head.Authorization = 'Bearer ' + this.session.token;
     const r = await fetch(this.cfg.url.replace(/\/+$/,'') + '/rest/v1/' + path, Object.assign({}, opts, {
-      headers: Object.assign({ apikey:this.cfg.key, Authorization:auth, 'Content-Type':'application/json', Prefer:'return=minimal' }, opts.headers||{}),
+      headers: Object.assign(head, opts.headers||{}),
     }));
     if(r.status===401 && retry && this.session){
       if(await this.refresh()) return this.api(path, opts, false);
@@ -1126,8 +1130,8 @@ function viewConnect(){
     <div class="card">
       <label class="field"><span>Supabase Project URL</span>
         <input type="text" id="sbUrl" placeholder="https://xxxxxxxx.supabase.co" value="${esc(STORE.cfg.url||'')}"></label>
-      <label class="field"><span>Anon public key <em>\u2014 publishable, safe in a browser</em></span>
-        <input type="text" id="sbKey" placeholder="eyJhbGciOi..." value="${esc(STORE.cfg.key||'')}"></label>
+      <label class="field"><span>Publishable key <em>\u2014 Settings \u203a API Keys. Safe in a browser; never the secret key</em></span>
+        <input type="text" id="sbKey" placeholder="sb_publishable_..." value="${esc(STORE.cfg.key||'')}"></label>
       <button class="btn block" id="sbSave">Connect</button>
       <p class="lvl">Run <b>supabase-setup.sql</b> in the Supabase SQL editor first.</p>
     </div>
@@ -1390,8 +1394,8 @@ function viewHQ(){
       `}
       <label class="field" style="margin-top:12px"><span>Supabase Project URL</span>
         <input type="text" id="sbUrl" placeholder="https://xxxxxxxx.supabase.co" value="${esc(STORE.cfg.url||'')}"></label>
-      <label class="field"><span>Anon public key <em>— a public key, safe to keep in the browser</em></span>
-        <input type="text" id="sbKey" placeholder="eyJhbGciOi..." value="${esc(STORE.cfg.key||'')}"></label>
+      <label class="field"><span>Publishable key <em>— Settings › API Keys. Never the secret key</em></span>
+        <input type="text" id="sbKey" placeholder="sb_publishable_..." value="${esc(STORE.cfg.key||'')}"></label>
       <div class="inline">
         <button class="btn ghost sm" id="sbSave">${STORE.mode==='cloud'?'Update connection':'Connect Supabase'}</button>
         ${STORE.mode==='cloud'?`<button class="btn danger sm" id="sbOff">Disconnect</button>`:''}
@@ -1535,7 +1539,14 @@ document.addEventListener('click', async (e)=>{
     case 'sbSave': {
       const url = $('#sbUrl').value.trim().replace(/\/+$/,''), key = $('#sbKey').value.trim();
       if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)){ toast('URL should look like https://xxxx.supabase.co'); break; }
-      if(key.length < 40){ toast('That anon key looks incomplete'); break; }
+      if(/^sb_secret_/.test(key) || /service_role/.test(key)){
+        toast('That is a SECRET key. Use the publishable key \u2014 a secret key in a web page exposes your whole database.');
+        break;
+      }
+      if(!/^sb_publishable_/.test(key) && !/^eyJ/.test(key)){
+        toast('Expected a key starting with sb_publishable_ (or a legacy anon key starting with eyJ)');
+        break;
+      }
       try{ localStorage.setItem(CONN, JSON.stringify({url,key})); }
       catch(e){ toast('This browser is blocking storage'); break; }
       STORE.cfg = {url,key}; STORE.mode = 'cloud';
