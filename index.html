@@ -206,6 +206,42 @@ a{color:var(--ink-2)}
 .medwrap{position:relative;display:inline-block;line-height:0}
 
 /* ---------- addons ---------- */
+.snackrow{
+  display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding:2px 2px 12px;margin:0 -2px;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent;
+}
+.snackrow::-webkit-scrollbar{height:6px}
+.snackrow::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:3px}
+.snack{
+  flex:0 0 44%;min-width:150px;max-width:190px;scroll-snap-align:start;
+  background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);
+  padding:12px 12px 10px;display:flex;flex-direction:column;gap:6px;
+}
+.snack.on{border-color:var(--ink);background:var(--cream-2)}
+.snack .pic{
+  width:100%;aspect-ratio:1/1;border-radius:12px;background:var(--bone);
+  border:1px solid var(--line);overflow:hidden
+}
+.snack .pic img{display:block;width:100%;height:100%;object-fit:cover}
+.snack .nm{font-weight:800;font-size:13.5px;line-height:1.2;color:var(--text)}
+.snack .ds{font-size:11.5px;color:var(--text-soft);line-height:1.25}
+.snack .pr{font-weight:900;font-size:13.5px;color:var(--ink-2);margin-top:auto}
+.step2{display:flex;align-items:center;gap:8px;margin-top:4px}
+.step2 button{
+  width:34px;height:34px;border-radius:50%;border:2px solid var(--line-strong);
+  font-weight:900;font-size:17px;color:var(--ink);display:grid;place-items:center;flex:none
+}
+.step2 button:disabled{opacity:.3}
+.step2 .qty{font-weight:900;font-size:15px;min-width:20px;text-align:center}
+.step2 .add{flex:1;width:auto;border-radius:999px;background:var(--ink);color:#FFFBF2;border-color:var(--ink);font-size:14px;font-family:var(--display)}
+.scrollhint{font-size:11.5px;color:var(--text-soft);text-align:right;margin:-6px 0 0}
+.contact{
+  text-align:center;font-size:12.5px;color:var(--text-soft);line-height:1.6;
+  border-top:2px dashed var(--line);margin-top:14px;padding-top:14px
+}
+.contact a{color:var(--ink-2);font-weight:700;text-decoration:none}
+.contact .ig{display:inline-flex;align-items:center;gap:5px}
 .addon{
   display:flex;align-items:center;gap:12px;background:var(--surface);
   border:2px solid var(--line);border-radius:var(--r-m);padding:11px 14px;width:100%;text-align:left
@@ -410,6 +446,10 @@ const BRAND = {
   promoLine:  'Pick a portion, mix the toppings, collect at the counter',
   bannerHeadline: 'Give The Very best for your Pet',   // the big line on the printed x-banner
   bannerSub: 'Pick, Mix, Delivered it to You',
+  // Shown at the bottom of the menu and on every receipt. Replace with the real ones.
+  address:   'Jl. Kelapa Gading Raya No. 1, Gading Serpong, Tangerang 15810',
+  instagram: '@pawsly.gourmet',
+  whatsapp:  '+62 811 0000 0000',
 };
 function logoMark(size, suffix){
   const tail = suffix ? ` <span style="font-family:var(--body);font-size:${Math.round(size*0.42)}px;font-weight:700;color:var(--text-soft)">${esc(suffix)}</span>` : '';
@@ -454,6 +494,16 @@ const GROUPS = [
 const ADDONS = [
   { id:'potion', label:'Pawsly Potion', price:25000, desc:'Fish oil supplement for coat & skin' },
   { id:'topper', label:'Extra Protein Topper', price:15000, desc:'Extra 50g of your chosen protein' },
+];
+
+/* Five treats. Rename and reprice freely; add img:'treat-x.jpg' next to
+   index.html when you have photos and it replaces the drawn version. */
+const SNACKS = [
+  { id:'jerky',   label:'Chicken Jerky Strips',  price:35000, desc:'Air-dried, 50g',   c1:'#C98A5A', c2:'#8E5A2E', shape:'grain' },
+  { id:'liver',   label:'Beef Liver Bites',      price:38000, desc:'Freeze-dried, 40g',c1:'#6B2016', c2:'#3F100A', shape:'dice'  },
+  { id:'chews',   label:'Sweet Potato Chews',    price:28000, desc:'No additives, 60g',c1:'#DD6B20', c2:'#B24D0D', shape:'grain' },
+  { id:'salmon',  label:'Salmon Skin Twists',    price:42000, desc:'Omega-3 rich, 35g',c1:'#E8956A', c2:'#C2653A', shape:'blob'  },
+  { id:'cookies', label:'Pumpkin & Oat Cookies', price:25000, desc:'Soft baked, 8 pcs',c1:'#E89A2A', c2:'#B99A61', shape:'floret'},
 ];
 
 const RECIPES = [
@@ -516,6 +566,7 @@ let DB = null;          // { venues, orders, config }
 let S = {               // view state
   route:'order', venueCode:null, stage:'menu',
   size:'M', pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],
+  snacks:{},                       // { snackId: qty }
   fulfil:FULFIL[0].id, payment:PAYMENTS[0].id, uniq:null,
   cust:{name:'',phone:'',dog:''}, note:'',
   lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null, askedFor:'',
@@ -550,7 +601,7 @@ const SUPABASE = {
 const CONN = 'pawsly:conn';
 const CFGK = 'pawsly:cfg';
 const SESS = 'pawsly:sess';
-const ORDER_COLS = 'id,code,venue_code,created_at,size,size_name,pick,addons,fulfil,fee,'
+const ORDER_COLS = 'id,code,venue_code,created_at,size,size_name,pick,addons,snacks,fulfil,fee,'
                  + 'payment,payment_label,collect,status,cust_name,dog_name,phone_mask,note,'
                  + 'subtotal,total,uniq,pay_total,rate,commission,settled,notified';
 
@@ -561,7 +612,7 @@ const fromRowVenue = r => ({ code:r.code, name:r.name, kind:r.kind||'', city:r.c
 
 const orderPayload = o => ({
   code:o.code, venue_code:o.venueCode, size:o.size, size_name:o.sizeName,
-  pick:o.pick, addons:o.addons, fulfil:o.fulfil, fee:o.fee,
+  pick:o.pick, addons:o.addons, snacks:o.snacks||[], fulfil:o.fulfil, fee:o.fee,
   payment:o.payment, payment_label:o.paymentLabel, collect:o.collect, status:o.status,
   cust_name:o.cust.name, dog_name:o.cust.dog,
   phone:o.cust.phone||'', phone_mask:maskPhone(o.cust.phone),
@@ -569,7 +620,7 @@ const orderPayload = o => ({
 });
 const fromRowOrder = r => ({
   id:r.id, code:r.code, venueCode:r.venue_code, createdAt:r.created_at,
-  size:r.size, sizeName:r.size_name, pick:r.pick||{}, addons:r.addons||[],
+  size:r.size, sizeName:r.size_name, pick:r.pick||{}, addons:r.addons||[], snacks:r.snacks||[],
   fulfil:r.fulfil, fee:r.fee||0, payment:r.payment, paymentLabel:r.payment_label,
   collect:r.collect, status:r.status,
   cust:{ name:r.cust_name||'', dog:r.dog_name||'', phone:r.phone_mask||'' },
@@ -839,15 +890,21 @@ function drawnBowl(){
 }
 function bowlFallback(el){ el.outerHTML = drawnBowl(); }
 
+function snackLines(map){
+  return SNACKS.filter(s=>(map||{})[s.id]>0)
+               .map(s=>({ id:s.id, label:s.label, price:s.price, qty:map[s.id] }));
+}
 function priceNow(){
   const size = SIZES.find(s=>s.id===S.size) || SIZES[0];
   const addon = S.addons.reduce((t,id)=>t+(ADDONS.find(a=>a.id===id)||{price:0}).price,0);
+  const snacks = snackLines(S.snacks);
+  const snackTotal = snacks.reduce((t,s)=>t+s.price*s.qty,0);
   const fee = (FULFIL.find(f=>f.id===S.fulfil)||{}).fee||0;
-  const subtotal = size.price + addon;
+  const subtotal = size.price + addon + snackTotal;
   const total = subtotal + fee;
   const pay = PAYMENTS.find(m=>m.id===S.payment) || PAYMENTS[0];
   const uniq = pay.uniq ? (S.uniq || 0) : 0;
-  return { size, addon, fee, subtotal, total, pay, uniq, payTotal: total + uniq };
+  return { size, addon, snacks, snackTotal, fee, subtotal, total, pay, uniq, payTotal: total + uniq };
 }
 
 /* A 2-digit code appended to the amount so a bank or QRIS entry maps to exactly
@@ -944,7 +1001,41 @@ function viewMenu(){
       </div>
     </section>
 
+    <section>
+      <div class="step"><b>Treats to take home</b><i>${SNACKS.length} options</i></div>
+      <div class="snackrow">
+        ${SNACKS.map(s=>{
+          const q = S.snacks[s.id]||0;
+          return `<div class="snack ${q?'on':''}">
+            <span class="pic">${s.img
+              ? `<img src="${esc(s.img)}" alt="" loading="lazy">`
+              : `<span style="display:block;width:100%;height:100%;background:${medallion(s)}"></span>`}</span>
+            <span class="nm">${esc(s.label)}</span>
+            <span class="ds">${esc(s.desc||'')}</span>
+            <span class="pr">${rp(s.price)}</span>
+            <div class="step2">
+              ${q ? `<button data-snack="${s.id}" data-d="-1" aria-label="Remove one ${esc(s.label)}">−</button>
+                     <span class="qty" aria-live="polite">${q}</span>
+                     <button data-snack="${s.id}" data-d="1" aria-label="Add one ${esc(s.label)}">+</button>`
+                  : `<button class="add" data-snack="${s.id}" data-d="1">Add</button>`}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <p class="scrollhint">swipe for more →</p>
+    </section>
+
     <p class="foot">🐾 More love, more nutrition, for your best friend.</p>
+    ${contactBlock()}
+  </div>`;
+}
+
+function contactBlock(){
+  const ig = (BRAND.instagram||'').replace(/^@/,'');
+  return `<div class="contact">
+    ${BRAND.address ? `${esc(BRAND.address)}<br>` : ''}
+    ${ig ? `<a class="ig" href="https://instagram.com/${esc(ig)}" target="_blank" rel="noopener">◉ ${esc(BRAND.instagram)}</a>` : ''}
+    ${BRAND.whatsapp ? `${ig?' &nbsp;·&nbsp; ':''}${esc(BRAND.whatsapp)}` : ''}
   </div>`;
 }
 
@@ -971,6 +1062,7 @@ function viewCheckout(){
       <div class="row"><span><b>${p.size.name} Bowl</b></span><span>${rp(p.size.price)}</span></div>
       <p class="bowlline" style="margin:6px 0 0">${bowlText(S.pick)}</p>
       ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row" style="margin-top:7px"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
+      ${p.snacks.map(s=>`<div class="row" style="margin-top:7px"><span>${esc(s.label)} ×${s.qty}</span><span>${rp(s.price*s.qty)}</span></div>`).join('')}
       <div style="margin-top:10px"><button class="btn ghost sm" id="backMenu">Change ingredients</button></div>
     </div>
 
@@ -1004,6 +1096,7 @@ function viewCheckout(){
       <div class="rows">
         <div class="row"><span>${p.size.name} Bowl</span><span>${rp(p.size.price)}</span></div>
         ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
+        ${p.snacks.map(s=>`<div class="row"><span>${esc(s.label)} ×${s.qty}</span><span>${rp(s.price*s.qty)}</span></div>`).join('')}
         ${p.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(p.fee)}</span></div>`:''}
         <div class="row total"><span>Total</span><span>${rp(p.total)}</span></div>
       </div>
@@ -1048,6 +1141,7 @@ async function placeOrder(){
     size:S.size, sizeName:p.size.name,
     pick: JSON.parse(JSON.stringify(S.pick)),
     addons: S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return {id:a.id,label:a.label,price:a.price};}),
+    snacks: p.snacks,
     fulfil:S.fulfil, fee:p.fee,
     payment:pay.id, paymentLabel:pay.label, collect:pay.collect,
     status: pay.collect==='venue' ? 'awaiting_cash' : 'preparing',
@@ -1098,7 +1192,8 @@ function viewDone(){
 
     <div class="card" style="margin-top:12px">
       <div class="rows">
-        <div class="row"><span>${esc(o.sizeName)} Bowl${o.addons.length?` + ${o.addons.map(a=>esc(a.label)).join(', ')}`:''}</span><span>${rp(o.subtotal)}</span></div>
+        <div class="row"><span>${esc(o.sizeName)} Bowl${o.addons.length?` + ${o.addons.map(a=>esc(a.label)).join(', ')}`:''}</span><span>${rp(o.subtotal - (o.snacks||[]).reduce((t,s)=>t+s.price*s.qty,0))}</span></div>
+        ${(o.snacks||[]).map(s=>`<div class="row"><span>${esc(s.label)} ×${s.qty}</span><span>${rp(s.price*s.qty)}</span></div>`).join('')}
         ${o.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(o.fee)}</span></div>`:''}
         ${o.uniq ? `<div class="row"><span>Verification code</span><span>+ ${String(o.uniq).padStart(2,'0')}</span></div>
         <div class="row total"><span>Transfer exactly</span><span>${rp(o.payTotal||o.total)}</span></div>`
@@ -1118,6 +1213,7 @@ function viewDone(){
       <button class="btn block" id="again">Order again</button>
     </div>
     <p class="foot">Order updates go to WhatsApp ${esc(o.cust.phone)}.</p>
+    ${contactBlock()}
   </div>`;
 }
 
@@ -1481,12 +1577,14 @@ function viewHQ(){
    CSV
    ============================================================ */
 function downloadCsv(list, name){
-  const head = ['code','time','venue','size','protein','organ','vegetables','carbs','addons','payment','revenue','pay_amount','share_pct','venue_share','settlement'];
+  const head = ['code','time','venue','size','protein','organ','vegetables','carbs','addons','snacks','payment','revenue','pay_amount','share_pct','venue_share','settlement'];
   const body = list.map(o=>[
     o.code, new Date(o.createdAt).toLocaleString('en-GB'), o.venueCode||'-', o.sizeName,
     (o.pick.protein||[]).map(label).join('|'), (o.pick.organ||[]).map(label).join('|'),
     (o.pick.sayuran||[]).map(label).join('|'), (o.pick.karbohidrat||[]).map(label).join('|'),
-    o.addons.map(a=>a.label).join('|'), o.paymentLabel, o.total, o.payTotal||o.total, Math.round(o.rate*100), o.commission,
+    o.addons.map(a=>a.label).join('|'),
+    (o.snacks||[]).map(s=>s.label+' x'+s.qty).join('|'),
+    o.paymentLabel, o.total, o.payTotal||o.total, Math.round(o.rate*100), o.commission,
     o.settled?'settled':'pending',
   ].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
   const blob = new Blob(['\uFEFF'+[head.join(','),...body].join('\n')],{type:'text/csv;charset=utf-8'});
@@ -1539,6 +1637,11 @@ document.addEventListener('click', async (e)=>{
     else { toast(`Maximum ${g.max} ${g.title.toLowerCase()}`); return; }
     render(); return;
   }
+  if(d.snack){
+    const n = Math.max(0, Math.min(20, (S.snacks[d.snack]||0) + parseInt(d.d,10)));
+    if(n) S.snacks[d.snack] = n; else delete S.snacks[d.snack];
+    render(); return;
+  }
   if(d.addon){
     const i = S.addons.indexOf(d.addon);
     i>=0 ? S.addons.splice(i,1) : S.addons.push(d.addon);
@@ -1556,7 +1659,7 @@ document.addEventListener('click', async (e)=>{
     case 'backMenu':   keepForm(); S.stage='menu'; render(); window.scrollTo(0,0); break;
     case 'payNow':     await placeOrder(); break;
     case 'again':
-      S.pick={protein:[],organ:[],sayuran:[],karbohidrat:[]}; S.addons=[]; S.stage='menu'; S.lastOrder=null;
+      S.pick={protein:[],organ:[],sayuran:[],karbohidrat:[]}; S.addons=[]; S.snacks={}; S.stage='menu'; S.lastOrder=null;
       S.payment=PAYMENTS[0].id; S.fulfil=FULFIL[0].id; S.uniq=null;
       render(); window.scrollTo(0,0); break;
     case 'doSignIn': {
