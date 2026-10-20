@@ -451,9 +451,9 @@ const BRAND = {
   bannerHeadline: 'Give The Very best for your Pet',   // the big line on the printed x-banner
   bannerSub: 'Pick, Mix, Delivered it to You',
   // Shown at the bottom of the menu and on every receipt. Replace with the real ones.
-  address:   'Jl. Ruko Pasar Sinpasa Blok SG 3 no.8, Gading Serpong, Tangerang 15810',
-  instagram: '@pawsly.id',
-  whatsapp:  '+62 819 5918 8563',
+  address:   'Jl. Kelapa Gading Raya No. 1, Gading Serpong, Tangerang 15810',
+  instagram: '@pawsly.gourmet',
+  whatsapp:  '+62 811 0000 0000',
 };
 function logoMark(size, suffix){
   const tail = suffix ? ` <span style="font-family:var(--body);font-size:${Math.round(size*0.42)}px;font-weight:700;color:var(--text-soft)">${esc(suffix)}</span>` : '';
@@ -528,7 +528,7 @@ const PAYMENTS = [
   //           payments automatically -- then the exact amount no longer matters.
   // showQr  : display BRAND.qrisImage on the checkout screen.
   { id:'qris', label:'QRIS',         desc:'Scan with any e-wallet or mobile banking app', collect:'pawsly', uniq:true, showQr:true },
-  
+  { id:'bca',  label:'BCA Transfer', desc:'Transfer the exact amount shown',              collect:'pawsly', uniq:true },
 ];
 
 const FULFIL = [
@@ -569,7 +569,7 @@ function medallion(it){
 let DB = null;          // { venues, orders, config }
 let S = {               // view state
   route:'order', venueCode:null, stage:'menu',
-  size:'M', pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],
+  size:null, pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],   // size null = treats only
   snacks:{},                       // { snackId: qty }
   fulfil:FULFIL[0].id, payment:PAYMENTS[0].id, uniq:null,
   cust:{name:'',phone:'',dog:''}, note:'',
@@ -899,12 +899,12 @@ function snackLines(map){
                .map(s=>({ id:s.id, label:s.label, price:s.price, qty:map[s.id] }));
 }
 function priceNow(){
-  const size = SIZES.find(s=>s.id===S.size) || SIZES[0];
-  const addon = S.addons.reduce((t,id)=>t+(ADDONS.find(a=>a.id===id)||{price:0}).price,0);
+  const size = S.size ? SIZES.find(s=>s.id===S.size) : null;     // null = no bowl
+  const addon = size ? S.addons.reduce((t,id)=>t+(ADDONS.find(a=>a.id===id)||{price:0}).price,0) : 0;
   const snacks = snackLines(S.snacks);
   const snackTotal = snacks.reduce((t,s)=>t+s.price*s.qty,0);
   const fee = (FULFIL.find(f=>f.id===S.fulfil)||{}).fee||0;
-  const subtotal = size.price + addon + snackTotal;
+  const subtotal = (size ? size.price : 0) + addon + snackTotal;
   const total = subtotal + fee;
   const pay = PAYMENTS.find(m=>m.id===S.payment) || PAYMENTS[0];
   const uniq = pay.uniq ? (S.uniq || 0) : 0;
@@ -924,6 +924,14 @@ function pickUniq(){
 }
 function bowlReady(){
   return S.pick.protein.length>0 && S.pick.karbohidrat.length>0;
+}
+/* You can order a bowl, treats, or both. The only thing blocked is an empty
+   cart, or a bowl missing the two things the kitchen cannot cook without. */
+function cartState(){
+  const treats = Object.values(S.snacks||{}).some(q=>q>0);
+  if(!S.size && !treats) return { ok:false, why:'Add a bowl or a treat' };
+  if(S.size && !bowlReady()) return { ok:false, why:'Pick a protein & carb' };
+  return { ok:true, why:'Continue to payment', treatsOnly: !S.size };
 }
 function bowlText(pick){
   return GROUPS.map(g=>{
@@ -945,7 +953,7 @@ function viewMenu(){
     </header>
 
     <section>
-      <div class="step"><b>Choose size</b><i>Step 1</i></div>
+      <div class="step"><b>Choose size</b><i>${S.size?'Step 1':'optional'}</i></div>
       <div class="sizes">
         ${SIZES.map(s=>`
           <button class="size ${s.cls}" data-size="${s.id}" aria-pressed="${S.size===s.id}">
@@ -956,9 +964,12 @@ function viewMenu(){
             <span class="sub">${s.sub}</span>
           </button>`).join('')}
       </div>
-      <p class="lvl">Toppings below are already included in the price. Maximum 2 per category.</p>
+      <p class="lvl">${S.size
+        ? 'Toppings below are already included in the price. Maximum 2 per category. Tap the size again if you only want treats.'
+        : 'No bowl selected — you can order treats on their own, or pick a size above.'}</p>
     </section>
 
+    ${!S.size ? '' : `
     <section>
       <div class="step"><b>Kitchen favourites</b><i>Shortcut</i></div>
       <div class="recipes">
@@ -1003,7 +1014,7 @@ function viewMenu(){
             <span class="p">+${rp(a.price)}</span>
           </button>`).join('')}
       </div>
-    </section>
+    </section>`}
 
     <section>
       <div class="step"><b>Treats to take home</b><i>${SNACKS.length} options</i></div>
@@ -1045,10 +1056,15 @@ function contactBlock(){
 
 function stickyMenu(){
   const p = priceNow();
-  const ready = bowlReady();
+  const c = cartState();
+  const bits = [];
+  if(p.size) bits.push(p.size.name);
+  if(S.addons.length) bits.push(`${S.addons.length} add-on${S.addons.length>1?'s':''}`);
+  const nTreats = p.snacks.reduce((t,s)=>t+s.qty,0);
+  if(nTreats) bits.push(`${nTreats} treat${nTreats>1?'s':''}`);
   return `<div class="sticky"><div class="inner">
-    <span class="sum"><b>${rp(p.subtotal)}</b><span>${p.size.name}${S.addons.length?` + ${S.addons.length} add-on${S.addons.length>1?'s':''}`:''}</span></span>
-    <button class="btn" id="toCheckout" ${ready?'':'disabled'}>${ready?'Continue to payment':'Pick a protein & carb'}</button>
+    <span class="sum"><b>${rp(p.subtotal)}</b><span>${bits.length?esc(bits.join(' + ')):'nothing yet'}</span></span>
+    <button class="btn" id="toCheckout" ${c.ok?'':'disabled'}>${esc(c.why)}</button>
   </div></div>`;
 }
 
@@ -1063,11 +1079,12 @@ function viewCheckout(){
     </header>
 
     <div class="card">
-      <div class="row"><span><b>${p.size.name} Bowl</b></span><span>${rp(p.size.price)}</span></div>
-      <p class="bowlline" style="margin:6px 0 0">${bowlText(S.pick)}</p>
+      ${p.size ? `<div class="row"><span><b>${p.size.name} Bowl</b></span><span>${rp(p.size.price)}</span></div>
+      <p class="bowlline" style="margin:6px 0 0">${bowlText(S.pick)}</p>`
+      : `<div class="row"><span><b>Treats only</b></span><span></span></div>`}
       ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row" style="margin-top:7px"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
       ${p.snacks.map(s=>`<div class="row" style="margin-top:7px"><span>${esc(s.label)} ×${s.qty}</span><span>${rp(s.price*s.qty)}</span></div>`).join('')}
-      <div style="margin-top:10px"><button class="btn ghost sm" id="backMenu">Change ingredients</button></div>
+      <div style="margin-top:10px"><button class="btn ghost sm" id="backMenu">${p.size?'Change ingredients':'Change order'}</button></div>
     </div>
 
     <div class="step"><b>Collection</b></div>
@@ -1098,7 +1115,7 @@ function viewCheckout(){
 
     <div class="card" style="margin-top:14px">
       <div class="rows">
-        <div class="row"><span>${p.size.name} Bowl</span><span>${rp(p.size.price)}</span></div>
+        ${p.size ? `<div class="row"><span>${p.size.name} Bowl</span><span>${rp(p.size.price)}</span></div>` : ''}
         ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
         ${p.snacks.map(s=>`<div class="row"><span>${esc(s.label)} ×${s.qty}</span><span>${rp(s.price*s.qty)}</span></div>`).join('')}
         ${p.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(p.fee)}</span></div>`:''}
@@ -1142,7 +1159,7 @@ async function placeOrder(){
     id:'o'+Date.now(), code:'PW-'+rid(4),
     venueCode: S.venueCode || null,
     createdAt: new Date().toISOString(),
-    size:S.size, sizeName:p.size.name,
+    size:S.size, sizeName: p.size ? p.size.name : 'Treats only',
     pick: JSON.parse(JSON.stringify(S.pick)),
     addons: S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return {id:a.id,label:a.label,price:a.price};}),
     snacks: p.snacks,
@@ -1197,7 +1214,7 @@ function viewDone(){
 
     <div class="card" style="margin-top:12px">
       <div class="rows">
-        <div class="row"><span>${esc(o.sizeName)} Bowl${o.addons.length?` + ${o.addons.map(a=>esc(a.label)).join(', ')}`:''}</span><span>${rp(o.subtotal - (o.snacks||[]).reduce((t,s)=>t+s.price*s.qty,0))}</span></div>
+        ${o.size ? `<div class="row"><span>${esc(o.sizeName)} Bowl${o.addons.length?` + ${o.addons.map(a=>esc(a.label)).join(', ')}`:''}</span><span>${rp(o.subtotal - (o.snacks||[]).reduce((t,s)=>t+s.price*s.qty,0))}</span></div>` : ''}
         ${(o.snacks||[]).map(s=>`<div class="row"><span>${esc(s.label)} ×${s.qty}</span><span>${rp(s.price*s.qty)}</span></div>`).join('')}
         ${o.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(o.fee)}</span></div>`:''}
         ${o.uniq ? `<div class="row"><span>Verification code</span><span>+ ${String(o.uniq).padStart(2,'0')}</span></div>
@@ -1205,14 +1222,11 @@ function viewDone(){
         : `<div class="row total"><span>Total</span><span>${rp(o.total)}</span></div>`}
         <div class="row muted"><span>${esc(o.paymentLabel)}</span><span>${cash?'<span class="chip cash">Pay at counter</span>':'<span class="chip paid">Paid</span>'}</span></div>
       </div>
-      <hr class="sep">
-      <p class="bowlline">${bowlText(o.pick)}</p>
+      ${o.size ? `<hr class="sep">
+      <p class="bowlline">${bowlText(o.pick)}</p>` : ''}
       ${o.note?`<p class="bowlline" style="margin-top:6px"><b>Note:</b> ${esc(o.note)}</p>`:''}
       ${v?`<p class="bowlline" style="margin-top:6px"><b>Venue:</b> ${esc(v.name)} — ${esc(FULFIL.find(f=>f.id===o.fulfil).label)}</p>`:''}
     </div>
-
-    ${v?`<div class="note" style="margin-top:12px"><b>Thanks for ordering at ${esc(v.name)}</b>
-      ${Math.round(v.rate*100)}% of this order goes back to the venue to keep its facilities running.</div>`:''}
 
     <div style="margin-top:16px;display:grid;gap:8px">
       <button class="btn block" id="again">Order again</button>
@@ -1367,7 +1381,9 @@ function viewPartner(){
         <tbody>${rows.slice(0,60).map(o=>`<tr>
           <td>${fmtTime(o.createdAt)}<br><span style="color:var(--text-soft);font-size:11.5px">${fmtDay(dayKey(o.createdAt))}</span></td>
           <td><b>${esc(o.code)}</b><br><span style="color:var(--text-soft);font-size:11.5px">${esc(o.cust.dog||o.cust.name)}</span></td>
-          <td>${esc(o.sizeName)}${o.addons.length?` +${o.addons.length}`:''}<br><span style="color:var(--text-soft);font-size:11.5px">${esc((o.pick.protein||[]).map(label).join(', '))}</span></td>
+          <td>${esc(o.sizeName||'\u2014')}${o.addons.length?` +${o.addons.length}`:''}<br><span style="color:var(--text-soft);font-size:11.5px">${esc(
+            o.size ? (o.pick.protein||[]).map(label).join(', ')
+                   : (o.snacks||[]).map(s=>s.label+' \u00d7'+s.qty).join(', '))}</span></td>
           <td>${o.collect==='venue'?'<span class="chip cash">Cash</span>':`<span class="chip paid">${esc(o.paymentLabel)}</span>`}</td>
           <td class="num">${rp(o.total)}</td>
           <td class="num"><b>${rp(o.commission)}</b></td>
@@ -1627,7 +1643,11 @@ document.addEventListener('click', async (e)=>{
 
   if(d.route){ S.route = d.route; if(d.route==='order') S.stage = S.lastOrder&&S.stage==='done'?'done':'menu'; render(); window.scrollTo(0,0); return; }
   if(d.venue){ S.venueCode = d.venue; S.stage='menu'; render(); return; }
-  if(d.size){ S.size = d.size; render(); return; }
+  if(d.size){
+    S.size = (S.size === d.size) ? null : d.size;     // tap again to drop the bowl
+    if(!S.size){ S.addons = []; S.pick = {protein:[],organ:[],sayuran:[],karbohidrat:[]}; }
+    render(); return;
+  }
   if(d.recipe){
     const r = RECIPES.find(x=>x.id===d.recipe);
     S.pick = JSON.parse(JSON.stringify(r.pick)); S.addons = [...r.addons];
