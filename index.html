@@ -441,15 +441,19 @@ const BRAND = {
   logo:    'Logo.png',                    // must match the uploaded filename EXACTLY, capitals included
   logoH:   190,                           // logo height in px (capped at 86vw so phones never clip it)
   qrisImage: 'qris.png',                  // your static QRIS sticker, sitting next to index.html
-  payeeName: 'Pawsly Gourmet',            // the account name customers should expect to see
+  // Must match what the customer's e-wallet shows when they scan, or they
+  // hesitate. Taken from the QRIS sticker itself.
+  payeeName:    'Pawsly Tangerang - Petshop',
+  qrisMerchant: 'Pawsly Tangerang - Petshop',
+  qrisNmid:     'ID2026523403767',
   promoTitle: 'Freshly cooked, right here at the park',
   promoLine:  'Pick a portion, mix the toppings, collect at the counter',
   bannerHeadline: 'Give The Very best for your Pet',   // the big line on the printed x-banner
   bannerSub: 'Pick, Mix, Delivered it to You',
   // Shown at the bottom of the menu and on every receipt. Replace with the real ones.
-  address:   'Jl. Ruko Pasar Sinpasa Blok SG3 no.8, Gading Serpong, Tangerang 15810',
-  instagram: '@pawsly.id',
-  whatsapp:  '+62 819 5918 8563',
+  address:   'Jl. Kelapa Gading Raya No. 1, Gading Serpong, Tangerang 15810',
+  instagram: '@pawsly.gourmet',
+  whatsapp:  '+62 811 0000 0000',
 };
 function logoMark(size, suffix){
   const tail = suffix ? ` <span style="font-family:var(--body);font-size:${Math.round(size*0.42)}px;font-weight:700;color:var(--text-soft)">${esc(suffix)}</span>` : '';
@@ -1163,10 +1167,11 @@ function qrisPanel(o){
   return `<div class="card" style="margin-top:12px;text-align:center">
     <b style="font-family:var(--display);font-size:18px">Scan to pay ${rp(o.payTotal||o.total)}</b>
     <div style="margin-top:10px">
-      <img src="${esc(BRAND.qrisImage)}" alt="QRIS payment code" style="width:240px;max-width:100%;border-radius:12px;background:#FFFBF2;padding:10px"
+      <img src="${esc(BRAND.qrisImage)}" alt="QRIS payment code" style="width:250px;max-width:72vw;border-radius:10px;background:#fff;padding:10px;border:1px solid var(--line)"
            onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'lvl',textContent:'QRIS image not uploaded yet \u2014 ask staff at the counter.'}))">
     </div>
-    <p class="lvl">Any e-wallet works. Enter the amount above exactly.</p>
+    ${BRAND.qrisMerchant ? `<p class="lvl" style="margin-top:8px"><b>${esc(BRAND.qrisMerchant)}</b>${BRAND.qrisNmid?`<br>NMID ${esc(BRAND.qrisNmid)}`:''}</p>` : ''}
+    <p class="lvl">Any e-wallet works. Type the amount in yourself — this code does not carry it.</p>
   </div>`;
 }
 
