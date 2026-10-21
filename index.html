@@ -423,6 +423,9 @@ hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
 <body>
 <main id="app" aria-live="polite"></main>
 <div id="sticky"></div>
+<!-- Your Supabase connection lives in config.js, a separate file, so uploading a new
+     index.html can never wipe it. If the file is missing the page says so on screen. -->
+<script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 /* ============================================================
@@ -596,10 +599,27 @@ let S = {               // view state
    of its own, and Row Level Security in supabase-setup.sql is what
    actually protects the data. Never put the secret key here.
    ============================================================ */
-const SUPABASE = {
-  url: '',   // e.g. 'https://abcdefgh.supabase.co'
-  key: '',   // 'sb_publishable_...'  (Settings > API Keys)
-};
+/* The connection now comes from config.js (next to index.html), so this file
+   never needs editing and a new upload can never blank it. Anything already
+   typed here still works as a fallback. */
+function keyIsSecret(k){
+  k = String(k||'');
+  if(/^sb_secret_/.test(k)) return true;
+  if(/^eyJ/.test(k)){                       // legacy JWT keys: read the role claim
+    try{
+      const body = JSON.parse(atob(k.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+      return body.role === 'service_role';
+    }catch(e){ return false; }
+  }
+  return false;
+}
+const SUPABASE = Object.assign({ url:'', key:'' }, (window.PAWSLY_CONFIG || {}));
+SUPABASE.url = String(SUPABASE.url||'').trim().replace(/\/+$/,'');
+SUPABASE.key = String(SUPABASE.key||'').trim();
+// config.js is public. A secret key there would hand out the whole database,
+// so it is refused outright and flagged loudly on screen.
+const SECRET_IN_CONFIG = keyIsSecret(SUPABASE.key);
+if(SECRET_IN_CONFIG){ console.error('config.js contains a SECRET key. Remove it and rotate it in Supabase.'); SUPABASE.key = ''; }
 
 const CONN = 'pawsly:conn';
 const CFGK = 'pawsly:cfg';
@@ -1252,7 +1272,8 @@ function diagTitle(){
 }
 function diagBody(){
   if(S.closedVenue) return `Pawsly no longer takes orders at ${esc(S.closedVenue)}. Pick another branch below.`;
-  if(!STORE.live)   return 'This page has no database connection, so it cannot look up any branch. Staff: fill in SUPABASE.url and SUPABASE.key near the top of index.html and commit.';
+  if(SECRET_IN_CONFIG) return 'config.js contains a SECRET key, so it was ignored. Staff: remove it, then rotate that key in Supabase today.';
+  if(!STORE.live)   return 'This page has no database connection, so it cannot look up any branch. Staff: upload config.js next to index.html with the Supabase URL and publishable key.';
   if(!DB.venues.length) return 'The database is connected but has no branches in it. Pawsly staff need to add one from the HQ console.';
   if(S.askedFor)    return `This link asked for branch "${esc(S.askedFor)}", which is not in the system. Pick a branch below instead.`;
   return 'Ordering opens from the QR code on the x-banner at the pool or dog park. Or pick a branch below.';
@@ -1268,7 +1289,7 @@ function viewNoVenue(){
     </header>
     ${(!STORE.live || !DB.venues.length || S.askedFor) ? `<div class="note" style="margin-bottom:14px">
       <b>Diagnostics</b>
-      Database: ${STORE.live ? 'connected' : '<b>NOT CONNECTED \u2014 SUPABASE.url / SUPABASE.key are empty in index.html</b>'}<br>
+      Database: ${STORE.live ? 'connected' : (SECRET_IN_CONFIG ? '<b>config.js holds a SECRET key \u2014 ignored. Remove and rotate it.</b>' : '<b>NOT CONNECTED \u2014 config.js is missing or its url / key are empty</b>')}<br>
       Branches loaded: ${DB.venues.length}${DB.venues.length?' ('+DB.venues.map(v=>esc(v.code)).join(', ')+')':''}<br>
       ${S.askedFor ? `Branch code in this link: <b>${esc(S.askedFor)}</b>` : 'No branch code in this link'}
     </div>` : ''}
@@ -1313,7 +1334,7 @@ function viewConnect(){
       <label class="field"><span>Publishable key <em>\u2014 Settings \u203a API Keys. Safe in a browser; never the secret key</em></span>
         <input type="text" id="sbKey" placeholder="sb_publishable_..." value="${esc(STORE.cfg.key||'')}"></label>
       <button class="btn block" id="sbSave">Connect</button>
-      <p class="lvl">Run <b>supabase-setup.sql</b> in the Supabase SQL editor first.</p>
+      <p class="lvl">Run <b>supabase-setup.sql</b> in the Supabase SQL editor first. This only saves the details on this device; put the same two values in <b>config.js</b> and every device gets them.</p>
     </div>
   </div>`;
 }
@@ -1732,7 +1753,7 @@ document.addEventListener('click', async (e)=>{
     case 'sbSave': {
       const url = $('#sbUrl').value.trim().replace(/\/+$/,''), key = $('#sbKey').value.trim();
       if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)){ toast('URL should look like https://xxxx.supabase.co'); break; }
-      if(/^sb_secret_/.test(key) || /service_role/.test(key)){
+      if(keyIsSecret(key)){
         toast('That is a SECRET key. Use the publishable key \u2014 a secret key in a web page exposes your whole database.');
         break;
       }
