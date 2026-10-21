@@ -15,6 +15,6 @@
    but if one was ever uploaded, rotate it in Supabase straight away.
    ============================================================ */
 window.PAWSLY_CONFIG = {
-  url: '',
-  key: '',
+  url: 'https://tpidbegfupmvoirlbwjv.supabase.co',
+  key: 'sb_publishable_Ay8rSHNrzH-tt1Wv4laxfQ_rODK3n1o',
 };
