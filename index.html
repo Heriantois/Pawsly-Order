@@ -571,6 +571,7 @@ let S = {               // view state
   route:'order', venueCode:null, stage:'menu',
   size:null, pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],   // size null = treats only
   snacks:{},                       // { snackId: qty }
+  bowls:[],                        // basket: finished bowls [{size,pick,addons}]
   fulfil:FULFIL[0].id, payment:PAYMENTS[0].id, uniq:null,
   cust:{name:'',phone:'',dog:''}, note:'',
   lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null, askedFor:'',
@@ -915,17 +916,46 @@ function snackLines(map){
   return SNACKS.filter(s=>(map||{})[s.id]>0)
                .map(s=>({ id:s.id, label:s.label, price:s.price, qty:map[s.id] }));
 }
+const EMPTY_PICK = () => ({protein:[],organ:[],sayuran:[],karbohidrat:[]});
+function bowlPrice(b){
+  const sz = SIZES.find(s=>s.id===b.size);
+  return (sz?sz.price:0) + b.addons.reduce((t,id)=>t+(ADDONS.find(a=>a.id===id)||{price:0}).price,0);
+}
+/* Every bowl in the order: the basket plus the one currently being built. */
+function allBowls(){
+  const list = S.bowls.slice();
+  if(S.size) list.push({ size:S.size, pick:S.pick, addons:S.addons });
+  return list;
+}
 function priceNow(){
-  const size = S.size ? SIZES.find(s=>s.id===S.size) : null;     // null = no bowl
-  const addon = size ? S.addons.reduce((t,id)=>t+(ADDONS.find(a=>a.id===id)||{price:0}).price,0) : 0;
+  const bowls = allBowls().map(b=>({ ...b, sz:SIZES.find(s=>s.id===b.size), price:bowlPrice(b) }));
+  const bowlTotal = bowls.reduce((t,b)=>t+b.price,0);
+  const size = bowls.length ? bowls[0].sz : null;                 // null = no bowl
   const snacks = snackLines(S.snacks);
   const snackTotal = snacks.reduce((t,s)=>t+s.price*s.qty,0);
   const fee = (FULFIL.find(f=>f.id===S.fulfil)||{}).fee||0;
-  const subtotal = (size ? size.price : 0) + addon + snackTotal;
+  const subtotal = bowlTotal + snackTotal;
   const total = subtotal + fee;
   const pay = PAYMENTS.find(m=>m.id===S.payment) || PAYMENTS[0];
   const uniq = pay.uniq ? (S.uniq || 0) : 0;
-  return { size, addon, snacks, snackTotal, fee, subtotal, total, pay, uniq, payTotal: total + uniq };
+  return { size, bowls, bowlTotal, snacks, snackTotal, fee, subtotal, total, pay, uniq, payTotal: total + uniq };
+}
+/* Move the bowl being built into the basket and clear the builder. */
+function commitBowl(){
+  if(!S.size || !bowlReady()) return false;
+  S.bowls.push({ size:S.size, pick:JSON.parse(JSON.stringify(S.pick)), addons:[...S.addons] });
+  S.size = null; S.pick = EMPTY_PICK(); S.addons = [];
+  return true;
+}
+/* Bowls of a saved order. Extra bowls ride inside pick.extra so the database
+   table needs no new column; old single-bowl orders read exactly as before. */
+function orderBowls(o){
+  if(!o.size) return [];
+  const extra = (o.pick && o.pick.extra) || [];
+  const snackSum = (o.snacks||[]).reduce((t,s)=>t+s.price*s.qty,0);
+  const extraSum = extra.reduce((t,b)=>t+(b.price||0),0);
+  return [{ sizeName:o.sizeName, pick:o.pick, addons:o.addons, price:o.subtotal-snackSum-extraSum },
+          ...extra.map(b=>({ sizeName:b.sizeName, pick:b.pick, addons:b.addons||[], price:b.price||0 }))];
 }
 
 /* A 2-digit code appended to the amount so a bank or QRIS entry maps to exactly
@@ -946,9 +976,9 @@ function bowlReady(){
    cart, or a bowl missing the two things the kitchen cannot cook without. */
 function cartState(){
   const treats = Object.values(S.snacks||{}).some(q=>q>0);
-  if(!S.size && !treats) return { ok:false, why:'Add a bowl or a treat' };
+  if(!S.size && !S.bowls.length && !treats) return { ok:false, why:'Add a bowl or a treat' };
   if(S.size && !bowlReady()) return { ok:false, why:'Pick a protein & carb' };
-  return { ok:true, why:'Continue to payment', treatsOnly: !S.size };
+  return { ok:true, why:'Review basket & pay', treatsOnly: !S.size && !S.bowls.length };
 }
 function bowlText(pick){
   return GROUPS.map(g=>{
@@ -969,8 +999,17 @@ function viewMenu(){
       <div class="promo"><b>${esc(BRAND.promoTitle)}</b><span>${esc(BRAND.promoLine)}</span></div>
     </header>
 
+    ${S.bowls.length ? `<div class="card" style="margin-bottom:14px">
+      <div class="step" style="margin:0 0 8px"><b>Your basket</b><i>${S.bowls.length} bowl${S.bowls.length>1?'s':''}</i></div>
+      ${S.bowls.map((b,i)=>`<div style="padding:8px 0;${i?'border-top:1px solid var(--line)':''}">
+        <div class="row"><span><b>${SIZES.find(s=>s.id===b.size).name} Bowl</b></span><span>${rp(bowlPrice(b))}</span></div>
+        <p class="bowlline" style="margin:4px 0 6px">${bowlText(b.pick)}${b.addons.length?' · <b>Add-ons:</b> '+esc(b.addons.map(id=>ADDONS.find(a=>a.id===id).label).join(', ')):''}</p>
+        <button class="btn ghost sm" data-rmbowl="${i}">Remove</button>
+      </div>`).join('')}
+    </div>` : ''}
+
     <section>
-      <div class="step"><b>Choose size</b><i>${S.size?'Step 1':'optional'}</i></div>
+      <div class="step"><b>Choose size</b><i>${S.size?(S.bowls.length?'Bowl '+(S.bowls.length+1):'Step 1'):(S.bowls.length?'another bowl?':'optional')}</i></div>
       <div class="sizes">
         ${SIZES.map(s=>`
           <button class="size ${s.cls}" data-size="${s.id}" aria-pressed="${S.size===s.id}">
@@ -1033,6 +1072,11 @@ function viewMenu(){
       </div>
     </section>`}
 
+    ${S.size ? `<section>
+      <button class="btn block ${bowlReady()?'gold':'ghost'}" id="addBowl" ${bowlReady()?'':'disabled'}>+ Add this bowl to basket &amp; build another</button>
+      <p class="lvl">${bowlReady() ? 'Want a different recipe for another dog? Add this one to the basket first, then pick again. Or just scroll down and continue.' : 'Pick at least a protein and a carb to add this bowl to your basket.'}</p>
+    </section>` : ''}
+
     <section>
       <div class="step"><b>Treats to take home</b><i>${SNACKS.length} options</i></div>
       <div class="snackrow">
@@ -1083,8 +1127,9 @@ function stickyMenu(){
   const p = priceNow();
   const c = cartState();
   const bits = [];
-  if(p.size) bits.push(p.size.name);
-  if(S.addons.length) bits.push(`${S.addons.length} add-on${S.addons.length>1?'s':''}`);
+  if(p.bowls.length) bits.push(p.bowls.length>1 ? `${p.bowls.length} bowls` : p.bowls[0].sz.name);
+  const nAddons = p.bowls.reduce((t,b)=>t+b.addons.length,0);
+  if(nAddons) bits.push(`${nAddons} add-on${nAddons>1?'s':''}`);
   const nTreats = p.snacks.reduce((t,s)=>t+s.qty,0);
   if(nTreats) bits.push(`${nTreats} treat${nTreats>1?'s':''}`);
   return `<div class="sticky"><div class="inner">
@@ -1104,12 +1149,22 @@ function viewCheckout(){
     </header>
 
     <div class="card">
-      ${p.size ? `<div class="row"><span><b>${p.size.name} Bowl</b></span><span>${rp(p.size.price)}</span></div>
-      <p class="bowlline" style="margin:6px 0 0">${bowlText(S.pick)}</p>`
+      ${p.bowls.length ? p.bowls.map((b,i)=>`<div style="padding:6px 0;${i?'border-top:1px solid var(--line);margin-top:6px':''}">
+        <div class="row"><span><b>${b.sz.name} Bowl</b></span><span>${rp(b.sz.price)}</span></div>
+        <p class="bowlline" style="margin:6px 0 0">${bowlText(b.pick)}</p>
+        ${b.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row" style="margin-top:7px"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn ghost sm" data-editbowl="${i}">Edit</button>
+          <button class="btn ghost sm" data-rmbowl="${i}">Remove</button>
+        </div></div>`).join('')
       : `<div class="row"><span><b>Treats only</b></span><span></span></div>`}
-      ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row" style="margin-top:7px"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
-      ${p.snacks.map(s=>`<div class="row" style="margin-top:7px"><span>${esc(s.label)} ×${s.qty}</span><span>${rp(s.price*s.qty)}</span></div>`).join('')}
-      <div style="margin-top:10px"><button class="btn ghost sm" id="backMenu">${p.size?'Change ingredients':'Change order'}</button></div>
+      ${p.snacks.map(s=>`<div class="row" style="margin-top:10px;align-items:center"><span>${esc(s.label)}<br><span class="lvl" style="margin:0">${rp(s.price)} each</span></span>
+        <span style="display:flex;align-items:center;gap:8px">
+          <button class="btn ghost sm" data-snack="${s.id}" data-d="-1" aria-label="Remove one ${esc(s.label)}">−</button>
+          <b>${s.qty}</b>
+          <button class="btn ghost sm" data-snack="${s.id}" data-d="1" aria-label="Add one ${esc(s.label)}">+</button>
+          <span style="min-width:74px;text-align:right">${rp(s.price*s.qty)}</span></span></div>`).join('')}
+      <div style="margin-top:12px"><button class="btn gold block" id="backMenu">+ Add more items</button></div>
     </div>
 
     <div class="step"><b>Collection</b></div>
@@ -1140,8 +1195,8 @@ function viewCheckout(){
 
     <div class="card" style="margin-top:14px">
       <div class="rows">
-        ${p.size ? `<div class="row"><span>${p.size.name} Bowl</span><span>${rp(p.size.price)}</span></div>` : ''}
-        ${S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}
+        ${p.bowls.map(b=>`<div class="row"><span>${b.sz.name} Bowl</span><span>${rp(b.sz.price)}</span></div>
+        ${b.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return `<div class="row"><span>${esc(a.label)}</span><span>${rp(a.price)}</span></div>`;}).join('')}`).join('')}
         ${p.snacks.map(s=>`<div class="row"><span>${esc(s.label)} ×${s.qty}</span><span>${rp(s.price*s.qty)}</span></div>`).join('')}
         ${p.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(p.fee)}</span></div>`:''}
         <div class="row total"><span>Total</span><span>${rp(p.total)}</span></div>
@@ -1163,6 +1218,17 @@ function stickyCheckout(){
   </div></div>`;
 }
 
+const bowlAddons = b => b.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return {id:a.id,label:a.label,price:a.price};});
+/* First bowl fills the usual columns; any further bowls ride in pick.extra. */
+function orderPick(bowls){
+  if(!bowls.length) return EMPTY_PICK();
+  const pick = JSON.parse(JSON.stringify(bowls[0].pick));
+  if(bowls.length>1) pick.extra = bowls.slice(1).map(b=>({
+    size:b.size, sizeName:b.sz.name, price:b.price,
+    pick:JSON.parse(JSON.stringify(b.pick)), addons:bowlAddons(b),
+  }));
+  return pick;
+}
 async function placeOrder(){
   const name = ($('#cName')||{}).value?.trim() || '';
   const phone = ($('#cPhone')||{}).value?.trim() || '';
@@ -1184,9 +1250,10 @@ async function placeOrder(){
     id:'o'+Date.now(), code:'PW-'+rid(4),
     venueCode: S.venueCode || null,
     createdAt: new Date().toISOString(),
-    size:S.size, sizeName: p.size ? p.size.name : 'Treats only',
-    pick: JSON.parse(JSON.stringify(S.pick)),
-    addons: S.addons.map(id=>{const a=ADDONS.find(x=>x.id===id);return {id:a.id,label:a.label,price:a.price};}),
+    size: p.bowls.length ? p.bowls[0].size : null,
+    sizeName: p.size ? p.size.name : 'Treats only',
+    pick: orderPick(p.bowls),
+    addons: p.bowls.length ? bowlAddons(p.bowls[0]) : [],
     snacks: p.snacks,
     fulfil:S.fulfil, fee:p.fee,
     payment:pay.id, paymentLabel:pay.label, collect:pay.collect,
@@ -1239,7 +1306,7 @@ function viewDone(){
 
     <div class="card" style="margin-top:12px">
       <div class="rows">
-        ${o.size ? `<div class="row"><span>${esc(o.sizeName)} Bowl${o.addons.length?` + ${o.addons.map(a=>esc(a.label)).join(', ')}`:''}</span><span>${rp(o.subtotal - (o.snacks||[]).reduce((t,s)=>t+s.price*s.qty,0))}</span></div>` : ''}
+        ${orderBowls(o).map(b=>`<div class="row"><span>${esc(b.sizeName)} Bowl${b.addons.length?` + ${b.addons.map(a=>esc(a.label)).join(', ')}`:''}</span><span>${rp(b.price)}</span></div>`).join('')}
         ${(o.snacks||[]).map(s=>`<div class="row"><span>${esc(s.label)} ×${s.qty}</span><span>${rp(s.price*s.qty)}</span></div>`).join('')}
         ${o.fee?`<div class="row"><span>Pool deck delivery</span><span>${rp(o.fee)}</span></div>`:''}
         ${o.uniq ? `<div class="row"><span>Verification code</span><span>+ ${String(o.uniq).padStart(2,'0')}</span></div>
@@ -1248,7 +1315,7 @@ function viewDone(){
         <div class="row muted"><span>${esc(o.paymentLabel)}</span><span>${cash?'<span class="chip cash">Pay at counter</span>':'<span class="chip paid">Paid</span>'}</span></div>
       </div>
       ${o.size ? `<hr class="sep">
-      <p class="bowlline">${bowlText(o.pick)}</p>` : ''}
+      ${orderBowls(o).map((b,i,a)=>`<p class="bowlline" style="${i?'margin-top:6px':''}">${a.length>1?`<b>Bowl ${i+1}</b> · `:''}${bowlText(b.pick)}</p>`).join('')}` : ''}
       ${o.note?`<p class="bowlline" style="margin-top:6px"><b>Note:</b> ${esc(o.note)}</p>`:''}
       ${v?`<p class="bowlline" style="margin-top:6px"><b>Venue:</b> ${esc(v.name)} — ${esc(FULFIL.find(f=>f.id===o.fulfil).label)}</p>`:''}
     </div>
@@ -1407,8 +1474,8 @@ function viewPartner(){
         <tbody>${rows.slice(0,60).map(o=>`<tr>
           <td>${fmtTime(o.createdAt)}<br><span style="color:var(--text-soft);font-size:11.5px">${fmtDay(dayKey(o.createdAt))}</span></td>
           <td><b>${esc(o.code)}</b><br><span style="color:var(--text-soft);font-size:11.5px">${esc(o.cust.dog||o.cust.name)}</span></td>
-          <td>${esc(o.sizeName||'\u2014')}${o.addons.length?` +${o.addons.length}`:''}<br><span style="color:var(--text-soft);font-size:11.5px">${esc(
-            o.size ? (o.pick.protein||[]).map(label).join(', ')
+          <td>${esc(o.sizeName||'\u2014')}${o.addons.length?` +${o.addons.length}`:''}${(((o.pick&&o.pick.extra)||[]).length)?` <b>+${o.pick.extra.length} bowl${o.pick.extra.length>1?'s':''}</b>`:''}<br><span style="color:var(--text-soft);font-size:11.5px">${esc(
+            o.size ? orderBowls(o).map(b=>(b.pick.protein||[]).map(label).join(', ')).join(' / ')
                    : (o.snacks||[]).map(s=>s.label+' \u00d7'+s.qty).join(', '))}</span></td>
           <td>${o.collect==='venue'?'<span class="chip cash">Cash</span>':`<span class="chip paid">${esc(o.paymentLabel)}</span>`}</td>
           <td class="num">${rp(o.total)}</td>
@@ -1624,13 +1691,14 @@ function viewHQ(){
    CSV
    ============================================================ */
 function downloadCsv(list, name){
-  const head = ['code','time','venue','size','protein','organ','vegetables','carbs','addons','snacks','payment','revenue','pay_amount','share_pct','venue_share','settlement'];
+  const head = ['code','time','venue','size','protein','organ','vegetables','carbs','addons','snacks','extra_bowls','payment','revenue','pay_amount','share_pct','venue_share','settlement'];
   const body = list.map(o=>[
     o.code, new Date(o.createdAt).toLocaleString('en-GB'), o.venueCode||'-', o.sizeName,
     (o.pick.protein||[]).map(label).join('|'), (o.pick.organ||[]).map(label).join('|'),
     (o.pick.sayuran||[]).map(label).join('|'), (o.pick.karbohidrat||[]).map(label).join('|'),
     o.addons.map(a=>a.label).join('|'),
     (o.snacks||[]).map(s=>s.label+' x'+s.qty).join('|'),
+    orderBowls(o).slice(1).map(b=>b.sizeName+': '+GROUPS.map(g=>(b.pick[g.id]||[]).map(label).join('+')).join(' / ')+(b.addons.length?' + '+b.addons.map(a=>a.label).join('+'):'')).join(' | '),
     o.paymentLabel, o.total, o.payTotal||o.total, Math.round(o.rate*100), o.commission,
     o.settled?'settled':'pending',
   ].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
@@ -1663,6 +1731,13 @@ function render(){
   st.innerHTML = sticky;
 }
 
+/* If someone empties the basket while on the payment screen, send them back to the menu. */
+function emptyCheckoutToMenu(){
+  if(S.stage==='checkout' && !S.bowls.length && !S.size && !Object.values(S.snacks).some(q=>q>0)){
+    S.stage='menu'; window.scrollTo(0,0);
+  }
+}
+
 document.addEventListener('click', async (e)=>{
   const b = e.target.closest('button'); if(!b) return;
   const d = b.dataset;
@@ -1691,7 +1766,17 @@ document.addEventListener('click', async (e)=>{
   if(d.snack){
     const n = Math.max(0, Math.min(20, (S.snacks[d.snack]||0) + parseInt(d.d,10)));
     if(n) S.snacks[d.snack] = n; else delete S.snacks[d.snack];
-    render(); return;
+    emptyCheckoutToMenu(); render(); return;
+  }
+  if(d.rmbowl){
+    S.bowls.splice(parseInt(d.rmbowl,10),1);
+    emptyCheckoutToMenu(); render(); toast('Bowl removed'); return;
+  }
+  if(d.editbowl){
+    if(S.size && !commitBowl()){ toast('Finish or clear the bowl you are building first'); return; }
+    const b = S.bowls.splice(parseInt(d.editbowl,10),1)[0];
+    S.size=b.size; S.pick=b.pick; S.addons=b.addons;
+    keepForm(); S.stage='menu'; render(); window.scrollTo(0,0); return;
   }
   if(d.addon){
     const i = S.addons.indexOf(d.addon);
@@ -1706,11 +1791,12 @@ document.addEventListener('click', async (e)=>{
   if(d.paid){ await STORE.settleOrder(d.paid); render(); toast('Marked received'); return; }
 
   switch(b.id){
-    case 'toCheckout': S.uniq = STORE.live ? 0 : pickUniq(); S.stage='checkout'; render(); window.scrollTo(0,0); break;
+    case 'addBowl':    if(commitBowl()){ render(); window.scrollTo(0,0); toast('Bowl added to your basket'); } break;
+    case 'toCheckout': commitBowl(); S.uniq = STORE.live ? 0 : pickUniq(); S.stage='checkout'; render(); window.scrollTo(0,0); break;
     case 'backMenu':   keepForm(); S.stage='menu'; render(); window.scrollTo(0,0); break;
     case 'payNow':     await placeOrder(); break;
     case 'again':
-      S.pick={protein:[],organ:[],sayuran:[],karbohidrat:[]}; S.addons=[]; S.snacks={}; S.stage='menu'; S.lastOrder=null;
+      S.pick={protein:[],organ:[],sayuran:[],karbohidrat:[]}; S.addons=[]; S.snacks={}; S.bowls=[]; S.stage='menu'; S.lastOrder=null;
       S.payment=PAYMENTS[0].id; S.fulfil=FULFIL[0].id; S.uniq=null;
       render(); window.scrollTo(0,0); break;
     case 'doSignIn': {
