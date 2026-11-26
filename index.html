@@ -26,6 +26,7 @@
   --page:#FDF1DC;
   --panel:#FAE4C2;
   --pill-text:#FFFBF2;
+  --on-ink-accent:#E89C2A;
   --good:#1D7A4C;
   --warn:#B8701A;
   --bad:#A33327;
@@ -53,6 +54,7 @@
     --page:#0E2316;
     --panel:#17301F;
     --pill-text:#0E2316;
+    --on-ink-accent:#7A4A00;
     --good:#6FD39A;
     --warn:#F0A93C;
     --bad:#E88877;
@@ -85,7 +87,7 @@ a{color:var(--ink-2)}
 
 /* ---------- venue ribbon ---------- */
 .ribbon{
-  background:var(--ink);color:#FFFBF2;
+  background:var(--ink);color:var(--pill-text);
   padding:8px 16px;font-size:13.5px;font-weight:700;
   display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;
 }
@@ -170,7 +172,7 @@ a{color:var(--ink-2)}
 }
 .recipe:hover{border-color:var(--line-strong)}
 .recipe .n{
-  flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#FFFBF2;
+  flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--pill-text);
   display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:16px
 }
 .recipe .t{font-family:var(--display);font-weight:700;font-size:17px;color:var(--ink);line-height:1.15}
@@ -179,11 +181,11 @@ a{color:var(--ink-2)}
 /* ---------- ingredient groups ---------- */
 .group{margin:18px 0 0;background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);overflow:hidden}
 .group > header{
-  background:var(--ink);color:#FFFBF2;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px
+  background:var(--ink);color:var(--pill-text);padding:9px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px
 }
 .group > header h3{font-family:var(--display);font-weight:700;font-size:16px;margin:0;letter-spacing:.01em}
 .group > header span{font-size:12px;font-weight:700;opacity:.8}
-.group.full > header span{color:var(--marigold);opacity:1}
+.group.full > header span{color:var(--on-ink-accent);opacity:1;font-weight:900}
 .picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;padding:12px 8px}
 .pick{
   display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 2px 9px;
@@ -214,13 +216,15 @@ a{color:var(--ink-2)}
 .snackrow::-webkit-scrollbar{height:6px}
 .snackrow::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:3px}
 .snack{
-  flex:0 0 44%;min-width:150px;max-width:190px;scroll-snap-align:start;
+  min-width:0;
   background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);
   padding:12px 12px 10px;display:flex;flex-direction:column;gap:6px;
 }
 .snack.on{border-color:var(--ink);background:var(--cream-2)}
+.snack.soon{opacity:.72}
+.snack.soon .step2 .add{background:transparent;color:var(--text-soft);border:2px dashed var(--line-strong)}
 .snack .pic{
-  width:100%;aspect-ratio:1/1;border-radius:12px;background:var(--bone);
+  display:block;width:100%;aspect-ratio:1/1;border-radius:12px;background-color:var(--bone);
   border:1px solid var(--line);overflow:hidden
 }
 .snack .pic img{display:block;width:100%;height:100%;object-fit:cover}
@@ -234,7 +238,7 @@ a{color:var(--ink-2)}
 }
 .step2 button:disabled{opacity:.3}
 .step2 .qty{font-weight:900;font-size:15px;min-width:20px;text-align:center}
-.step2 .add{flex:1;width:auto;border-radius:999px;background:var(--ink);color:#FFFBF2;border-color:var(--ink);font-size:14px;font-family:var(--display)}
+.step2 .add{flex:1;width:auto;border-radius:999px;background:var(--ink);color:var(--pill-text);border-color:var(--ink);font-size:14px;font-family:var(--display)}
 .scrollhint{font-size:11.5px;color:var(--text-soft);text-align:right;margin:-6px 0 0}
 .contact{
   text-align:center;font-size:12.5px;color:var(--text-soft);line-height:1.6;
@@ -280,7 +284,7 @@ textarea{min-height:68px;resize:vertical}
 /* ---------- buttons ---------- */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  background:var(--ink);color:#FFFBF2;border-radius:999px;padding:13px 22px;
+  background:var(--ink);color:var(--pill-text);border-radius:999px;padding:13px 22px;
   font-family:var(--display);font-weight:700;font-size:17px;box-shadow:var(--shadow)
 }
 .btn.block{display:flex;width:100%}
@@ -311,11 +315,19 @@ textarea{min-height:68px;resize:vertical}
 .row.total{border-top:2px dashed var(--line-strong);padding-top:9px;margin-top:3px;font-size:17px}
 .row.total span{font-family:var(--display);font-weight:800}
 .row.muted span{color:var(--text-soft);font-weight:600}
+/* Payment ticket: colours are FIXED (not theme tokens) so it is equally readable
+   in light and dark mode. White on deep green, amount in a bright box. */
 .tix{
-  text-align:center;background:var(--ink);color:#FFFBF2;border-radius:var(--r-m);padding:22px 16px
+  text-align:center;background:#12351F;color:#FFFFFF;border:3px solid #F0A93C;
+  border-radius:var(--r-m);padding:22px 16px
 }
-.tix .code{font-family:var(--display);font-weight:800;font-size:38px;letter-spacing:.04em;line-height:1}
-.tix .lbl{font-size:12.5px;opacity:.8;margin-top:4px}
+.tix .k{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#F0A93C}
+.tix .code{font-family:var(--display);font-weight:800;font-size:44px;letter-spacing:.05em;line-height:1.05;color:#FFFFFF;margin-top:2px}
+.tix .lbl{font-size:15px;font-weight:600;color:#FFFFFF;margin-top:4px}
+.tix .amt{background:#FFFBF2;color:#12351F;border-radius:14px;padding:14px 12px;margin-top:18px}
+.tix .amt .ak{font-size:14px;font-weight:800;color:#12351F}
+.tix .amt .av{font-family:var(--display);font-weight:800;font-size:38px;line-height:1.1;color:#12351F;margin:2px 0 6px}
+.tix .amt .an{font-size:14px;font-weight:600;color:#33483B;line-height:1.4}
 .chip{
   display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;
   font-size:12px;font-weight:800
@@ -336,11 +348,11 @@ textarea{min-height:68px;resize:vertical}
 .tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
 
 /* ---------- dashboard ---------- */
-.dash-top{background:var(--ink);color:#FFFBF2;padding:18px 0 56px;margin-bottom:-44px}
+.dash-top{background:var(--ink);color:var(--pill-text);padding:18px 0 56px;margin-bottom:-44px}
 .dash-top .wrap{padding-bottom:0}
 .dash-top h2{font-family:var(--display);font-size:26px;margin:0;font-weight:800}
 .dash-top p{margin:2px 0 0;font-size:13.5px;opacity:.78}
-.dash-top .out{margin-left:auto;color:#FFFBF2;border:2px solid rgba(255,251,242,.35);border-radius:999px;padding:6px 14px;font-weight:700;font-size:13.5px}
+.dash-top .out{margin-left:auto;color:var(--pill-text);border:2px solid color-mix(in srgb,var(--pill-text) 45%,transparent);border-radius:999px;padding:6px 14px;font-weight:700;font-size:13.5px}
 .dash-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 
 @media(max-width:620px){.dash-top .dash-head > div:first-child{padding-right:78px}}
@@ -400,7 +412,7 @@ td b{font-weight:800}
 .foot{text-align:center;font-size:12.5px;color:var(--text-soft);margin-top:28px}
 .toast{
   position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:80;
-  background:var(--ink);color:#FFFBF2;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;
+  background:var(--ink);color:var(--pill-text);padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;
   box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:88vw;text-align:center
 }
 .grid2{display:grid;gap:12px}
@@ -418,6 +430,28 @@ hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
 .promo span{display:block;font-size:13px;font-weight:600;color:#3A2A08;margin-top:2px}
 .xbgrid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(238px,1fr))}
 .xbgrid .xb{max-width:none}
+
+/* ---------- sized add-ons (potion / VCO) ---------- */
+.opt{background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);padding:12px 14px}
+.opt + .opt{margin-top:10px}
+.opt .t{font-weight:800;font-size:15.5px}
+.opt .d{font-size:12.5px;color:var(--text-soft)}
+.szrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.szbtn{border:2px solid var(--line-strong);border-radius:12px;padding:9px 4px;text-align:center;background:var(--bone);min-height:54px}
+.szbtn b{display:block;font-family:var(--display);font-size:15px;color:var(--ink)}
+.szbtn span{font-size:12.5px;font-weight:800;color:var(--ink-2)}
+.szbtn[aria-pressed="true"]{border-color:var(--ink);background:var(--cream-2);box-shadow:inset 0 0 0 1px var(--ink)}
+
+/* ---------- treats grid (2 cols phone, 3 cols tablet) ---------- */
+.snackgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+
+/* ---------- tablet ---------- */
+@media(min-width:768px){
+  .wrap:not(.wide){max-width:720px}
+  .snackgrid{grid-template-columns:repeat(3,1fr)}
+  .picks{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+}
+@media(min-width:1000px){.snackgrid{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
@@ -434,6 +468,8 @@ hr.sep{border:none;border-top:2px dashed var(--line);margin:18px 0}
 
 const KEY = 'pawsly:v1';
 const DEFAULT_RATE = 0.10;        // 10% to the venue
+const MAX_BRANCHES = 5;           // HQ console stops offering "add branch" at this many
+const IDLE_MS = 30*60*1000;       // staff sessions end after 30 min without a tap or key
 
 /* ============================================================
    BRAND — edit these five lines to rebrand the whole app
@@ -489,6 +525,7 @@ const GROUPS = [
     { id:'brokoli',     label:'Broccoli',    img:'broccoli.jpg',    c1:'#3F7A2E', c2:'#27551C', shape:'floret' },
     { id:'edamame',     label:'Edamame',     img:'edamame.jpg',     c1:'#8FBE4A', c2:'#5E8F2A', shape:'grain' },
     { id:'kembang_kol', label:'Cauliflower', img:'cauliflower.jpg', c1:'#EFE3C8', c2:'#D4C39C', shape:'floret' },
+    { id:'zucchini',    label:'Zucchini',    img:'zucchini.jpg',    c1:'#8DB04A', c2:'#5C8130', shape:'dice' },
   ]},
   { id:'karbohidrat', title:'Carbs', max:2, items:[
     { id:'oats',       label:'Rolled Oats',  img:'oats.jpg',         c1:'#D9BE8A', c2:'#B99A61', shape:'grain' },
@@ -498,38 +535,76 @@ const GROUPS = [
   ]},
 ];
 
-const ADDONS = [
-  { id:'potion', label:'Pawsly Potion', price:25000, desc:'Fish oil supplement for coat & skin' },
-  { id:'topper', label:'Extra Protein Topper', price:15000, desc:'Extra 50g of your chosen protein' },
+/* Add-ons come in sizes. Each product below is shown as ONE card with S/M/L
+   buttons; a bowl can hold at most one size per product. The flat ADDONS list
+   (id, label, price) is generated from it, so orders, receipts, CSV and the
+   dashboards keep working exactly as before. */
+const ADDON_GROUPS = [
+  { id:'potion', label:'Pawsly Potion', desc:'Salmon oil and eggshell powder',
+    sizes:[ {n:'Small',price:3000}, {n:'Medium',price:6000}, {n:'Large',price:9000} ] },
+  { id:'vco',    label:'VCO Oil',       desc:'Virgin coconut oil',
+    sizes:[ {n:'Small',price:2000}, {n:'Medium',price:4000}, {n:'Large',price:6000} ] },
 ];
+const ADDONS = ADDON_GROUPS.flatMap(g => g.sizes.map(z => ({
+  id: g.id+'_'+z.n.charAt(0).toLowerCase(), grp:g.id, size:z.n,
+  label: g.label+' ('+z.n+')', price:z.price, desc:g.desc,
+})));
 
-/* Three treats for now. Prices and descriptions are PLACEHOLDERS: edit freely.
-   Photos sit next to index.html; img replaces the drawn version. */
+/* Treats. price:null + soon:true = listed on the menu but cannot be ordered yet.
+   Drop a photo next to index.html and set img to its exact filename -- until
+   then a drawn placeholder (c1 / c2 / shape) is shown automatically. */
 const SNACKS = [
-  { id:'bones',  label:'Beef Flavoured Bones Biscuit', price:13000, desc:'Baked biscuit',   img:'treat-bones.jpg',  c1:'#C2342B', c2:'#8E201A', shape:'dice' },
+  { id:'bully_s',   label:'Bully Stick (S)',  price:20000, desc:'1 pcs', img:'treat-bully-s.jpg',  c1:'#B07A4A', c2:'#7A4F2A', shape:'blob' },
+  { id:'bully_m',   label:'Bully Stick (M)',  price:29000, desc:'1 pcs', img:'treat-bully-m.jpg',  c1:'#B07A4A', c2:'#7A4F2A', shape:'blob' },
+  { id:'quail',     label:'Baby Quail',       price:12000, desc:'2 pcs', img:'treat-quail.jpg',    c1:'#C99A5B', c2:'#8E6A35', shape:'blob' },
+  { id:'rab_ear',   label:'Rabbit Ear',       price:21000, desc:'2 pcs', img:'treat-rabbit-ear.jpg',  c1:'#D8C3A5', c2:'#A88F6B', shape:'blob' },
+  { id:'rab_foot',  label:'Rabbit Foot',      price:21000, desc:'2 pcs', img:'treat-rabbit-foot.jpg', c1:'#D8C3A5', c2:'#A88F6B', shape:'blob' },
+  { id:'fd_beef',   label:'Freeze Dry Beef',  price:null, soon:true, desc:'Details coming soon', img:'treat-fd-beef.jpg',    c1:'#C2342B', c2:'#8E201A', shape:'dice' },
+  { id:'fd_chicken',label:'Freeze Dry Chicken',price:null, soon:true, desc:'Details coming soon', img:'treat-fd-chicken.jpg', c1:'#F0D6A8', c2:'#D8B26A', shape:'dice' },
+  { id:'bones',  label:'Beef Flavoured Bones Biscuit', price:13000, desc:'Baked biscuit',        img:'treat-bones.jpg',  c1:'#C2342B', c2:'#8E201A', shape:'dice' },
   { id:'banana', label:'Banana Biscuits',              price:10000, desc:'Fruity biscuit, 100g', img:'treat-banana.jpg', c1:'#E8C86A', c2:'#B99A61', shape:'dice' },
-  { id:'cube',   label:'Silky Beef Cube',              price:12000, desc:'Soft beef treat', img:'treat-cube.jpg',   c1:'#8E4A3A', c2:'#5A2A1E', shape:'dice' },
+  { id:'cube',   label:'Silky Beef Cube',              price:12000, desc:'Soft beef treat',      img:'treat-cube.jpg',   c1:'#8E4A3A', c2:'#5A2A1E', shape:'dice' },
 ];
 
 const RECIPES = [
   { id:'tears', n:1, title:'Bye Bye Tears Stain', desc:'Chicken · Chicken Liver · Rolled Oats · Carrot',
     pick:{ protein:['ayam'], organ:['liver_ayam'], sayuran:['wortel'], karbohidrat:['oats'] }, addons:[] },
-  { id:'bulu', n:2, title:'Bye Bye Bulu Rontok', desc:'Beef · Beef Liver · Sweet Potato · Carrot + Pawsly Potion',
-    pick:{ protein:['sapi'], organ:['liver_sapi'], sayuran:['wortel'], karbohidrat:['ubi_madu'] }, addons:['potion'] },
+  { id:'bulu', n:2, title:'Bye Bye Bulu Rontok', desc:'Beef · Beef Liver · Sweet Potato · Carrot + Pawsly Potion (S)',
+    pick:{ protein:['sapi'], organ:['liver_sapi'], sayuran:['wortel'], karbohidrat:['ubi_madu'] }, addons:['potion_s'] },
 ];
 
-// Trim or extend freely -- the selected default is always the first entry,
-// so deleting a method can no longer leave the checkout with nothing selected.
+/* All payment methods that exist. Which ones a branch OFFERS is set below. */
+//   collect : 'pawsly' = you receive the money and owe the venue its share
+//             'venue'  = the branch's own cashier receives it
+//   uniq    : add a 2-digit verification code to the amount so staff can match a
+//             payment to an order (QR only; cashier orders need none)
+//   showQr  : display BRAND.qrisImage on the order-confirmed screen
 const PAYMENTS = [
-  // collect : 'pawsly' = you receive the money and owe the venue its share
-  //           'venue'  = the venue receives it, keeps its share, owes you the rest
-  //                      (use this if the QRIS sticker is the venue's own)
-  // uniq    : add a 2-digit verification code to the amount so your admin can
-  //           match a payment to an order. Turn OFF once a gateway confirms
-  //           payments automatically -- then the exact amount no longer matters.
-  // showQr  : display BRAND.qrisImage on the checkout screen.
-  { id:'qris', label:'QRIS', desc:'Scan with any e-wallet or mobile banking app', collect:'pawsly', uniq:true, showQr:true },
+  { id:'qris', label:'Scan QR',        desc:'Scan with any e-wallet or mobile banking app', collect:'pawsly', uniq:true,  showQr:true  },
+  { id:'cash', label:'Pay at cashier', desc:'Pay at the counter when you collect',          collect:'venue',  uniq:false, showQr:false },
 ];
+
+/* Which payment methods each branch offers. The key is the branch CODE (upper
+   case) or the branch NAME (lower case) -- either works. A branch that is not
+   listed here gets DEFAULT_PAYMENTS, so a new branch can never accidentally
+   offer QR. */
+const BRANCH_PAYMENTS = {
+  'pawsly hq': ['qris','cash'],     // Scan QR + Pay at cashier
+  'paws':      ['cash'],            // Pay at cashier only
+};
+const DEFAULT_PAYMENTS = ['cash'];
+function allowedPayments(v){
+  const key = v ? (BRANCH_PAYMENTS[String(v.code||'').toUpperCase()] || BRANCH_PAYMENTS[String(v.name||'').trim().toLowerCase()]) : null;
+  const ids = key || DEFAULT_PAYMENTS;
+  const out = PAYMENTS.filter(m=>ids.includes(m.id));
+  return out.length ? out : PAYMENTS.filter(m=>m.id==='cash');
+}
+/* The method actually in force: the customer's pick if this branch allows it,
+   otherwise the branch's first method. */
+function curPay(){
+  const al = allowedPayments(venue(S.venueCode));
+  return al.find(m=>m.id===S.payment) || al[0];
+}
 
 const FULFIL = [
   { id:'counter',  label:'Pick up at the counter', desc:"We'll deliver it to you when it's ready" },
@@ -572,7 +647,7 @@ let S = {               // view state
   size:null, pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],   // size null = treats only
   snacks:{},                       // { snackId: qty }
   bowls:[],                        // basket: finished bowls [{size,pick,addons}]
-  fulfil:FULFIL[0].id, payment:PAYMENTS[0].id, uniq:null,
+  fulfil:FULFIL[0].id, payment:PAYMENTS[0].id, uniq:null, rep:{ venue:'all', days:'30' },
   cust:{name:'',phone:'',dog:''}, note:'',
   lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null, askedFor:'',
 };
@@ -662,7 +737,11 @@ const STORE = {
       if(c && c.url && c.key) this.cfg = c;                       // per-device override
       else if(SUPABASE.url && SUPABASE.key) this.cfg = {...SUPABASE};
       const s = JSON.parse(localStorage.getItem(SESS)||'null');
-      if(s && s.token) this.session = s;
+      if(s && s.token){
+        const act = Number(localStorage.getItem('pawsly:act')||0);
+        if(act && Date.now()-act > IDLE_MS) localStorage.removeItem(SESS);   // stale: make them sign in again
+        else this.session = s;
+      }
     }catch(e){
       this.canLocal = false;
       if(SUPABASE.url && SUPABASE.key) this.cfg = {...SUPABASE};   // storage blocked, still works
@@ -913,7 +992,7 @@ function drawnBowl(){
 function bowlFallback(el){ el.outerHTML = drawnBowl(); }
 
 function snackLines(map){
-  return SNACKS.filter(s=>(map||{})[s.id]>0)
+  return SNACKS.filter(s=>!s.soon && (map||{})[s.id]>0)
                .map(s=>({ id:s.id, label:s.label, price:s.price, qty:map[s.id] }));
 }
 const EMPTY_PICK = () => ({protein:[],organ:[],sayuran:[],karbohidrat:[]});
@@ -936,7 +1015,7 @@ function priceNow(){
   const fee = (FULFIL.find(f=>f.id===S.fulfil)||{}).fee||0;
   const subtotal = bowlTotal + snackTotal;
   const total = subtotal + fee;
-  const pay = PAYMENTS.find(m=>m.id===S.payment) || PAYMENTS[0];
+  const pay = curPay();
   const uniq = pay.uniq ? (S.uniq || 0) : 0;
   return { size, bowls, bowlTotal, snacks, snackTotal, fee, subtotal, total, pay, uniq, payTotal: total + uniq };
 }
@@ -1062,13 +1141,16 @@ function viewMenu(){
     </section>
 
     <section>
-      <div class="step"><b>Add-ons</b><i>Optional</i></div>
-      <div class="recipes">
-        ${ADDONS.map(a=>`
-          <button class="addon" data-addon="${a.id}" aria-pressed="${S.addons.includes(a.id)}">
-            <span><span class="t">${esc(a.label)}</span><br><span class="d">${esc(a.desc)}</span></span>
-            <span class="p">+${rp(a.price)}</span>
-          </button>`).join('')}
+      <div class="step"><b>Add-ons</b><i>Optional · one size each</i></div>
+      ${ADDON_GROUPS.map(g=>`
+        <div class="opt">
+          <span class="t">${esc(g.label)}</span><br><span class="d">${esc(g.desc)}</span>
+          <div class="szrow">
+            ${g.sizes.map(z=>{ const a = ADDONS.find(x=>x.grp===g.id && x.size===z.n);
+              return `<button class="szbtn" data-addon="${a.id}" aria-pressed="${S.addons.includes(a.id)}" aria-label="${esc(a.label)} plus ${rp(a.price)}">
+                <b>${z.n}</b><span>+${rp(a.price)}</span></button>`; }).join('')}
+          </div>
+        </div>`).join('')}
       </div>
     </section>`}
 
@@ -1079,18 +1161,17 @@ function viewMenu(){
 
     <section>
       <div class="step"><b>Treats to take home</b><i>${SNACKS.length} options</i></div>
-      <div class="snackrow">
+      <div class="snackgrid">
         ${SNACKS.map(s=>{
           const q = S.snacks[s.id]||0;
-          return `<div class="snack ${q?'on':''}">
-            <span class="pic">${s.img
-              ? `<img src="${esc(s.img)}" alt="" loading="lazy">`
-              : `<span style="display:block;width:100%;height:100%;background:${medallion(s)}"></span>`}</span>
+          return `<div class="snack ${q?'on':''} ${s.soon?'soon':''}">
+            <span class="pic" style="background:${medallion(s)}"></span>
             <span class="nm">${esc(s.label)}</span>
             <span class="ds">${esc(s.desc||'')}</span>
-            <span class="pr">${rp(s.price)}</span>
+            <span class="pr">${s.soon ? 'Coming soon' : rp(s.price)}</span>
             <div class="step2">
-              ${q ? `<button data-snack="${s.id}" data-d="-1" aria-label="Remove one ${esc(s.label)}">−</button>
+              ${s.soon ? `<button class="add" disabled>Soon</button>`
+                : q ? `<button data-snack="${s.id}" data-d="-1" aria-label="Remove one ${esc(s.label)}">−</button>
                      <span class="qty" aria-live="polite">${q}</span>
                      <button data-snack="${s.id}" data-d="1" aria-label="Add one ${esc(s.label)}">+</button>`
                   : `<button class="add" data-snack="${s.id}" data-d="1">Add</button>`}
@@ -1098,7 +1179,6 @@ function viewMenu(){
           </div>`;
         }).join('')}
       </div>
-      <p class="scrollhint">swipe for more →</p>
     </section>
 
     <p class="foot">🐾 More love, more nutrition, for your best friend.</p>
@@ -1185,13 +1265,15 @@ function viewCheckout(){
     </div>
 
     <div class="step"><b>Payment method</b></div>
-    <div class="radios">
-      ${PAYMENTS.map(m=>`
-        <button class="radio" data-pay="${m.id}" aria-pressed="${S.payment===m.id}">
+    ${(()=>{ const al = allowedPayments(v);
+      return al.length>1 ? `<div class="radios">
+      ${al.map(m=>`
+        <button class="radio" data-pay="${m.id}" aria-pressed="${p.pay.id===m.id}">
           <span class="mk"></span>
           <span><span class="t">${esc(m.label)}</span><br><span class="d">${esc(m.desc)}</span></span>
         </button>`).join('')}
-    </div>
+    </div>`
+      : `<div class="card"><div class="row" style="align-items:center"><span><b>${esc(al[0].label)}</b><br><span class="lvl" style="margin:0">${esc(al[0].desc)}</span></span><span class="chip neutral">Only option here</span></div></div>`; })()}
 
     <div class="card" style="margin-top:14px">
       <div class="rows">
@@ -1211,9 +1293,9 @@ function viewCheckout(){
 
 function stickyCheckout(){
   const p = priceNow();
-  const cash = S.payment==='cash';
+  const cash = p.pay.collect==='venue';
   return `<div class="sticky"><div class="inner">
-    <span class="sum"><b>${rp(p.total)}</b><span>${cash?'Pay at the venue counter':'Amount confirmed next'}</span></span>
+    <span class="sum"><b>${rp(p.total)}</b><span>${cash?'Pay at the cashier':'Amount confirmed next'}</span></span>
     <button class="btn gold" id="payNow">${cash?'Place order':'Pay now'}</button>
   </div></div>`;
 }
@@ -1243,7 +1325,7 @@ async function placeOrder(){
   const p = priceNow();
   const v = venue(S.venueCode);
   const rate = v ? v.rate : 0;
-  const pay = PAYMENTS.find(m=>m.id===S.payment) || PAYMENTS[0];
+  const pay = curPay();
   const btn = $('#payNow'); if(btn){ btn.disabled = true; btn.textContent = 'Processing…'; }
 
   const order = {
@@ -1264,6 +1346,7 @@ async function placeOrder(){
     settled:false,
   };
   await STORE.addOrder(order);
+  if(!pay.uniq){ order.uniq = 0; order.payTotal = order.total; }   // cashier orders carry no verification code
   notify(order);
   S.lastOrder = order; S.stage = 'done';
   render();
@@ -1290,16 +1373,21 @@ function viewDone(){
   const cash = o.collect==='venue';
   return `
   <div class="wrap">
-    <header class="mast"><h2 class="h1">${cash?'Order placed':'Payment received'}</h2>
-    <p class="lede">${cash?'Show this code at the venue counter to pay.':'The kitchen has started cooking.'}</p></header>
+    <header class="mast"><h2 class="h1">${cash?'Order placed':'Order received'}</h2>
+    <p class="lede">${cash?'Show this code at the cashier and pay there.':'Pay the exact amount below. The kitchen starts cooking once it is confirmed.'}</p></header>
 
     <div class="tix">
+      <div class="k">Your order code</div>
       <div class="code">${esc(o.code)}</div>
       <div class="lbl">Give this code when you collect</div>
-      ${o.uniq ? `<div style="margin-top:14px;border-top:1px solid rgba(255,251,242,.25);padding-top:12px">
-        <div style="font-family:var(--display);font-weight:800;font-size:30px">${rp(o.payTotal)}</div>
-        <div class="lbl">Transfer this exact amount to ${esc(BRAND.payeeName||BRAND.name)}<br>
-        The last 2 digits identify your order — please don't round it</div></div>` : ''}
+      ${o.uniq ? `<div class="amt">
+        <div class="ak">Transfer this exact amount</div>
+        <div class="av">${rp(o.payTotal)}</div>
+        <div class="an">To ${esc(BRAND.payeeName||BRAND.name)}.<br>The last 2 digits identify your order — please don't round it.</div></div>`
+      : cash ? `<div class="amt">
+        <div class="ak">Pay at the cashier</div>
+        <div class="av">${rp(o.total)}</div>
+        <div class="an">Show your order code when you pay.</div></div>` : ''}
     </div>
 
     ${qrisPanel(o)}
@@ -1312,7 +1400,7 @@ function viewDone(){
         ${o.uniq ? `<div class="row"><span>Verification code</span><span>+ ${String(o.uniq).padStart(2,'0')}</span></div>
         <div class="row total"><span>Transfer exactly</span><span>${rp(o.payTotal||o.total)}</span></div>`
         : `<div class="row total"><span>Total</span><span>${rp(o.total)}</span></div>`}
-        <div class="row muted"><span>${esc(o.paymentLabel)}</span><span>${cash?'<span class="chip cash">Pay at counter</span>':'<span class="chip paid">Paid</span>'}</span></div>
+        <div class="row muted"><span>${esc(o.paymentLabel)}</span><span>${cash?'<span class="chip cash">Pay at cashier</span>':'<span class="chip pending">Awaiting payment</span>'}</span></div>
       </div>
       ${o.size ? `<hr class="sep">
       ${orderBowls(o).map((b,i,a)=>`<p class="bowlline" style="${i?'margin-top:6px':''}">${a.length>1?`<b>Bowl ${i+1}</b> · `:''}${bowlText(b.pick)}</p>`).join('')}` : ''}
@@ -1352,7 +1440,7 @@ function viewNoVenue(){
       <h2 class="h1">${diagTitle()}</h2>
       <p class="lede">${diagBody()}</p>
     </header>
-    ${(!STORE.live || !DB.venues.length || S.askedFor) ? `<div class="note" style="margin-bottom:14px">
+    ${(location.hash.includes('debug') && (!STORE.live || !DB.venues.length || S.askedFor)) ? `<div class="note" style="margin-bottom:14px">
       <b>Diagnostics</b>
       Database: ${STORE.live ? 'connected' : (SECRET_IN_CONFIG ? '<b>config.js holds a SECRET key \u2014 ignored. Remove and rotate it.</b>' : '<b>NOT CONNECTED \u2014 config.js is missing or its url / key are empty</b>')}<br>
       Branches loaded: ${DB.venues.length}${DB.venues.length?' ('+DB.venues.map(v=>esc(v.code)).join(', ')+')':''}<br>
@@ -1410,15 +1498,13 @@ function viewSignIn(){
     <header class="mast">
       <h1 class="logo" style="font-size:78px">${logoMark(78)}</h1>
       <h2 class="h1" style="font-size:26px">Staff sign in</h2>
-      <p class="lede">Venue partners see their own branch only. Pawsly staff see every branch.</p>
+      <p class="lede">Branch partners see their own branch only. Pawsly staff see every branch.</p>
     </header>
     <div class="card">
       <label class="field"><span>Email</span><input type="text" id="aEmail" inputmode="email" autocomplete="username" placeholder="you@example.com"></label>
       <label class="field"><span>Password</span><input type="password" id="aPass" autocomplete="current-password"></label>
       <button class="btn block" id="doSignIn">Sign in</button>
-      <p class="lvl">Create accounts in Supabase under Authentication, then add a row in the <b>staff</b> table to say which branch they manage.</p>
-      <hr class="sep">
-      <button class="btn ghost sm" id="sbForget">Use a different database</button>
+      <p class="lvl">Sessions end automatically after 30 minutes of inactivity.</p>
     </div>
   </div>`;
 }
@@ -1561,23 +1647,25 @@ function viewHQ(){
   return `
   <div class="dash-top"><div class="wrap wide">
     <div class="dash-head">
-      <div><h2>Pawsly HQ</h2><p>Venue network, revenue share and settlement</p></div>
+      <div><h2>Pawsly HQ</h2><p>Branches, sales reports and settlement</p></div>
       <button class="out" id="logout">Sign out</button>
     </div>
   </div></div>
 
   <div class="wrap wide">
     <div class="kpis">
-      <div class="kpi hero"><div class="k">Revenue today</div><div class="v">${rpk(today.gmv)}</div><div class="n">${today.n} orders across all venues</div></div>
-      <div class="kpi"><div class="k">Revenue, 14 days</div><div class="v">${rpk(t.gmv)}</div><div class="n">${t.n} orders</div></div>
+      <div class="kpi hero"><div class="k">Revenue today</div><div class="v">${rpk(today.gmv)}</div><div class="n">${today.n} orders across all branches</div></div>
+      <div class="kpi"><div class="k">Revenue, all time</div><div class="v">${rpk(t.gmv)}</div><div class="n">${t.n} orders</div></div>
       <div class="kpi"><div class="k">Share owed to venues</div><div class="v">${rpk(payable)}</div><div class="n">for Pawsly to transfer</div></div>
       <div class="kpi"><div class="k">Cash held by venues</div><div class="v">${rpk(receivable)}</div><div class="n">for Pawsly to collect</div></div>
     </div>
 
-    <div class="step"><b>Partner venues</b><i>${DB.venues.length} listed</i></div>
+    ${viewReport()}
+
+    <div class="step"><b>Branches</b><i>${DB.venues.length} of ${MAX_BRANCHES}</i></div>
     <div class="card" style="padding:14px 10px">
       <div class="tscroll"><table>
-        <thead><tr><th>Venue</th><th class="num">Share</th><th class="num">Orders</th><th class="num">Revenue 14d</th><th class="num">Owed</th><th></th></tr></thead>
+        <thead><tr><th>Branch</th><th class="num">Share</th><th class="num">Orders</th><th class="num">Revenue</th><th class="num">Owed</th><th></th></tr></thead>
         <tbody>${DB.venues.map(v=>{
           const list = ordersFor(v.code);
           const due = list.filter(o=>!o.settled && o.collect==='pawsly').reduce((s,o)=>s+o.commission,0);
@@ -1598,7 +1686,9 @@ function viewHQ(){
 
     ${S.editVenue && venue(S.editVenue) ? editVenueCard(venue(S.editVenue)) : ''}
 
-    <div class="step"><b>Add a partner venue</b></div>
+    ${DB.venues.length>=MAX_BRANCHES ? `<div class="step"><b>Add a branch</b></div>
+    <div class="note"><b>Branch limit reached (${MAX_BRANCHES})</b>Set an unused branch to Inactive, or raise MAX_BRANCHES in index.html.</div>` : `
+    <div class="step"><b>Add a branch</b></div>
     <div class="card">
       <div class="grid2">
         <div>
@@ -1614,6 +1704,7 @@ function viewHQ(){
       <button class="btn block" id="addVenue">Create venue & QR</button>
       <p class="lvl">The venue code and dashboard PIN are generated automatically.</p>
     </div>
+`}
 
     ${(()=>{
       const pending = all.filter(o=>!o.settled && o.collect==='pawsly' && o.uniq)
@@ -1688,6 +1779,56 @@ function viewHQ(){
 }
 
 /* ============================================================
+   HQ sales report (filter by branch and period)
+   ============================================================ */
+function repOrders(){
+  const r = S.rep, now = new Date();
+  let cut = 0;
+  if(r.days==='today') cut = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  else if(r.days!=='all') cut = Date.now() - Number(r.days)*864e5;
+  return DB.orders.filter(o => (r.venue==='all' || o.venueCode===r.venue) && new Date(o.createdAt).getTime() >= cut);
+}
+function viewReport(){
+  const list = repOrders(), t = totals(list);
+  const rows = DB.venues.filter(v=>S.rep.venue==='all' || v.code===S.rep.venue)
+                        .map(v=>({ v, ...totals(list.filter(o=>o.venueCode===v.code)) }));
+  const pay = {};
+  list.forEach(o=>{ const k=o.paymentLabel||'Other'; (pay[k]=pay[k]||{n:0,gmv:0}); pay[k].n++; pay[k].gmv+=o.total; });
+  const periods = [['today','Today'],['7','Last 7 days'],['30','Last 30 days'],['all','All time']];
+  return `
+    <div class="step"><b>Sales report</b><i>${list.length} orders</i></div>
+    <div class="card">
+      <div class="grid2" style="grid-template-columns:1fr 1fr">
+        <label class="field" style="margin:0 0 8px"><span>Branch</span>
+          <select data-rep="venue">
+            <option value="all" ${S.rep.venue==='all'?'selected':''}>All branches</option>
+            ${DB.venues.map(v=>`<option value="${esc(v.code)}" ${S.rep.venue===v.code?'selected':''}>${esc(v.name)}</option>`).join('')}
+          </select></label>
+        <label class="field" style="margin:0 0 8px"><span>Period</span>
+          <select data-rep="days">
+            ${periods.map(([k,l])=>`<option value="${k}" ${S.rep.days===k?'selected':''}>${l}</option>`).join('')}
+          </select></label>
+      </div>
+      <div class="kpis" style="margin-top:6px">
+        <div class="kpi"><div class="k">Orders</div><div class="v">${t.n}</div></div>
+        <div class="kpi hero"><div class="k">Revenue</div><div class="v">${rpk(t.gmv)}</div></div>
+        <div class="kpi"><div class="k">Average order</div><div class="v">${rpk(t.avg)}</div></div>
+        <div class="kpi"><div class="k">Branch share</div><div class="v">${rpk(t.com)}</div></div>
+      </div>
+      <div class="tscroll" style="margin-top:12px"><table>
+        <thead><tr><th>Branch</th><th class="num">Orders</th><th class="num">Revenue</th><th class="num">Share</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td><b>${esc(r.v.name)}</b></td><td class="num">${r.n}</td><td class="num">${rp(r.gmv)}</td><td class="num">${rp(r.com)}</td></tr>`).join('')}</tbody>
+      </table></div>
+      <div class="tscroll" style="margin-top:12px"><table>
+        <thead><tr><th>Payment</th><th class="num">Orders</th><th class="num">Revenue</th></tr></thead>
+        <tbody>${Object.keys(pay).length ? Object.keys(pay).map(k=>`<tr><td>${esc(k)}</td><td class="num">${pay[k].n}</td><td class="num">${rp(pay[k].gmv)}</td></tr>`).join('')
+          : `<tr><td colspan="3" style="color:var(--text-soft)">No orders in this period.</td></tr>`}</tbody>
+      </table></div>
+      <div class="inline" style="margin-top:12px"><button class="btn ghost sm" id="csvRep">Download this report (CSV)</button></div>
+    </div>`;
+}
+
+/* ============================================================
    CSV
    ============================================================ */
 function downloadCsv(list, name){
@@ -1701,7 +1842,8 @@ function downloadCsv(list, name){
     orderBowls(o).slice(1).map(b=>b.sizeName+': '+GROUPS.map(g=>(b.pick[g.id]||[]).map(label).join('+')).join(' / ')+(b.addons.length?' + '+b.addons.map(a=>a.label).join('+'):'')).join(' | '),
     o.paymentLabel, o.total, o.payTotal||o.total, Math.round(o.rate*100), o.commission,
     o.settled?'settled':'pending',
-  ].map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
+  ].map(c=>{ c = String(c); if(/^[=+@]|^-./.test(c)) c = "'"+c;   // stop spreadsheet formula injection
+             return `"${c.replace(/"/g,'""')}"`; }).join(','));
   const blob = new Blob(['\uFEFF'+[head.join(','),...body].join('\n')],{type:'text/csv;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = name; a.click();
@@ -1779,12 +1921,16 @@ document.addEventListener('click', async (e)=>{
     keepForm(); S.stage='menu'; render(); window.scrollTo(0,0); return;
   }
   if(d.addon){
-    const i = S.addons.indexOf(d.addon);
-    i>=0 ? S.addons.splice(i,1) : S.addons.push(d.addon);
+    // One size per product: picking a size replaces the other sizes of the same
+    // product, and tapping the chosen size again removes it.
+    const a = ADDONS.find(x=>x.id===d.addon); if(!a) return;
+    const had = S.addons.includes(a.id);
+    S.addons = S.addons.filter(id => (ADDONS.find(x=>x.id===id)||{}).grp !== a.grp);
+    if(!had) S.addons.push(a.id);
     render(); return;
   }
   if(d.ful){ S.fulfil = d.ful; keepForm(); render(); return; }
-  if(d.pay){ S.payment = d.pay; keepForm(); render(); return; }
+  if(d.pay){ if(allowedPayments(venue(S.venueCode)).some(m=>m.id===d.pay)) S.payment = d.pay; keepForm(); render(); return; }
   if(d.tab){ S.tab = d.tab; render(); return; }
   if(d.edit){ S.editVenue = (S.editVenue===d.edit ? null : d.edit); render(); return; }
   if(d.print){ printBanner(d.print); return; }
@@ -1792,19 +1938,19 @@ document.addEventListener('click', async (e)=>{
 
   switch(b.id){
     case 'addBowl':    if(commitBowl()){ render(); window.scrollTo(0,0); toast('Bowl added to your basket'); } break;
-    case 'toCheckout': commitBowl(); S.uniq = STORE.live ? 0 : pickUniq(); S.stage='checkout'; render(); window.scrollTo(0,0); break;
+    case 'toCheckout': commitBowl(); S.payment = curPay().id; S.uniq = STORE.live ? 0 : pickUniq(); S.stage='checkout'; render(); window.scrollTo(0,0); break;
     case 'backMenu':   keepForm(); S.stage='menu'; render(); window.scrollTo(0,0); break;
     case 'payNow':     await placeOrder(); break;
     case 'again':
       S.pick={protein:[],organ:[],sayuran:[],karbohidrat:[]}; S.addons=[]; S.snacks={}; S.bowls=[]; S.stage='menu'; S.lastOrder=null;
-      S.payment=PAYMENTS[0].id; S.fulfil=FULFIL[0].id; S.uniq=null;
+      S.payment=allowedPayments(venue(S.venueCode))[0].id; S.fulfil=FULFIL[0].id; S.uniq=null;
       render(); window.scrollTo(0,0); break;
     case 'doSignIn': {
       const email = $('#aEmail').value.trim(), pass = $('#aPass').value;
       if(!email || !pass){ toast('Enter your email and password'); break; }
       const btn = $('#doSignIn'); btn.disabled = true; btn.textContent = 'Signing in\u2026';
       try{
-        await STORE.signIn(email, pass);
+        await STORE.signIn(email, pass); touch();
         S.session = STORE.session.venueCode || null;
         S.route = STORE.isHQ ? 'hq' : 'partner';
         S.tab = 'today';
@@ -1834,6 +1980,7 @@ document.addEventListener('click', async (e)=>{
     }
     case 'csv':    downloadCsv(ordersFor(S.session), `pawsly-${S.session}.csv`); break;
     case 'csvAll': downloadCsv(DB.orders, 'pawsly-all-orders.csv'); break;
+    case 'csvRep': downloadCsv(repOrders(), `pawsly-report-${S.rep.venue}-${S.rep.days}.csv`); break;
     case 'sbSave': {
       const url = $('#sbUrl').value.trim().replace(/\/+$/,''), key = $('#sbKey').value.trim();
       if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)){ toast('URL should look like https://xxxx.supabase.co'); break; }
@@ -1888,6 +2035,7 @@ document.addEventListener('click', async (e)=>{
       break;
     }
     case 'addVenue': {
+      if(DB.venues.length>=MAX_BRANCHES){ toast('Branch limit reached ('+MAX_BRANCHES+')'); break; }
       const name = $('#nName').value.trim();
       if(!name){ toast('Enter a venue name'); break; }
       const kind = $('#nKind').value.trim() || 'Dog park';
@@ -1896,7 +2044,7 @@ document.addEventListener('click', async (e)=>{
         rate: Math.min(0.4, Math.max(0, (parseFloat($('#nRate').value)||15)/100)),
         payout: $('#nPayout').value.trim() || 'Not set', active:true };
       DB.venues.push(v); await STORE.saveVenue(v); render();
-      toast(`${name} created — code ${code}. Add its manager to the staff table to grant access.`);
+      toast(`${name} created — code ${code}. Next: set its payment methods (BRANCH_PAYMENTS) and add its manager as staff.`);
       break;
     }
   }
@@ -1907,6 +2055,8 @@ document.addEventListener('click', async (e)=>{
 });
 
 document.addEventListener('change', async (e)=>{
+  const rk = e.target.dataset.rep;
+  if(rk){ S.rep[rk] = e.target.value; render(); return; }
   const r = e.target.dataset.rate;
   if(r){
     const v = venue(r);
@@ -1937,6 +2087,22 @@ function printBanner(id){
   w.document.close();
   setTimeout(()=>w.print(), 400);
 }
+
+/* ---------- idle sign-out for staff (shared tablets at branches) ---------- */
+let lastTouch = 0;
+function touch(){
+  const n = Date.now(); if(n - lastTouch < 10000) return; lastTouch = n;
+  try{ localStorage.setItem('pawsly:act', String(n)); }catch(e){}
+}
+['click','keydown','touchstart','scroll'].forEach(ev=>document.addEventListener(ev, touch, {passive:true, capture:true}));
+setInterval(async ()=>{
+  if(!STORE.signedIn) return;
+  let act = lastTouch; try{ act = Number(localStorage.getItem('pawsly:act')||lastTouch); }catch(e){}
+  if(act && Date.now()-act > IDLE_MS){
+    STORE.signOut(); S.session=null; clearInterval(pollT);
+    await load(); render(); toast('Signed out after 30 minutes of inactivity');
+  }
+}, 30000);
 
 /* ---------- boot ---------- */
 (async function boot(){
