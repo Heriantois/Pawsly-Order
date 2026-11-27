@@ -857,7 +857,19 @@ const STORE = {
   /* ---- reads ---- */
   async loadAll(){
     if(this.mode==='cloud'){
-      const venues = (await this.api('venues?select=*&order=name.asc', this.read)).map(fromRowVenue);
+      // Customers only ever see the menu-safe view (name, city, active). Payout and
+      // share % come from the full table, which the database only gives to signed-in
+      // staff (their own branch, or every branch for admin). If the hardening SQL has
+      // not been run yet, the old query is used so nothing breaks in between.
+      let pub;
+      try{ pub = await this.api('venues_public?select=*&order=name.asc', this.read); }
+      catch(e){ pub = await this.api('venues?select=*&order=name.asc', this.read); }
+      const byCode = {};
+      pub.forEach(r => { byCode[r.code] = fromRowVenue(r); });
+      if(this.signedIn){
+        try{ (await this.api('venues?select=*&order=name.asc', this.read)).forEach(r => { byCode[r.code] = fromRowVenue(r); }); }catch(e){}
+      }
+      const venues = Object.values(byCode).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
       // Orders are only readable with a staff session; customers never fetch them.
       let orders = [];
       if(this.signedIn){
@@ -1386,7 +1398,15 @@ async function placeOrder(){
     rate, commission: Math.round(p.subtotal*rate),
     settled:false,
   };
-  await STORE.addOrder(order);
+  try{ await STORE.addOrder(order); }
+  catch(e){
+    const m = String((e && e.message) || '');
+    toast(/price mismatch/.test(m) ? 'Prices have changed. Please refresh the page and try again.'
+        : /not available|not sold|inactive/.test(m) ? 'That is not available at this branch. Please refresh and try again.'
+        : 'Could not place the order. Please try again, or ask staff.');
+    if(btn){ btn.disabled = false; btn.textContent = p.pay.collect==='venue' ? 'Place order' : 'Pay now'; }
+    return;
+  }
   if(!pay.uniq){ order.uniq = 0; order.payTotal = order.total; }   // cashier orders carry no verification code
   notify(order);
   S.lastOrder = order; S.stage = 'done';
