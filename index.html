@@ -552,7 +552,7 @@ const ADDONS = ADDON_GROUPS.flatMap(g => g.sizes.map(z => ({
   label: g.label+' ('+z.n+')', price:z.price, desc:g.desc,
 })));
 
-/* Treats. price:null + soon:true = listed on the menu but cannot be ordered yet.
+/* Treats. (price:null + soon:true would list an item as "Coming soon", not orderable.)
    Drop a photo next to index.html and set img to its exact filename -- until
    then a drawn placeholder (c1 / c2 / shape) is shown automatically. */
 const SNACKS = [
@@ -561,8 +561,8 @@ const SNACKS = [
   { id:'quail',     label:'Baby Quail',       price:12000, desc:'2 pcs', img:'treat-quail.jpg',    c1:'#C99A5B', c2:'#8E6A35', shape:'blob' },
   { id:'rab_ear',   label:'Rabbit Ear',       price:21000, desc:'2 pcs', img:'treat-rabbit-ear.jpg',  c1:'#D8C3A5', c2:'#A88F6B', shape:'blob' },
   { id:'rab_foot',  label:'Rabbit Foot',      price:21000, desc:'2 pcs', img:'treat-rabbit-foot.jpg', c1:'#D8C3A5', c2:'#A88F6B', shape:'blob' },
-  { id:'fd_beef',   label:'Freeze Dry Beef',  price:null, soon:true, desc:'Details coming soon', img:'treat-fd-beef.jpg',    c1:'#C2342B', c2:'#8E201A', shape:'dice' },
-  { id:'fd_chicken',label:'Freeze Dry Chicken',price:null, soon:true, desc:'Details coming soon', img:'treat-fd-chicken.jpg', c1:'#F0D6A8', c2:'#D8B26A', shape:'dice' },
+  { id:'fd_beef',   label:'Freeze Dry Beef',  price:18000, desc:'Freeze dried', img:'treat-fd-beef.jpg',    c1:'#C2342B', c2:'#8E201A', shape:'dice' },
+  { id:'fd_chicken',label:'Freeze Dry Chicken',price:18000, desc:'Freeze dried', img:'treat-fd-chicken.jpg', c1:'#F0D6A8', c2:'#D8B26A', shape:'dice' },
   { id:'bones',  label:'Beef Flavoured Bones Biscuit', price:13000, desc:'Baked biscuit',        img:'treat-bones.jpg',  c1:'#C2342B', c2:'#8E201A', shape:'dice' },
   { id:'banana', label:'Banana Biscuits',              price:10000, desc:'Fruity biscuit, 100g', img:'treat-banana.jpg', c1:'#E8C86A', c2:'#B99A61', shape:'dice' },
   { id:'cube',   label:'Silky Beef Cube',              price:12000, desc:'Soft beef treat',      img:'treat-cube.jpg',   c1:'#8E4A3A', c2:'#5A2A1E', shape:'dice' },
