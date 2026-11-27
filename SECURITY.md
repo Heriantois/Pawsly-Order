@@ -27,10 +27,10 @@ where table_schema='public' and table_name='orders' and column_name='phone';
 ```
 
 **Rules the policies must enforce (the app UI already assumes them):**
-1. Role `venue`: can SELECT only orders where `venue_code` = their own `staff.venue_code`. No other branch.
-2. Role `venue`: **no UPDATE or DELETE** on `orders` or `venues`. Marking payments received, settling,
+1. Roles `venue` (branch manager) and `staff` (cashier): can SELECT only orders where `venue_code` = their own `staff.venue_code`. No other branch.
+2. Roles `venue` and `staff`: **no UPDATE or DELETE** on `orders` or `venues`. Marking payments received, settling,
    changing revenue share and deleting branches must be HQ-only.
-3. Role `venue`: must **not** be able to read `orders.phone`. The app never requests it, but a venue login can call the API
+3. Roles `venue` and `staff`: must **not** be able to read `orders.phone`. The app never requests it, but a branch login can call the API
    directly. Revoke column SELECT on `phone` for `authenticated`, or keep phones in a separate table that only the
    WhatsApp worker (service role) can read.
 4. Role `hq`: full access. Nobody else.
@@ -42,16 +42,17 @@ different numbers (for example Rp 1 total, or a 90% commission). Inside the `pla
 - Recompute prices from a server-side price table (or at least reject totals that do not match).
 - Take `rate` and `commission` from `venues.rate`, not from the payload.
 - Reject inactive branches, and reject a payment method that the branch does not offer
-  (Paws = cashier only). The branch rule in the page (`BRANCH_PAYMENTS`) is for convenience only.
+  (Paws = cashier only). The branch rule in the page (`BRANCH_RULES`) is for convenience only.
 - Rate-limit it (Cloudflare in front of the site is the easy way).
 - Confirm it accepts `payment = 'cash'` / `collect = 'venue'` (new "Pay at cashier" orders use these).
 
 ## 4. Accounts for the venue owner
-- Turn **off** public sign-ups (Authentication > Providers > Email > disable "Allow new users to sign up"). Create accounts yourself.
-- One login per person, never shared. Add them in `staff` with role `venue` and their branch code.
+- Turn **off** public sign-ups (Authentication > Providers > Email > disable "Allow new users to sign up"). Usernames are turned into addresses ending `@staff.pawsly.id`, so if sign-ups were open, anyone could register one of them.
+- One login per person, never shared. Accounts are username + temporary password, created by you (see `ACCESS-GUIDE.md`).
 - Turn on MFA for your own HQ account, and enable leaked-password protection.
 - Never put the `service_role` / `sb_secret_` key in `config.js` or any web page. Only the publishable key belongs there.
-- Remove a person's `staff` row the day they leave.
+- When someone leaves, delete their `staff` row and their user the same day.
+- Treat the temporary password as one-time: tell staff to change it on first sign-in (Password button, top right).
 - Customer name and WhatsApp number are personal data (Indonesia's PDP law applies). Agree in writing with the venue
   owner what they may see (sales totals: yes; phone numbers: no) and tell customers what the number is used for.
 - Consider an audit log (who changed a rate, who marked something settled) before the venue owner gets write-adjacent screens.

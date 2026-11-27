@@ -352,10 +352,12 @@ textarea{min-height:68px;resize:vertical}
 .dash-top .wrap{padding-bottom:0}
 .dash-top h2{font-family:var(--display);font-size:26px;margin:0;font-weight:800}
 .dash-top p{margin:2px 0 0;font-size:13.5px;opacity:.78}
+.hdr-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.hdr-actions .out{margin-left:0}
 .dash-top .out{margin-left:auto;color:var(--pill-text);border:2px solid color-mix(in srgb,var(--pill-text) 45%,transparent);border-radius:999px;padding:6px 14px;font-weight:700;font-size:13.5px}
 .dash-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 
-@media(max-width:620px){.dash-top .dash-head > div:first-child{padding-right:78px}}
+@media(max-width:620px){.dash-top .dash-head > div:first-child{padding-right:0;flex:1 1 100%}}
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 @media(min-width:700px){.kpis{grid-template-columns:repeat(4,1fr)}}
 .kpi{background:var(--surface);border:2px solid var(--line);border-radius:var(--r-m);padding:13px 14px}
@@ -584,21 +586,27 @@ const PAYMENTS = [
   { id:'cash', label:'Pay at cashier', desc:'Pay at the counter when you collect',          collect:'venue',  uniq:false, showQr:false },
 ];
 
-/* Which payment methods each branch offers. The key is the branch CODE (upper
-   case) or the branch NAME (lower case) -- either works. A branch that is not
-   listed here gets DEFAULT_PAYMENTS, so a new branch can never accidentally
-   offer QR. */
-const BRANCH_PAYMENTS = {
-  'pawsly hq': ['qris','cash'],     // Scan QR + Pay at cashier
-  'paws':      ['cash'],            // Pay at cashier only
+/* Per-branch rules. The key is the branch CODE (upper case) or the branch NAME
+   (lower case) -- either works.
+     pay    : which payment methods the branch offers (ids from PAYMENTS)
+     treats : whether the Treats menu is shown at this branch
+   A branch that is not listed gets DEFAULT_RULE, so a new branch can never
+   accidentally offer QR payment or the treats menu. */
+const BRANCH_RULES = {
+  'pawsly hq': { pay:['qris','cash'], treats:true  },   // Scan QR + Pay at cashier, with treats
+  'paws':      { pay:['cash'],        treats:false },   // Pay at cashier only, bowls only
 };
-const DEFAULT_PAYMENTS = ['cash'];
+const DEFAULT_RULE = { pay:['cash'], treats:false };
+function branchRule(v){
+  if(!v) return DEFAULT_RULE;
+  return BRANCH_RULES[String(v.code||'').toUpperCase()] || BRANCH_RULES[String(v.name||'').trim().toLowerCase()] || DEFAULT_RULE;
+}
 function allowedPayments(v){
-  const key = v ? (BRANCH_PAYMENTS[String(v.code||'').toUpperCase()] || BRANCH_PAYMENTS[String(v.name||'').trim().toLowerCase()]) : null;
-  const ids = key || DEFAULT_PAYMENTS;
+  const ids = branchRule(v).pay;
   const out = PAYMENTS.filter(m=>ids.includes(m.id));
   return out.length ? out : PAYMENTS.filter(m=>m.id==='cash');
 }
+const treatsOn = v => !!branchRule(v).treats;
 /* The method actually in force: the customer's pick if this branch allows it,
    otherwise the branch's first method. */
 function curPay(){
@@ -647,7 +655,7 @@ let S = {               // view state
   size:null, pick:{protein:[],organ:[],sayuran:[],karbohidrat:[]}, addons:[],   // size null = treats only
   snacks:{},                       // { snackId: qty }
   bowls:[],                        // basket: finished bowls [{size,pick,addons}]
-  fulfil:FULFIL[0].id, payment:PAYMENTS[0].id, uniq:null, rep:{ venue:'all', days:'30' },
+  fulfil:FULFIL[0].id, payment:PAYMENTS[0].id, uniq:null, rep:{ venue:'all', days:'30' }, pw:false,
   cust:{name:'',phone:'',dog:''}, note:'',
   lastOrder:null, session:null, hq:false, tab:'today', editVenue:null, closedVenue:null, askedFor:'',
 };
@@ -694,6 +702,15 @@ SUPABASE.key = String(SUPABASE.key||'').trim();
 // so it is refused outright and flagged loudly on screen.
 const SECRET_IN_CONFIG = keyIsSecret(SUPABASE.key);
 if(SECRET_IN_CONFIG){ console.error('config.js contains a SECRET key. Remove it and rotate it in Supabase.'); SUPABASE.key = ''; }
+
+/* Staff sign in with a USERNAME. Supabase Auth needs an email-shaped id, so the
+   username is quietly turned into username@staff.pawsly.id. That address never
+   receives mail; the admin creates the account and sets the temporary password.
+   Anyone who already has a real email can still type the full email. */
+const STAFF_DOMAIN = 'staff.pawsly.id';
+const loginEmail = u => { u = String(u||'').trim().toLowerCase().replace(/\s+/g,''); return u.includes('@') ? u : u+'@'+STAFF_DOMAIN; };
+const uname = e => { e = String(e||''); const x='@'+STAFF_DOMAIN; return e.endsWith(x) ? e.slice(0,-x.length) : e; };
+const ROLE_LABEL = { hq:'Admin', venue:'Branch', staff:'Staff' };
 
 const CONN = 'pawsly:conn';
 const CFGK = 'pawsly:cfg';
@@ -752,23 +769,28 @@ const STORE = {
   get live(){ return this.mode==='cloud'; },
   get signedIn(){ return !!(this.session && this.session.role); },
   get isHQ(){ return this.signedIn && this.session.role==='hq'; },
+  get isStaff(){ return this.signedIn && this.session.role==='staff'; },
   label(){ return { cloud:'Supabase \u2014 live', device:'This device only', memory:'Temporary \u2014 not saved' }[this.mode]; },
 
   saveSession(){ try{ this.session ? localStorage.setItem(SESS, JSON.stringify(this.session)) : localStorage.removeItem(SESS); }catch(e){} },
 
   /* ---- auth ---- */
-  async signIn(email, password){
+  async signIn(login, password){
+    const email = loginEmail(login);
     const r = await fetch(this.cfg.url.replace(/\/+$/,'') + '/auth/v1/token?grant_type=password', {
       method:'POST', headers:{ apikey:this.cfg.key, 'Content-Type':'application/json' },
       body: JSON.stringify({ email, password }),
     });
     const d = await r.json().catch(()=>({}));
-    if(!r.ok) throw new Error(d.error_description || d.msg || d.message || ('sign-in failed ('+r.status+')'));
+    if(!r.ok){
+      if(/invalid login/i.test(d.error_description||d.msg||d.message||'')) throw new Error('Wrong username or password');
+      throw new Error(d.error_description || d.msg || d.message || ('sign-in failed ('+r.status+')'));
+    }
     this.session = { token:d.access_token, refresh:d.refresh_token, email:(d.user||{}).email };
     let rows;
     try{ rows = await this.api('staff?select=role,venue_code&limit=1', this.read); }
-    catch(e){ this.session=null; throw new Error('Signed in, but the staff table is unreachable \u2014 did you run the SQL?'); }
-    if(!rows || !rows.length){ this.session=null; throw new Error('No staff record for this account. Add a row in the staff table.'); }
+    catch(e){ this.session=null; throw new Error('Signed in, but access could not be loaded. Ask Pawsly admin.'); }
+    if(!rows || !rows.length){ this.session=null; throw new Error('This login has no access set up yet. Ask Pawsly admin.'); }
     this.session.role = rows[0].role;
     this.session.venueCode = rows[0].venue_code;
     this.saveSession();
@@ -788,6 +810,23 @@ const STORE = {
     }catch(e){ return false; }
   },
   signOut(){ this.session = null; this.saveSession(); },
+  async changePassword(current, next){
+    const base = this.cfg.url.replace(/\/+$/,'');
+    const v = await fetch(base + '/auth/v1/token?grant_type=password', {
+      method:'POST', headers:{ apikey:this.cfg.key, 'Content-Type':'application/json' },
+      body: JSON.stringify({ email:this.session.email, password:current }),
+    });
+    if(!v.ok) throw new Error('Current password is wrong');
+    const d = await v.json();
+    this.session.token = d.access_token; this.session.refresh = d.refresh_token;
+    const r = await fetch(base + '/auth/v1/user', {
+      method:'PUT',
+      headers:{ apikey:this.cfg.key, 'Content-Type':'application/json', Authorization:'Bearer '+this.session.token },
+      body: JSON.stringify({ password:next }),
+    });
+    if(!r.ok){ const e = await r.json().catch(()=>({})); throw new Error(e.msg || e.message || e.error_description || ('Could not change password ('+r.status+')')); }
+    this.saveSession();
+  },
 
   /* ---- rest ---- */
   async api(path, opts={}, retry=true){
@@ -1010,7 +1049,7 @@ function priceNow(){
   const bowls = allBowls().map(b=>({ ...b, sz:SIZES.find(s=>s.id===b.size), price:bowlPrice(b) }));
   const bowlTotal = bowls.reduce((t,b)=>t+b.price,0);
   const size = bowls.length ? bowls[0].sz : null;                 // null = no bowl
-  const snacks = snackLines(S.snacks);
+  const snacks = snackLines(treatsOn(venue(S.venueCode)) ? S.snacks : {});
   const snackTotal = snacks.reduce((t,s)=>t+s.price*s.qty,0);
   const fee = (FULFIL.find(f=>f.id===S.fulfil)||{}).fee||0;
   const subtotal = bowlTotal + snackTotal;
@@ -1054,8 +1093,9 @@ function bowlReady(){
 /* You can order a bowl, treats, or both. The only thing blocked is an empty
    cart, or a bowl missing the two things the kitchen cannot cook without. */
 function cartState(){
-  const treats = Object.values(S.snacks||{}).some(q=>q>0);
-  if(!S.size && !S.bowls.length && !treats) return { ok:false, why:'Add a bowl or a treat' };
+  const tOn = treatsOn(venue(S.venueCode));
+  const treats = tOn && Object.values(S.snacks||{}).some(q=>q>0);
+  if(!S.size && !S.bowls.length && !treats) return { ok:false, why: tOn ? 'Add a bowl or a treat' : 'Choose a bowl size' };
   if(S.size && !bowlReady()) return { ok:false, why:'Pick a protein & carb' };
   return { ok:true, why:'Review basket & pay', treatsOnly: !S.size && !S.bowls.length };
 }
@@ -1068,6 +1108,7 @@ function bowlText(pick){
 
 function viewMenu(){
   const v = venue(S.venueCode);
+  const tOn = treatsOn(v);
   return `
   ${v ? `<div class="ribbon"><span class="dot"></span>You're ordering at <b>&nbsp;${esc(v.name)}</b><small>&nbsp;· ${esc(v.city)}</small></div>` : ''}
   <div class="wrap">
@@ -1088,7 +1129,7 @@ function viewMenu(){
     </div>` : ''}
 
     <section>
-      <div class="step"><b>Choose size</b><i>${S.size?(S.bowls.length?'Bowl '+(S.bowls.length+1):'Step 1'):(S.bowls.length?'another bowl?':'optional')}</i></div>
+      <div class="step"><b>Choose size</b><i>${S.size?(S.bowls.length?'Bowl '+(S.bowls.length+1):'Step 1'):(S.bowls.length?'another bowl?':(tOn?'optional':'Step 1'))}</i></div>
       <div class="sizes">
         ${SIZES.map(s=>`
           <button class="size ${s.cls}" data-size="${s.id}" aria-pressed="${S.size===s.id}">
@@ -1100,8 +1141,8 @@ function viewMenu(){
           </button>`).join('')}
       </div>
       <p class="lvl">${S.size
-        ? 'Toppings below are already included in the price. Maximum 2 per category. Tap the size again if you only want treats.'
-        : 'No bowl selected — you can order treats on their own, or pick a size above.'}</p>
+        ? 'Toppings below are already included in the price. Maximum 2 per category.' + (tOn ? ' Tap the size again if you only want treats.' : '')
+        : (tOn ? 'No bowl selected — you can order treats on their own, or pick a size above.' : 'Pick a size above to start your bowl.')}</p>
     </section>
 
     ${!S.size ? '' : `
@@ -1159,7 +1200,7 @@ function viewMenu(){
       <p class="lvl">${bowlReady() ? 'Want a different recipe for another dog? Add this one to the basket first, then pick again. Or just scroll down and continue.' : 'Pick at least a protein and a carb to add this bowl to your basket.'}</p>
     </section>` : ''}
 
-    <section>
+    ${tOn ? `    <section>
       <div class="step"><b>Treats to take home</b><i>${SNACKS.length} options</i></div>
       <div class="snackgrid">
         ${SNACKS.map(s=>{
@@ -1179,7 +1220,7 @@ function viewMenu(){
           </div>`;
         }).join('')}
       </div>
-    </section>
+    </section>` : ''}
 
     <p class="foot">🐾 More love, more nutrition, for your best friend.</p>
     ${contactBlock()}
@@ -1497,17 +1538,29 @@ function viewSignIn(){
   <div class="wrap">
     <header class="mast">
       <h1 class="logo" style="font-size:78px">${logoMark(78)}</h1>
-      <h2 class="h1" style="font-size:26px">Staff sign in</h2>
+      <h2 class="h1" style="font-size:26px">Sign in</h2>
       <p class="lede">Branch partners see their own branch only. Pawsly staff see every branch.</p>
     </header>
     <div class="card">
-      <label class="field"><span>Email</span><input type="text" id="aEmail" inputmode="email" autocomplete="username" placeholder="you@example.com"></label>
+      <label class="field"><span>Username</span><input type="text" id="aEmail" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="e.g. paws.kasir1"></label>
       <label class="field"><span>Password</span><input type="password" id="aPass" autocomplete="current-password"></label>
       <button class="btn block" id="doSignIn">Sign in</button>
-      <p class="lvl">Sessions end automatically after 30 minutes of inactivity.</p>
+      <p class="lvl">Your username and temporary password come from Pawsly admin. You can change the password after signing in. Sessions end after 30 minutes of inactivity.</p>
     </div>
   </div>`;
 }
+
+function pwPanel(){
+  if(!S.pw) return '';
+  return `<div class="card" style="margin-bottom:12px;border-color:var(--ink)">
+    <div class="row" style="margin-bottom:6px"><span><b>Change password</b></span><span class="chip neutral">${esc(uname(STORE.session.email))}</span></div>
+    <label class="field"><span>Current password</span><input type="password" id="pwCur" autocomplete="current-password"></label>
+    <label class="field"><span>New password <em>— at least 8 characters</em></span><input type="password" id="pwNew" autocomplete="new-password"></label>
+    <label class="field"><span>New password again</span><input type="password" id="pwNew2" autocomplete="new-password"></label>
+    <div class="inline"><button class="btn sm" id="pwSave">Save new password</button><button class="btn ghost sm" id="pwCancel">Cancel</button></div>
+  </div>`;
+}
+const hdrActions = () => `<div class="hdr-actions"><button class="out" id="pwOpen">Password</button><button class="out" id="logout">Sign out</button></div>`;
 
 function viewPartner(){
   const v = venue(S.session);
@@ -1527,13 +1580,14 @@ function viewPartner(){
     <div class="dash-head">
       <div>
         <h2>${esc(v.name)}</h2>
-        <p>${esc(v.kind)} · ${Math.round(v.rate*100)}% revenue share · code ${esc(v.code)}</p>
+        <p>${esc(v.kind)} · ${Math.round(v.rate*100)}% revenue share · ${esc(uname(STORE.session.email))}</p>
       </div>
-      <button class="out" id="logout">Sign out</button>
+      ${hdrActions()}
     </div>
   </div></div>
 
   <div class="wrap wide">
+    ${pwPanel()}
     <div class="kpis">
       <div class="kpi hero"><div class="k">Your share today</div><div class="v">${rp(t.com)}</div><div class="n">${Math.round(v.rate*100)}% of ${rp(t.gmv)}</div></div>
       <div class="kpi"><div class="k">Orders today</div><div class="v">${t.n}</div><div class="n">${rp(t.avg)} average</div></div>
@@ -1594,6 +1648,45 @@ function viewPartner(){
   </div>`;
 }
 
+/* Staff (cashier) view: today's orders for ONE branch, nothing about money
+   shared with Pawsly, no payout details, no QR banner. */
+function viewStaff(){
+  const v = venue(S.session) || { name:'Branch', code:'' };
+  const today = ordersFor(v.code).filter(o=>dayKey(o.createdAt)===todayKey()).slice().reverse();
+  const cashOrders = today.filter(o=>o.collect==='venue');
+  const cashSum = cashOrders.reduce((t,o)=>t+o.total,0);
+  return `
+  <div class="dash-top"><div class="wrap wide">
+    <div class="dash-head">
+      <div><h2>${esc(v.name)}</h2><p>Staff · today's orders · ${esc(uname(STORE.session.email))}</p></div>
+      ${hdrActions()}
+    </div>
+  </div></div>
+
+  <div class="wrap wide">
+    ${pwPanel()}
+    <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+      <div class="kpi hero"><div class="k">Orders today</div><div class="v">${today.length}</div><div class="n">${esc(fmtDay(todayKey()))}</div></div>
+      <div class="kpi"><div class="k">To collect at cashier</div><div class="v">${rpk(cashSum)}</div><div class="n">${cashOrders.length} order${cashOrders.length===1?'':'s'}</div></div>
+    </div>
+    <div class="step"><b>Today's orders</b><i>newest first</i></div>
+    ${today.length ? today.map(o=>`
+      <div class="card">
+        <div class="row" style="align-items:center"><span style="font-family:var(--display);font-size:22px;font-weight:800">${esc(o.code)}</span><span style="color:var(--text-soft)">${fmtTime(o.createdAt)}</span></div>
+        <p class="bowlline" style="margin:2px 0 8px">${esc(o.cust.dog||'')}${o.cust.dog&&o.cust.name?' · ':''}${esc(o.cust.name||'')}</p>
+        ${o.size ? orderBowls(o).map((b,i,a)=>`<p class="bowlline" style="margin:0 0 4px"><b>${esc(b.sizeName)} bowl${a.length>1?' '+(i+1):''}</b> · ${bowlText(b.pick)}${b.addons.length?' · <b>Add-ons:</b> '+esc(b.addons.map(x=>x.label).join(', ')):''}</p>`).join('') : ''}
+        ${(o.snacks||[]).length ? `<p class="bowlline" style="margin:0 0 4px"><b>Treats:</b> ${esc(o.snacks.map(x=>x.label+' ×'+x.qty).join(', '))}</p>` : ''}
+        ${o.note ? `<p class="bowlline" style="margin:0 0 4px"><b>Note:</b> ${esc(o.note)}</p>` : ''}
+        <div class="row" style="margin-top:8px;align-items:center">
+          <span>${o.collect==='venue' ? '<span class="chip cash">Collect at cashier</span>' : `<span class="chip neutral">${esc(o.paymentLabel)}</span>`}</span>
+          <span style="font-weight:900;font-size:17px">${rp(o.total)}</span>
+        </div>
+      </div>`).join('')
+      : `<div class="card"><div class="empty"><b>No orders yet today</b>New orders appear here by themselves.</div></div>`}
+    <p class="foot">Updates every 20 seconds.</p>
+  </div>`;
+}
+
 function editVenueCard(v){
   const n = ordersFor(v.code).length;
   return `
@@ -1647,12 +1740,13 @@ function viewHQ(){
   return `
   <div class="dash-top"><div class="wrap wide">
     <div class="dash-head">
-      <div><h2>Pawsly HQ</h2><p>Branches, sales reports and settlement</p></div>
-      <button class="out" id="logout">Sign out</button>
+      <div><h2>Pawsly HQ</h2><p>Branches, sales reports and settlement · ${esc(uname(STORE.session.email))}</p></div>
+      ${hdrActions()}
     </div>
   </div></div>
 
   <div class="wrap wide">
+    ${pwPanel()}
     <div class="kpis">
       <div class="kpi hero"><div class="k">Revenue today</div><div class="v">${rpk(today.gmv)}</div><div class="n">${today.n} orders across all branches</div></div>
       <div class="kpi"><div class="k">Revenue, all time</div><div class="v">${rpk(t.gmv)}</div><div class="n">${t.n} orders</div></div>
@@ -1861,7 +1955,8 @@ function render(){
     if(!STORE.live)            html = viewConnect();
     else if(!STORE.signedIn)   html = viewSignIn();
     else if(STORE.isHQ)        html = viewHQ();          // Pawsly staff: every branch
-    else if(S.session)         html = viewPartner();     // venue partner: their branch
+    else if(STORE.isStaff)     html = viewStaff();       // branch staff: today's orders only
+    else if(S.session)         html = viewPartner();     // branch manager: their branch
     else                       html = viewSignIn();
   }else{
     if(!S.venueCode) html = viewNoVenue();
@@ -1885,7 +1980,7 @@ document.addEventListener('click', async (e)=>{
   const d = b.dataset;
 
   if(d.route){ S.route = d.route; if(d.route==='order') S.stage = S.lastOrder&&S.stage==='done'?'done':'menu'; render(); window.scrollTo(0,0); return; }
-  if(d.venue){ S.venueCode = d.venue; S.stage='menu'; render(); return; }
+  if(d.venue){ S.venueCode = d.venue; S.stage='menu'; S.snacks = {}; S.payment = allowedPayments(venue(d.venue))[0].id; render(); return; }
   if(d.size){
     S.size = (S.size === d.size) ? null : d.size;     // tap again to drop the bowl
     if(!S.size){ S.addons = []; S.pick = {protein:[],organ:[],sayuran:[],karbohidrat:[]}; }
@@ -1947,7 +2042,7 @@ document.addEventListener('click', async (e)=>{
       render(); window.scrollTo(0,0); break;
     case 'doSignIn': {
       const email = $('#aEmail').value.trim(), pass = $('#aPass').value;
-      if(!email || !pass){ toast('Enter your email and password'); break; }
+      if(!email || !pass){ toast('Enter your username and password'); break; }
       const btn = $('#doSignIn'); btn.disabled = true; btn.textContent = 'Signing in\u2026';
       try{
         await STORE.signIn(email, pass); touch();
@@ -1955,7 +2050,7 @@ document.addEventListener('click', async (e)=>{
         S.route = STORE.isHQ ? 'hq' : 'partner';
         S.tab = 'today';
         await load();
-        toast('Signed in as ' + (STORE.isHQ ? 'Pawsly staff' : (venue(S.session)||{name:'venue'}).name));
+        toast('Signed in: ' + uname(STORE.session.email) + ' (' + (ROLE_LABEL[STORE.session.role]||'') + ')');
         render(); poll(); window.scrollTo(0,0);
       }catch(e){
         toast(e.message);
@@ -1970,7 +2065,7 @@ document.addEventListener('click', async (e)=>{
       break;
     }
     case 'logout':
-      STORE.signOut(); S.session=null; clearInterval(pollT);
+      S.pw=false; STORE.signOut(); S.session=null; clearInterval(pollT);
       await load(); render(); toast('Signed out'); break;
     case 'copyLink': {
       const link = orderLink(S.session);
@@ -2025,6 +2120,19 @@ document.addEventListener('click', async (e)=>{
       S.editVenue = null; render(); toast(`${nm} updated`);
       break;
     }
+    case 'pwOpen':   S.pw = !S.pw; render(); break;
+    case 'pwCancel': S.pw = false; render(); break;
+    case 'pwSave': {
+      const cur = $('#pwCur').value, n1 = $('#pwNew').value, n2 = $('#pwNew2').value;
+      if(!cur){ toast('Enter your current password'); break; }
+      if(n1.length < 8){ toast('New password must be at least 8 characters'); break; }
+      if(n1 !== n2){ toast('The two new passwords do not match'); break; }
+      if(n1 === cur){ toast('Choose a password different from the current one'); break; }
+      const btn = $('#pwSave'); btn.disabled = true; btn.textContent = 'Saving\u2026';
+      try{ await STORE.changePassword(cur, n1); S.pw = false; render(); toast('Password changed'); }
+      catch(e){ toast(e.message); btn.disabled = false; btn.textContent = 'Save new password'; }
+      break;
+    }
     case 'veCancel': S.editVenue = null; render(); break;
     case 'veDelete': {
       const v = venue(S.editVenue); if(!v) break;
@@ -2044,7 +2152,7 @@ document.addEventListener('click', async (e)=>{
         rate: Math.min(0.4, Math.max(0, (parseFloat($('#nRate').value)||15)/100)),
         payout: $('#nPayout').value.trim() || 'Not set', active:true };
       DB.venues.push(v); await STORE.saveVenue(v); render();
-      toast(`${name} created — code ${code}. Next: set its payment methods (BRANCH_PAYMENTS) and add its manager as staff.`);
+      toast(`${name} created — code ${code}. Next: set its payment methods and treats in BRANCH_RULES, and create its logins.`);
       break;
     }
   }
